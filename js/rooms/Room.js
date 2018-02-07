@@ -103,3 +103,34 @@ function ComparePrivacy(a, b) {
     }
     return 0;
 }
+
+Room.prototype.getTotalArea = function(usedRooms) {
+    var toReturn = this.area;
+    console.log(this.name);
+    console.log(this.area);
+    usedRooms.push(this);
+    for (var i = 0; i < this.adjacent.length; i++) {
+        var nextRoom = this.adjacent[i];
+        //console.log(nextRoom);
+        if (!usedRooms.includes(nextRoom)) {
+            toReturn += nextRoom.getTotalArea(usedRooms);
+            //console.log("here");
+        }
+    }
+    //usedRooms.pop();
+    // for (var i = 0; i < this.adjacent.length; i++) {
+    //     if (!usedRooms.includes(this.adjacent[i])) {
+    //         var newList = [];
+    //         newList.push.apply(newList, usedRooms);
+    //         newList.push(this);
+    //         console.log("NewList:");
+    //         newList.forEach(function (element) {
+    //             console.log(element);
+    //         });
+    //         console.log("Next Room:");
+    //         console.log(this.adjacent[i]);
+    //         toReturn += this.adjacent[i].getTotalArea(newList);
+    //     }
+    // }
+    return toReturn;
+}

@@ -3,7 +3,7 @@
 // Buildings represent the entire plot and contain functions to generate the floor plan
 //
 
-var plotSize = 60;
+var plotSize = 50;
 
 function Building() {
     this.plot = {width:0, height:0, area: 0};
@@ -34,12 +34,12 @@ Building.prototype.addPlot = function (plotSize) {
     this.plot.area = this.plot.width * this.plot.height;
     canvas.width = this.plot.width * scale;
     canvas.height = this.plot.height * scale;
-    this.minPlotPortion = this.plot.area * 0.7; // Calculate this based on density at a later date
+    this.minPlotPortion = this.plot.area * 0.6; // Calculate this based on density at a later date
     //console.log("height: " + this.plot.height);
     //console.log("width: " + this.plot.width);
     //console.log("area: " + this.plot.area);
     //console.log("minPlotPortion: " + this.minPlotPortion);
-    this.maxPlotPortion = this.plot.area * 0.9 // Calculate this based on density at a later date
+    this.maxPlotPortion = this.plot.area * 0.8 // Calculate this based on density at a later date
 }
 
 Building.prototype.generateRoomList = function () {
@@ -67,13 +67,13 @@ Building.prototype.placeRooms = function () {
     firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
     firstRoom.isPlaced = true;
 
-    console.log(this.roomList);
-    //for (var i = 0; i < firstRoom.adjacent.length; i++) {
-    //    var room = firstRoom.adjacent[i];
-    //    if (!room.isPlaced()) {
-    //        roomQueue.push(room);
-    //    }
-    //}
+
+    for (var i = 0; i < firstRoom.adjacent.length; i++) {
+        var room = firstRoom.adjacent[i];
+        if (!room.isPlaced()) {
+            roomQueue.push(room);
+        }
+    }
 }
 
 Building.prototype.drawRooms = function (context) {
@@ -98,7 +98,6 @@ Building.prototype.addRoomsToList = function () {
         this.roomList.push(room);
         this.protoRooms[0].priority += this.protoRooms[0].delay;
         this.area += room.area;
-        //console.log(this.area);
     }
 }
 
@@ -106,12 +105,14 @@ Building.prototype.trimSize = function () {
     // To do at a later date
 }
 
+// Builds subtrees based on the building's rules
 Building.prototype.createSubtrees = function () {
     for (var i = 0; i < this.rules.length; i++) {
         this.rules[i](this);
     }
 }
 
+// Connects the subtrees based on privacy
 Building.prototype.connectSubtrees = function () {
     this.roomList.sort();
     this.entry = this.roomList.peek();
@@ -162,6 +163,7 @@ function bedBathAndBeyondRule(building) {
         }
         var hall = new Room(new ProtoRoom(hallway));
         hall.connectAll(shortList);
+        building.area += hall.area;
         roomList.push(hall);
     }
 }

@@ -9,7 +9,7 @@ var canvas;
 var context;
 var seedEntry;
 var currentBuilding;
-var scale = 6;
+var scale = 8;
 
 // Start here
 window.onload = function init() {
@@ -29,6 +29,10 @@ window.onload = function init() {
     //var room = new Room(testRoomType);
     //room.printToConsole();
     //room.draw(context);
+
+    // var test = [canvas, seedEntry, currentBuilding, scale];
+    // console.log(test.includes(currentBuilding));
+    // console.log(test.includes(new Building()));
 };
 
 

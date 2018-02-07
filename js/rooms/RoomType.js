@@ -15,14 +15,15 @@ var diningRoom;
 var hallway;
 
 // Must call to initialize global RoomType variables
+// ("Name", "Purpose", privacy, priority, delay, avgSize, minSize, maxSize, sizeVariance, scaleFactor)
 function initRoomTypes() {
     testRoomType = new RoomType("Test","test",0,0,10,50,35,100,10,1);
     testRoomTypeEmpty = new RoomType();
-    greatRoom = new RoomType("Great Room","lounge",20,20,9999, 30, 10, 50, 5, 1);
+    greatRoom = new RoomType("Great Room","lounge",20,20,9999, 20, 10, 50, 4, 1);
     bathroom = new RoomType("Bathroom","bathroom",80,0,60,8, 4, 12, 1, 1);
     bedroom = new RoomType("Bedroom","bedroom",100, 0,40, 12, 8, 18, 2, 1);
-    kitchen = new RoomType("Kitchen","kitchen",40,0,9999,25,10,40,5,1);
-    diningRoom = new RoomType("Dining Room","dining",30,0,200,25,10,40,5,1);
+    kitchen = new RoomType("Kitchen","kitchen",40,0,9999,15,10,40,2,1);
+    diningRoom = new RoomType("Dining Room","dining",30,0,200,20,10,40,3,1);
     hallway = new RoomType("Hallway","hallway",60,200,100,6,4,8,1,1);
 }
 
