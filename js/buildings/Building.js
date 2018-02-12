@@ -31,7 +31,7 @@ Building.prototype.build = function () {
     this.generateConnectivityGraph();
     this.placeRooms();
     this.drawRooms(context);
-}
+};
 
 /**
  * Randomly generates the size of the plot
@@ -45,7 +45,7 @@ Building.prototype.addPlot = function (plotSize) {
     canvas.height = this.plot.height * scale;
     this.minPlotPortion = this.plot.area * 0.6; // Calculate this based on density at a later date
     this.maxPlotPortion = this.plot.area * 0.8 // Calculate this based on density at a later date
-}
+};
 
 /**
  * Creates a list of rooms to be placed into the building
@@ -57,7 +57,7 @@ Building.prototype.generateRoomList = function () {
     if (this.area > this.maxPlotPortion) {
         this.trimSize(); // So far, does absolutely nothing
     }
-}
+};
 
 /**
  * Creates the abstract graph that represents the flow of rooms in the building
@@ -65,7 +65,7 @@ Building.prototype.generateRoomList = function () {
 Building.prototype.generateConnectivityGraph = function () {
     this.createSubtrees();
     this.connectSubtrees();
-}
+};
 
 /**
  * Sets the rooms coordinates within the plot
@@ -88,6 +88,7 @@ Building.prototype.placeRooms = function () {
         current.calcTotalArea(usedRooms);
     }
     roomQueue.sort(compareTotalArea);
+    roomQueue.reverse();
     // Place each room
    // while (roomQueue.length != 0) {
         var current = roomQueue.shift();
@@ -98,10 +99,11 @@ Building.prototype.placeRooms = function () {
         console.log(sides);
         for (var i = 0; i < sides.length; i++) {
             var success = this.placeRoom(current, sides[i].direction);
+            if (success) break;
         }
     //}
 
-}
+};
 
 /**
  * Attempts to place the given room on the given side of it's parent
@@ -114,14 +116,56 @@ Building.prototype.placeRoom = function (room, direction) {
     if (openings.length === 0) {
         return false;
     }
+    var opening = openings[randInt(openings.length)];
+    var placeX;
+    var placeY;
+    var parent = room.parent;
+    console.log(direction);
+    switch (direction) {
+        case 'north':
+            placeY = parent.locY - room.height;
+            placeX = this.getPlacement(opening, room.width, new Line1D(parent.locX, parent.locX + parent.width));
+            break;
+        case 'south':
+            placeY = parent.locY + parent.height;
+            placeX = this.getPlacement(opening, room.width, new Line1D(parent.locX, parent.locX + parent.width));
+            break;
+        case 'east':
+            placeX = parent.locX + parent.width;
+            placeY = this.getPlacement(opening, room.height, new Line1D(parent.locY, parent.locY + parent.height));
+            break;
+        case 'west':
+            placeX = parent.locX - room.width;
+            placeY = this.getPlacement(opening, room.height, new Line1D(parent.locY, parent.locY + parent.height));
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+    console.log(room);
+    room.locX = placeX;
+    room.locY = placeY;
     return true;
-}
+};
+
+/**
+ * Chooses a random location within the given opening for the given side length
+ * @param opening The opening (Line1D) that is being used
+ * @param sideLength The size of the relevant side of the room being placed
+ * @returns {*} The random location of the room within the given parameters
+ */
+Building.prototype.getPlacement = function (opening, sideLength, parentSide) {
+    var availableSpace = new Line1D(opening.start, opening.end);
+    availableSpace.trimEnd(sideLength);
+    var validSpace = new Line1D(Math.max(availableSpace.start, 3 + parentSide.start - sideLength), Math.min(availableSpace.end, parentSide.end - 3));
+    var offset = randDoub(validSpace.length);
+    return validSpace.start + offset;
+};
 
 /**
  * Returns all obstacles in a the given direction
  * @param room The room being placed
  * @param direction The direction the room is being place in
- * @returns {Array} All relevant obstacles
+ * @returns {Array} All relevant obstacles as rectangles
  */
 Building.prototype.getObstacles = function(room, direction) {
     var parent = room.parent;
@@ -151,7 +195,7 @@ Building.prototype.getObstacles = function(room, direction) {
         }
     }
     return obstacles;
-}
+};
 
 /**
  * Returns all openings large enough to accommodate the new room that connect to it's parent
@@ -163,24 +207,54 @@ Building.prototype.getOpenings = function (room, direction) {
     var obstacles = this.getObstacles(room, direction);
     //console.log(obstacles);
     var openings = [];
+    var sideLength;
+    var parent = room.parent;
+    var parentSide;
     switch (direction) {
         case 'north':
         case 'south':
             if (obstacles.length === 0) {
                 openings.push(new Line1D(0, this.plot.width));
+            } else {
+                openings.push(new Line1D(0, obstacles[0].left));
+                for (var i = 0; i < obstacles.length - 1; i++) {
+                    openings.push(new Line1D(obstacles[i].right,obstacles[i+1].left));
+                }
+                openings.push(obstacles[obstacles.length - 1].right, this.plot.width);
             }
+            sideLength = room.width;
+            parentSide = new Line1D(parent.locX, parent.locX + parent.width);
             break;
         case 'east':
         case 'west':
             if (obstacles.length === 0) {
                 openings.push(new Line1D(0, this.plot.height));
+            } else {
+                openings.push(new Line1D(0, obstacles[0].top));
+                for (var i = 0; i < obstacles.length - 1; i++) {
+                    openings.push(new Line1D(obstacles[i].bottom,obstacles[i+1].top));
+                }
+                openings.push(obstacles[obstacles.length - 1].bottom, this.plot.height);
             }
+            sideLength = room.height;
+            parentSide = new Line1D(parent.locY, parent.locY + parent.height);
             break;
         default:
             throw("invalid direction: " + direction);
     }
-    return [];
-}
+    var toRemove = [];
+    for (var i = 0; i < openings.length; i++) {
+        var opening = openings[i];
+        if (opening.length < sideLength || opening.end - parentSide.start < 3 || parentSide.end - opening.start < 3) {
+            toRemove.push(opening);
+        }
+    }
+    for (var i = 0; i< toRemove.length; i++) {
+        var index = openings.indexOf(toRemove[i]);
+        openings.splice(index, 1);
+    }
+    return openings;
+};
 
 /**
  * Gets the available space on the each side of the room, to determine where to place the next room
@@ -203,7 +277,7 @@ Building.prototype.getSideSpace = function(parent) {
         }
     }
     return [{direction: "north", area: northRect.area},{direction: "south", area: southRect.area},{direction: "east", area: eastRect.area},{direction: "west", area: westRect.area}];
-}
+};
 
 function queueRooms(room, list) {
     for (var i = 0; i < room.adjacent.length; i++) {
@@ -224,7 +298,7 @@ Building.prototype.drawRooms = function (context) {
     for (var i = 0; i < this.roomList.length; i++) {
         this.roomList.get(i).draw(context);
     }
-}
+};
 
 /**
  *  Creates ProtoRooms for use in addRoomsToList
@@ -234,7 +308,7 @@ Building.prototype.initializeRoomPrototypes = function () {
         this.protoRooms.push(new ProtoRoom(this.roomTypes[i]));
     }
     //console.log(this.protoRooms);
-}
+};
 
 /**
  *  Adds rooms to the list such that the total room size fits inside the given percentage of the plot
@@ -247,14 +321,14 @@ Building.prototype.addRoomsToList = function () {
         this.protoRooms[0].priority += this.protoRooms[0].delay;
         this.area += room.area;
     }
-}
+};
 
 /**
  * Trims the rooms to insure that they fit on the plot
  */
 Building.prototype.trimSize = function () {
     // To do at a later date
-}
+};
 
 /**
  *  Builds subtrees based on the building's rules
@@ -263,7 +337,7 @@ Building.prototype.createSubtrees = function () {
     for (var i = 0; i < this.rules.length; i++) {
         this.rules[i](this);
     }
-}
+};
 
 /**
  *  Connects the subtrees based on privacy
@@ -291,7 +365,7 @@ Building.prototype.connectSubtrees = function () {
         }
         this.roomList.get(i).connect(toConnect);
     }
-}
+};
 
 function bedBathAndBeyondRule(building) {
     var roomList = building.roomList;

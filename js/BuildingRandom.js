@@ -2,13 +2,17 @@
 // BuildingRandom
 // A collection of functions regarding the production of random numbers
 //
-//
 
 var useLast;
 var y2;
 
-// Returns a random value between 0 (inclusive) and 1 (exclusive), such that generates numbers have a normal distribution
-// Algorithm by Dr. Everett (Skip) Carter Jr.
+/**
+ * Returns a random value between 0 (inclusive) and 1 (exclusive), such that generates numbers have a normal distribution
+ * Algorithm by Dr. Everett (Skip) Carter Jr.
+ * @param mean The number at the height of the normal curve
+ * @param standDev The size of a single standard deviation
+ * @returns {*} A random number between 0 (inclusive) and 1 (exclusive)
+ */
 function randGauss(mean, standDev) {
     var x1, x2, w, y1;
     useLast = false;
@@ -29,7 +33,28 @@ function randGauss(mean, standDev) {
     return (mean + y1 * standDev);
 }
 
-// Initialize the Math.random function to work from a given string
+/**
+ * Initialize the Math.random function to work from a given string
+ * @param string THe string to act as the random seed
+ */
 function initRandom(string) {
     Math.seedrandom(string);
+}
+
+/**
+ * Returns a random int between 0 (inclusive) and max (exclusive)
+ * @param max The limit for the number being generated
+ * @returns {number} An integer between 0 (inclusive) and max (exclusive)
+ */
+function randInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
+
+/**
+ * Returns a random number between 0 (inclusive) and max (exclusive)
+ * @param max The limit for the number being generated
+ * @returns {number} A number between 0 (inclusive) and max (exclusive)
+ */
+function randDoub(max) {
+    return Math.random() * max;
 }

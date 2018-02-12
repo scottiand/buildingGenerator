@@ -31,3 +31,21 @@ function Line1D(start, end) {
     this.end = end;
     this.length = Math.abs(this.end - this.start);
 }
+
+/**
+ * Trims the end of the line segment by the given amount
+ * @param amount How much to trim
+ */
+Line1D.prototype.trimEnd = function (amount) {
+    this.end = this.end - amount;
+    this.length = Math.abs(this.end - this.start);
+};
+
+/**
+ * Trims the start of the line segment by the given amount
+ * @param amount How much to trim
+ */
+Line1D.prototype.trimStart = function (amount) {
+    this.start = this.start + amount;
+    this.length = Math.abs(this.end - this.start);
+};
