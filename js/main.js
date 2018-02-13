@@ -10,6 +10,7 @@ var context;
 var seedEntry;
 var currentBuilding;
 var scale = 8;
+var failures = 0;
 
 // Start here
 window.onload = function init() {
@@ -22,7 +23,27 @@ window.onload = function init() {
 
     // Create the first Building, from the default values
     currentBuilding = new Building();
-    currentBuilding.build();
+
+    // var room = new Room(new ProtoRoom(testRoomType));
+    // room.locY = 5;
+    // room.locX = 5;
+    // room.draw(context);
+    // //console.log(room.corners);
+    // for (var i = 0; i < room.corners.length; i++) {
+    //     console.log(room.corners[i]);
+    // }
+    // room.rotate();
+    // for (var i = 0; i < room.corners.length; i++) {
+    //     console.log(room.corners[i]);
+    // }
+    // room.draw(context);
+
+   while (!currentBuilding.build()) {
+       currentBuilding = new Building();
+       failures++;
+       initRandom(Math.random());
+    }
+    console.log("Failures: " + failures);
 
     // Testing stuff
     //var roomType = new RoomType();

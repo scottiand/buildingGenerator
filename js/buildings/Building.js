@@ -18,6 +18,7 @@ function Building() {
     this.rules = [bedBathAndBeyondRule, diningAndKitchenRule]; // Eventually get this from BuildingType
     this.protoRooms = [];
     this.roomList = new RoomList();
+    this.allRooms = new RoomList();
     this.entry;
     //this.build();
 }
@@ -29,8 +30,12 @@ Building.prototype.build = function () {
     this.addPlot(plotSize);
     this.generateRoomList();
     this.generateConnectivityGraph();
-    this.placeRooms();
-    this.drawRooms(context);
+    if (this.placeRooms()) {
+        this.drawRooms(context);
+        return true;
+    } else {
+        return false;
+    }
 };
 
 /**
@@ -43,8 +48,8 @@ Building.prototype.addPlot = function (plotSize) {
     this.plot.area = this.plot.width * this.plot.height;
     canvas.width = this.plot.width * scale;
     canvas.height = this.plot.height * scale;
-    this.minPlotPortion = this.plot.area * 0.6; // Calculate this based on density at a later date
-    this.maxPlotPortion = this.plot.area * 0.8 // Calculate this based on density at a later date
+    this.minPlotPortion = this.plot.area * 0.5; // Calculate this based on density at a later date
+    this.maxPlotPortion = this.plot.area * 0.8; // Calculate this based on density at a later date
 };
 
 /**
@@ -83,26 +88,56 @@ Building.prototype.placeRooms = function () {
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
+    //console.log(usedRooms.length);
     for (var i = 0; i< roomQueue.length;i++) {
         var current = roomQueue[i];
-        current.calcTotalArea(usedRooms);
+        current.calcTotalArea(usedRooms.slice());
     }
     roomQueue.sort(compareTotalArea);
     roomQueue.reverse();
     // Place each room
-   // while (roomQueue.length != 0) {
+    while (roomQueue.length != 0) {
         var current = roomQueue.shift();
         var parent = current.parent;
+        console.log("------------------------------------------")
+        console.log(current);
         var sides = this.getSideSpace(parent);
         sides.sort(compareArea);
         sides.reverse();
-        console.log(sides);
+        //console.log(sides);
         for (var i = 0; i < sides.length; i++) {
-            var success = this.placeRoom(current, sides[i].direction);
-            if (success) break;
+            if (this.placeRoom(current, sides[i].direction)) break;
+            current.rotate();
+            if (this.placeRoom(current, sides[i].direction)) break;
+            if (i === 3) {
+                console.log("Failed to place room");
+                return false;
+            }
         }
-    //}
-
+        usedRooms.push(current);
+        current.isPlaced = true;
+        var children = current.adjacent.slice();
+        // console.log("children: ");
+        // console.log(children);
+        // console.log("usedRooms: ");
+        // console.log(usedRooms.length);
+        for (var i = 0; i < usedRooms.length; i++) {
+            if (children.includes(usedRooms[i])) {
+                children.splice(children.indexOf(usedRooms[i]),1);
+            }
+        }
+        for (var i = 0; i< children.length;i++) {
+            var currentChild = children[i];
+            currentChild.calcTotalArea(usedRooms.slice());
+        }
+        children.sort(compareTotalArea);
+        children.reverse();
+        for (var i = 0; i < children.length; i++) {
+            roomQueue.push(children[i]);
+        }
+        //console.log(roomQueue);
+    }
+    return true;
 };
 
 /**
@@ -120,7 +155,7 @@ Building.prototype.placeRoom = function (room, direction) {
     var placeX;
     var placeY;
     var parent = room.parent;
-    console.log(direction);
+    //console.log(direction);
     switch (direction) {
         case 'north':
             placeY = parent.locY - room.height;
@@ -141,7 +176,10 @@ Building.prototype.placeRoom = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    console.log(room);
+    if (isNaN(placeX) || isNaN(placeY)) {
+        return false;
+    }
+    //console.log(room);
     room.locX = placeX;
     room.locY = placeY;
     return true;
@@ -157,7 +195,9 @@ Building.prototype.getPlacement = function (opening, sideLength, parentSide) {
     var availableSpace = new Line1D(opening.start, opening.end);
     availableSpace.trimEnd(sideLength);
     var validSpace = new Line1D(Math.max(availableSpace.start, 3 + parentSide.start - sideLength), Math.min(availableSpace.end, parentSide.end - 3));
+    //console.log('offset: ' + offset);
     var offset = randDoub(validSpace.length);
+    //console.log('offset: ' + offset);
     return validSpace.start + offset;
 };
 
@@ -188,10 +228,10 @@ Building.prototype.getObstacles = function(room, direction) {
             throw("invalid direction: " + direction);
     }
     //context.fillRect(range.left * scale, range.top * scale, range.width * scale, range.height * scale);
-    for (var i = 0; i < this.roomList.length; i++) {
-        var current = this.roomList.get(i);
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
         if (current.intersection(range)) {
-            obstacles.add(range);
+            obstacles.push(range);
         }
     }
     return obstacles;
@@ -295,8 +335,12 @@ function queueRooms(room, list) {
  * @param context the context in which to draw the rooms
  */
 Building.prototype.drawRooms = function (context) {
-    for (var i = 0; i < this.roomList.length; i++) {
-        this.roomList.get(i).draw(context);
+    //console.log("All Rooms:");
+    //console.log(this.allRooms);
+    this.entry.printTree();
+    console.log(this.entry);
+    for (var i = 0; i < this.allRooms.length; i++) {
+        this.allRooms.get(i).draw(context);
     }
 };
 
@@ -317,7 +361,7 @@ Building.prototype.addRoomsToList = function () {
     while (this.area < this.minPlotPortion) {
         this.protoRooms.sort(ComparePriority);
         var room = new Room(this.protoRooms[0]);
-        this.roomList.push(room);
+        this.push(room);
         this.protoRooms[0].priority += this.protoRooms[0].delay;
         this.area += room.area;
     }
@@ -344,18 +388,26 @@ Building.prototype.createSubtrees = function () {
  */
 Building.prototype.connectSubtrees = function () {
     this.roomList.sort();
+    //this.roomList.reverse();
     this.entry = this.roomList.peek();
+    //console.log("length " + this.roomList.length);
     //console.log(this.roomList);
     for (var i = 1; i < this.roomList.length; i++) {
         var toConnect;
+        var room = this.roomList.get(i);
+        console.log("room " + room.name + " " + room.area);
         var lowScore = Infinity;
         for (var j = 0; j < this.roomList.length; j++) {
             if (j != i) {
                 var currentRoom = this.roomList.get(j);
                 var score = currentRoom.privacy;
-                score += currentRoom.adjacent.length * 10;
-                if (currentRoom.purpose === "hallway") {
-                    score -= 50;
+                if (room.adjacent.includes(currentRoom)) {
+                    score = Infinity;
+                } else {
+                    score += currentRoom.adjacent.length * 10;
+                    if (currentRoom.purpose === "hallway") {
+                        score -= 50;
+                    }
                 }
                 if (score < lowScore) {
                     lowScore = score;
@@ -363,9 +415,24 @@ Building.prototype.connectSubtrees = function () {
                 }
             }
         }
-        this.roomList.get(i).connect(toConnect);
+        console.log("toConnect " + toConnect.name + " " + toConnect.area);
+        //console.log("toConnect");
+        //console.log(toConnect);
+        //console.log("room");
+        //console.log(room);
+        toConnect.connect(room);
+
     }
 };
+
+/**
+ *  Adds the given room to the room lists
+ * @param room The room to add
+ */
+Building.prototype.push = function (room) {
+    this.roomList.push(room);
+    this.allRooms.push(room);
+}
 
 function bedBathAndBeyondRule(building) {
     var roomList = building.roomList;
@@ -393,7 +460,7 @@ function bedBathAndBeyondRule(building) {
         var hall = new Room(new ProtoRoom(hallway));
         hall.connectAll(shortList);
         building.area += hall.area;
-        roomList.push(hall);
+        building.push(hall);
     }
 }
 

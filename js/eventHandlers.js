@@ -5,6 +5,13 @@
 
 function generateButtonOnClick() {
     initRandom(seedEntry.value);
-    currentBuilding = new Building();
-    currentBuilding.build();
+    failures = 0;
+    var success = false;
+    while (!success) {
+        currentBuilding = new Building();
+        success = currentBuilding.build();
+        failures++;
+        initRandom(Math.random());
+    }
+    console.log("Failures: " + failures);
 }

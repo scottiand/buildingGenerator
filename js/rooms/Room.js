@@ -30,7 +30,7 @@ function Room(proto) {
         this.locX = -99999;
         this.locY = -99999;
         this.adjacent = [];
-        this.parent;
+        this.parent = null;
         this.isPlaced = false;
     } else {
         throw "no ProtoRoom provided";
@@ -41,25 +41,32 @@ function Room(proto) {
  * Returns a list of points that represent the corners of a rectangle, with randomly determined length and width
  * @returns {Array} An array of points
  */
-Room.prototype.makeRectangle = function () {
+Room.prototype.makeRectangle = function (newWidth, newHeight) {
     var corners = [];
     var width = -1;
-    while (width < this.proto.minSize || width > this.proto.maxSize) {
-        width = randGauss(this.proto.avgSize,this.proto.sizeVariance);
-    }
     var height = -1;
-    while (height < this.proto.minSize || height > this.proto.maxSize) {
-        height = randGauss(this.proto.avgSize,this.proto.sizeVariance)
+    if (typeof newWidth === 'undefined' || typeof newHeight === 'undefined') {
+        while (width < this.proto.minSize || width > this.proto.maxSize) {
+            width = randGauss(this.proto.avgSize, this.proto.sizeVariance);
+        }
+        while (height < this.proto.minSize || height > this.proto.maxSize) {
+            height = randGauss(this.proto.avgSize, this.proto.sizeVariance)
+        }
+    } else {
+        width = newWidth;
+        height = newHeight;
     }
     this.area = width * height;
     this.width = width;
+    //console.log(width);
     this.height = height;
+    //console.log(height);
     corners.push({x:0,y:0});
     corners.push({x:width,y:0});
     corners.push({x:width,y:height});
     corners.push({x:0,y:height});
     return corners;
-}
+};
 
 /**
  * Draws the room in the given context
@@ -72,6 +79,7 @@ Room.prototype.draw = function (context) {
     }
     context.lineTo(this.locX * scale, this.locY * scale);
     context.stroke();
+    context.fillText(this.name, this.locX * scale, this.locY * scale);
 };
 
 /**
@@ -88,8 +96,10 @@ Room.prototype.printToConsole = function () {
  * @param {Room} room the room to connect
  */
 Room.prototype.connect = function (room) {
-    room.adjacent = typeof room.adjacent === 'undefined' ? [] : room.adjacent;
-    room.adjacent.push(this);
+    //room.adjacent = typeof room.adjacent === 'undefined' ? [] : room.adjacent;
+    //room.adjacent.push(this);
+    console.log("here");
+    room.parent = this;
     this.adjacent.push(room);
 };
 
@@ -99,7 +109,6 @@ Room.prototype.connect = function (room) {
  */
 Room.prototype.connectAll = function (rooms) {
     for (var i = 0; i < rooms.length; i++) {
-        //console.log(rooms[i]);
         this.connect(rooms[i]);
     }
 };
@@ -112,7 +121,7 @@ Room.prototype.connectAll = function (rooms) {
 Room.prototype.setLocation = function (x, y) {
     this.locY = y;
     this.locX = x;
-}
+};
 
 /**
  * Calculates the area of this room and all rooms it's connected to, excluding rooms given as a paremeter
@@ -128,13 +137,13 @@ Room.prototype.calcTotalArea = function(usedRooms) {
         var nextRoom = this.adjacent[i];
         //console.log(nextRoom);
         if (!usedRooms.includes(nextRoom)) {
-            toReturn += nextRoom.calcTotalArea(usedRooms);
+            toReturn += nextRoom.calcTotalArea(usedRooms.slice());
             //console.log("here");
         }
     }
     this.totalArea = toReturn;
     return toReturn;
-}
+};
 
 /**
  * Returns the area of the intersection between the given rectangle and the room
@@ -152,4 +161,23 @@ Room.prototype.intersection = function (rectangle) {
     var yOverlap = Math.max(0, Math.min(rectangle.bottom, bottom) - Math.max(rectangle.top, top));
 
     return xOverlap * yOverlap;
+};
+
+/**
+ * Rotates the room by 90 degrees
+ */
+Room.prototype.rotate = function () {
+    this.corners = this.makeRectangle(this.height, this.width);
+};
+
+/**
+ * Prints out the room and all of it's descendants
+ */
+Room.prototype.printTree = function(string) {
+    var tab = typeof string != 'string' ? "" : string;
+    console.log(tab + this.name);
+    for (var i = 0; i < this.adjacent.length; i++) {
+        var current = this.adjacent[i];
+        current.printTree(tab + "   ");
+    }
 }

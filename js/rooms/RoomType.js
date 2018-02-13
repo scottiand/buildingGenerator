@@ -17,7 +17,7 @@ var hallway;
 // Must call to initialize global RoomType variables
 // ("Name", "Purpose", privacy, priority, delay, avgSize, minSize, maxSize, sizeVariance, scaleFactor)
 function initRoomTypes() {
-    testRoomType = new RoomType("Test","test",0,0,10,50,35,100,10,1);
+    testRoomType = new RoomType("Test","test",0,0,10,10,10,100,10,1);
     testRoomTypeEmpty = new RoomType();
     greatRoom = new RoomType("Great Room","lounge",20,20,9999, 20, 10, 50, 4, 1);
     bathroom = new RoomType("Bathroom","bathroom",80,0,60,8, 4, 12, 1, 1);

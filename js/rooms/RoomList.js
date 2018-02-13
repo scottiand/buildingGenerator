@@ -11,23 +11,23 @@ function RoomList() {
 // Resets the length variable
 RoomList.prototype.resetLength = function () {
     this.length = this.content.length;
-}
+};
 
 // Pushes item into the list. Item should be a Room
 RoomList.prototype.push = function (item) {
     this.content.push(item);
     this.resetLength();
-}
+};
 
 // Returns the Room at the given index
 RoomList.prototype.get = function (index) {
     return this.content[index];
-}
+};
 
 // Returns the first Room (at index 0)
 RoomList.prototype.peek = function () {
     return this.content[0];
-}
+};
 
 // Returns true if any Room has the given purpose
 RoomList.prototype.contains = function (purpose) {
@@ -37,7 +37,7 @@ RoomList.prototype.contains = function (purpose) {
         }
     }
     return false;
-}
+};
 
 // Returns a list of all Rooms with the given purpose
 RoomList.prototype.getAllOf = function (purpose) {
@@ -48,14 +48,14 @@ RoomList.prototype.getAllOf = function (purpose) {
         }
     }
     return toReturn;
-}
+};
 
 // Removes and returns the Room at the given index
 RoomList.prototype.remove = function (index) {
     var toReturn = this.content.splice(index,1)[0];
     this.resetLength();
     return toReturn;
-}
+};
 
 // Removes and returns a list of all Rooms with the given purpose
 RoomList.prototype.removeAllOf = function (purpose) {
@@ -68,7 +68,7 @@ RoomList.prototype.removeAllOf = function (purpose) {
     }
     this.resetLength();
     return toReturn;
-}
+};
 
 // Returns a count of all the Rooms with the given purpose
 RoomList.prototype.countAllOf = function (purpose) {
@@ -79,7 +79,7 @@ RoomList.prototype.countAllOf = function (purpose) {
         }
     }
     return toReturn;
-}
+};
 
 // Returns [number] Rooms with the given purpose
 RoomList.prototype.getSomeOf = function (purpose, number) {
@@ -99,7 +99,7 @@ RoomList.prototype.getSomeOf = function (purpose, number) {
         }
     }
     return toReturn;
-}
+};
 
 // Returns the first Room with the given purpose
 RoomList.prototype.getFirstOf = function(purpose) {
@@ -108,7 +108,7 @@ RoomList.prototype.getFirstOf = function(purpose) {
             return this.content[i];
         }
     }
-}
+};
 
 // Removes and returns [number] Rooms with the given purpose
 RoomList.prototype.removeSomeOf = function (purpose, number) {
@@ -130,9 +130,12 @@ RoomList.prototype.removeSomeOf = function (purpose, number) {
     }
     this.resetLength();
     return toReturn;
-}
+};
 
-// Removes the first Room with the given purpose
+/**
+ * Removes the first Room with the given purpose
+ * @param purpose The purpose of room to remove
+ */
 RoomList.prototype.removeFirstOf = function (purpose) {
     for (var i = 0; i < this.length; i++) {
         if (this.content[i].purpose === purpose) {
@@ -141,9 +144,18 @@ RoomList.prototype.removeFirstOf = function (purpose) {
             return toReturn;
         }
     }
-}
+};
 
-// Sorts the list by privacy
+/**
+ * Sorts the list by privacy
+ */
 RoomList.prototype.sort = function () {
     this.content.sort(ComparePrivacy);
-}
+};
+
+/**
+ * Reverses the order of the list
+ */
+RoomList.prototype.reverse = function () {
+    this.content.reverse();
+};
