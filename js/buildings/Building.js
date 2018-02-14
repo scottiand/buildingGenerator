@@ -20,7 +20,6 @@ function Building() {
     this.roomList = new RoomList();
     this.allRooms = new RoomList();
     this.entry;
-    //this.build();
 }
 
 /**
@@ -82,7 +81,7 @@ Building.prototype.placeRooms = function () {
     var firstRoom = this.roomList.peek();
     var XCenter = this.plot.width / 2;
     var XOffset =  randGauss(0, 5) - (firstRoom.width / 2);
-    var YOffset = Math.abs(randGauss(10, 5)) + firstRoom.height;
+    var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
     firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
     firstRoom.isPlaced = true;
     queueRooms(firstRoom, roomQueue);
@@ -99,8 +98,8 @@ Building.prototype.placeRooms = function () {
     while (roomQueue.length != 0) {
         var current = roomQueue.shift();
         var parent = current.parent;
-        console.log("------------------------------------------")
-        console.log(current);
+        //console.log("------------------------------------------")
+        //console.log(current);
         var sides = this.getSideSpace(parent);
         sides.sort(compareArea);
         sides.reverse();
@@ -228,12 +227,22 @@ Building.prototype.getObstacles = function(room, direction) {
             throw("invalid direction: " + direction);
     }
     //context.fillRect(range.left * scale, range.top * scale, range.width * scale, range.height * scale);
+    console.log("------------------------------");
+    console.log(room.name);
+    console.log("-----")
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
-        if (current.intersection(range)) {
-            obstacles.push(range);
+        if (current.intersection(range) > 0) {
+            console.log(current.name);
+            console.log(current.intersection(range));
+            obstacles.push(new Rectangle(current.locX, current.locY, current.width, current.height));
         }
     }
+   // if (parent.purpose === 'hallway') {
+        console.log(direction);
+        console.log(obstacles);
+    //}
+
     return obstacles;
 };
 
@@ -245,7 +254,6 @@ Building.prototype.getObstacles = function(room, direction) {
  */
 Building.prototype.getOpenings = function (room, direction) {
     var obstacles = this.getObstacles(room, direction);
-    //console.log(obstacles);
     var openings = [];
     var sideLength;
     var parent = room.parent;
@@ -260,7 +268,7 @@ Building.prototype.getOpenings = function (room, direction) {
                 for (var i = 0; i < obstacles.length - 1; i++) {
                     openings.push(new Line1D(obstacles[i].right,obstacles[i+1].left));
                 }
-                openings.push(obstacles[obstacles.length - 1].right, this.plot.width);
+                openings.push(new Line1D(obstacles[obstacles.length - 1].right, this.plot.width));
             }
             sideLength = room.width;
             parentSide = new Line1D(parent.locX, parent.locX + parent.width);
@@ -274,7 +282,7 @@ Building.prototype.getOpenings = function (room, direction) {
                 for (var i = 0; i < obstacles.length - 1; i++) {
                     openings.push(new Line1D(obstacles[i].bottom,obstacles[i+1].top));
                 }
-                openings.push(obstacles[obstacles.length - 1].bottom, this.plot.height);
+                openings.push(new Line1D(obstacles[obstacles.length - 1].bottom, this.plot.height));
             }
             sideLength = room.height;
             parentSide = new Line1D(parent.locY, parent.locY + parent.height);
@@ -293,6 +301,7 @@ Building.prototype.getOpenings = function (room, direction) {
         var index = openings.indexOf(toRemove[i]);
         openings.splice(index, 1);
     }
+    //console.log(openings);
     return openings;
 };
 
@@ -335,8 +344,8 @@ function queueRooms(room, list) {
  * @param context the context in which to draw the rooms
  */
 Building.prototype.drawRooms = function (context) {
-    //console.log("All Rooms:");
-    //console.log(this.allRooms);
+    console.log("All Rooms:");
+    console.log(this.allRooms);
     this.entry.printTree();
     console.log(this.entry);
     for (var i = 0; i < this.allRooms.length; i++) {
@@ -395,7 +404,7 @@ Building.prototype.connectSubtrees = function () {
     for (var i = 1; i < this.roomList.length; i++) {
         var toConnect;
         var room = this.roomList.get(i);
-        console.log("room " + room.name + " " + room.area);
+        //console.log("room " + room.name + " " + room.area);
         var lowScore = Infinity;
         for (var j = 0; j < this.roomList.length; j++) {
             if (j != i) {
@@ -415,7 +424,7 @@ Building.prototype.connectSubtrees = function () {
                 }
             }
         }
-        console.log("toConnect " + toConnect.name + " " + toConnect.area);
+        //console.log("toConnect " + toConnect.name + " " + toConnect.area);
         //console.log("toConnect");
         //console.log(toConnect);
         //console.log("room");

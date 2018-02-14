@@ -3,13 +3,16 @@
 // Functions that respond to the use of UI controls
 //
 
+/**
+ * Generates a new building based on the seed entry
+ */
 function generateButtonOnClick() {
     initRandom(seedEntry.value);
     failures = 0;
-    var success = false;
-    while (!success) {
+    //var success = false;
+    currentBuilding = new Building();
+    while (!currentBuilding.build()) {
         currentBuilding = new Building();
-        success = currentBuilding.build();
         failures++;
         initRandom(Math.random());
     }

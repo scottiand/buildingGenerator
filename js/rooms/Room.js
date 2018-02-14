@@ -98,7 +98,7 @@ Room.prototype.printToConsole = function () {
 Room.prototype.connect = function (room) {
     //room.adjacent = typeof room.adjacent === 'undefined' ? [] : room.adjacent;
     //room.adjacent.push(this);
-    console.log("here");
+    //console.log("here");
     room.parent = this;
     this.adjacent.push(room);
 };
@@ -151,7 +151,7 @@ Room.prototype.calcTotalArea = function(usedRooms) {
  * @returns {number} the area of the intersecting space
  */
 Room.prototype.intersection = function (rectangle) {
-    if (this.locX < 0 || this.locY < 0) return 0;
+    if (this.locX < -9999 || this.locY < -9999) return 0;
     var right = this.width + this.locX;
     var bottom = this.height + this.locY;
     var top = this.locY;
