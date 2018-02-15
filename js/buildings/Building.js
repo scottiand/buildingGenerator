@@ -79,15 +79,18 @@ Building.prototype.placeRooms = function () {
 
     // Place the first room
     var firstRoom = this.roomList.peek();
-    var XCenter = this.plot.width / 2;
-    var XOffset =  randGauss(0, 5) - (firstRoom.width / 2);
-    var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
-    firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
+    var validPlacement = false;
+    while (!validPlacement) {
+        var XCenter = this.plot.width / 2;
+        var XOffset = randGauss(0, 5) - (firstRoom.width / 2);
+        var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
+        firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
+        validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
+    }
     firstRoom.isPlaced = true;
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
-    //console.log(usedRooms.length);
     for (var i = 0; i< roomQueue.length;i++) {
         var current = roomQueue[i];
         current.calcTotalArea(usedRooms.slice());
@@ -98,12 +101,9 @@ Building.prototype.placeRooms = function () {
     while (roomQueue.length != 0) {
         var current = roomQueue.shift();
         var parent = current.parent;
-        //console.log("------------------------------------------")
-        //console.log(current);
         var sides = this.getSideSpace(parent);
         sides.sort(compareArea);
         sides.reverse();
-        //console.log(sides);
         for (var i = 0; i < sides.length; i++) {
             if (this.placeRoom(current, sides[i].direction)) break;
             current.rotate();
@@ -116,10 +116,6 @@ Building.prototype.placeRooms = function () {
         usedRooms.push(current);
         current.isPlaced = true;
         var children = current.adjacent.slice();
-        // console.log("children: ");
-        // console.log(children);
-        // console.log("usedRooms: ");
-        // console.log(usedRooms.length);
         for (var i = 0; i < usedRooms.length; i++) {
             if (children.includes(usedRooms[i])) {
                 children.splice(children.indexOf(usedRooms[i]),1);
@@ -134,7 +130,6 @@ Building.prototype.placeRooms = function () {
         for (var i = 0; i < children.length; i++) {
             roomQueue.push(children[i]);
         }
-        //console.log(roomQueue);
     }
     return true;
 };
@@ -154,7 +149,6 @@ Building.prototype.placeRoom = function (room, direction) {
     var placeX;
     var placeY;
     var parent = room.parent;
-    //console.log(direction);
     switch (direction) {
         case 'north':
             placeY = parent.locY - room.height;
@@ -178,7 +172,6 @@ Building.prototype.placeRoom = function (room, direction) {
     if (isNaN(placeX) || isNaN(placeY)) {
         return false;
     }
-    //console.log(room);
     room.locX = placeX;
     room.locY = placeY;
     return true;
@@ -231,9 +224,6 @@ Building.prototype.getObstacles = function(room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    //console.log("------------------------------");
-    //console.log(room.name);
-    //console.log("-----")
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
         if (current.intersection(range) > 0) {
@@ -243,10 +233,14 @@ Building.prototype.getObstacles = function(room, direction) {
     }
     obstacles.sort(sortFunction);
     obstacles = this.collapseObstacles(obstacles, direction);
-    console.log(obstacles.toString());
     return obstacles;
 };
 
+/**
+ * Collapses a list of obstacles such that overlapping obstacles are not considered as separate obstacles
+ * @param list The list of obstacles to collapse
+ * @param direction The direction the room is being placed in. ('north', 'south', 'east', or 'west')
+ */
 Building.prototype.collapseObstacles= function (list, direction) {
     for (var i = 0; i < list.length - 1; i++) {
         var current = list[i];
@@ -257,10 +251,6 @@ Building.prototype.collapseObstacles= function (list, direction) {
                     case 'north':
                     case 'south':
                         if (next.left <= current.right) {
-                            console.log("===================");
-                            console.log(direction);
-                            console.log(current);
-                            console.log(next);
                             var newLeft = Math.min(current.left, next.left);
                             var newTop = Math.min(current.top, next.top);
                             var newWidth = Math.max(current.right, next.right) - newLeft;
@@ -274,18 +264,12 @@ Building.prototype.collapseObstacles= function (list, direction) {
                     case 'east':
                     case 'west':
                         if (next.top <= current.bottom) {
-                            console.log("===================");
-                            console.log(direction);
-                            console.log(current);
-                            console.log(next);
                             var newLeft = Math.min(current.left, next.left);
                             var newTop = Math.min(current.top, next.top);
                             var newWidth = Math.max(current.right, next.right) - newLeft;
                             var newHeight = Math.max(current.bottom, next.bottom) - newTop;
                             list[i] = new Rectangle(newLeft, newTop, newWidth, newHeight);
                             list[j] = 0;
-                            console.log(list[i]);
-                            console.log(list[j]);
                         }
                         break;
                     default:
@@ -294,7 +278,6 @@ Building.prototype.collapseObstacles= function (list, direction) {
             }
         }
     }
-    console.log(list.toString());
     return list.filter(nonZero);
 };
 
