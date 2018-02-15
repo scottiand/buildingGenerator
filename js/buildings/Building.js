@@ -210,40 +210,92 @@ Building.prototype.getObstacles = function(room, direction) {
     var parent = room.parent;
     var range;
     var obstacles = [];
+    var sortFunction;
     switch (direction){
         case 'north':
             range = new Rectangle(0,parent.locY - room.height, this.plot.width, room.height);
+            sortFunction = compareLeft;
             break;
         case 'south':
             range = new Rectangle(0, parent.locY + parent.height, this.plot.width, room.height);
+            sortFunction = compareLeft;
             break;
         case 'east':
             range = new Rectangle(parent.locX + parent.width, 0, room.width, this.plot.height);
+            sortFunction = compareTop;
             break;
         case 'west':
             range = new Rectangle(parent.locX - room.width, 0, room.width, this.plot.height);
+            sortFunction = compareTop;
             break;
         default:
             throw("invalid direction: " + direction);
     }
-    //context.fillRect(range.left * scale, range.top * scale, range.width * scale, range.height * scale);
-    console.log("------------------------------");
-    console.log(room.name);
-    console.log("-----")
+    //console.log("------------------------------");
+    //console.log(room.name);
+    //console.log("-----")
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
         if (current.intersection(range) > 0) {
-            console.log(current.name);
-            console.log(current.intersection(range));
+            //console.log(current.name);
             obstacles.push(new Rectangle(current.locX, current.locY, current.width, current.height));
         }
     }
-   // if (parent.purpose === 'hallway') {
-        console.log(direction);
-        console.log(obstacles);
-    //}
-
+    obstacles.sort(sortFunction);
+    obstacles = this.collapseObstacles(obstacles, direction);
+    console.log(obstacles.toString());
     return obstacles;
+};
+
+Building.prototype.collapseObstacles= function (list, direction) {
+    for (var i = 0; i < list.length - 1; i++) {
+        var current = list[i];
+        for (var j = i + 1; j < list.length; j++) {
+            if (list[j] != 0) {
+                var next = list[j];
+                switch (direction) {
+                    case 'north':
+                    case 'south':
+                        if (next.left <= current.right) {
+                            console.log("===================");
+                            console.log(direction);
+                            console.log(current);
+                            console.log(next);
+                            var newLeft = Math.min(current.left, next.left);
+                            var newTop = Math.min(current.top, next.top);
+                            var newWidth = Math.max(current.right, next.right) - newLeft;
+                            var newHeight = Math.max(current.bottom, next.bottom) - newTop;
+                            list[i] = new Rectangle(newLeft, newTop, newWidth, newHeight);
+                            list[j] = 0;
+                            console.log(list[i]);
+                            console.log(list[j]);
+                        }
+                        break;
+                    case 'east':
+                    case 'west':
+                        if (next.top <= current.bottom) {
+                            console.log("===================");
+                            console.log(direction);
+                            console.log(current);
+                            console.log(next);
+                            var newLeft = Math.min(current.left, next.left);
+                            var newTop = Math.min(current.top, next.top);
+                            var newWidth = Math.max(current.right, next.right) - newLeft;
+                            var newHeight = Math.max(current.bottom, next.bottom) - newTop;
+                            list[i] = new Rectangle(newLeft, newTop, newWidth, newHeight);
+                            list[j] = 0;
+                            console.log(list[i]);
+                            console.log(list[j]);
+                        }
+                        break;
+                    default:
+                        throw("invalid direction: " + direction);
+                }
+            }
+        }
+    }
+    console.log(list.toString());
+    return list.filter(nonZero);
 };
 
 /**
@@ -290,6 +342,8 @@ Building.prototype.getOpenings = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
+    //console.log("Openings (Before):");
+    //console.log(openings.toString());
     var toRemove = [];
     for (var i = 0; i < openings.length; i++) {
         var opening = openings[i];
@@ -301,6 +355,7 @@ Building.prototype.getOpenings = function (room, direction) {
         var index = openings.indexOf(toRemove[i]);
         openings.splice(index, 1);
     }
+    //console.log("Openings (After):");
     //console.log(openings);
     return openings;
 };

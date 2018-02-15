@@ -49,3 +49,31 @@ Line1D.prototype.trimStart = function (amount) {
     this.start = this.start + amount;
     this.length = Math.abs(this.end - this.start);
 };
+
+/**
+ * Returns a String representation of a Line1D
+ * @returns {string}
+ */
+Line1D.prototype.toString = function () {
+    return "\nLine1D (" + this.start + " - " + this.end + ", Length: "+ this.length + ")";
+};
+
+function compareLeft(a, b) {
+    if (a.left < b.left) {
+        return -1;
+    }
+    if (a.left > b.left) {
+        return 1;
+    }
+    return 0;
+}
+
+function compareTop(a, b) {
+    if (a.top < b.top) {
+        return -1;
+    }
+    if (a.top > b.top) {
+        return 1;
+    }
+    return 0;
+}

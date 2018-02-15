@@ -18,3 +18,10 @@ function generateButtonOnClick() {
     }
     console.log("Failures: " + failures);
 }
+
+/**
+ * Prints the mouse location out when the canvas is clicked
+ */
+function canvasClicked(event) {
+    console.log("X: " + event.clientX / scale + " Y: " + event.clientY / scale);
+}
