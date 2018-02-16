@@ -80,6 +80,7 @@ Building.prototype.placeRooms = function () {
     // Place the first room
     var firstRoom = this.roomList.peek();
     var validPlacement = false;
+    // Make sure that the room is placed within the plot
     while (!validPlacement) {
         var XCenter = this.plot.width / 2;
         var XOffset = randGauss(0, 5) - (firstRoom.width / 2);
@@ -288,10 +289,26 @@ Building.prototype.collapseObstacles= function (list, direction) {
  * @returns {Array} All sufficient openings
  */
 Building.prototype.getOpenings = function (room, direction) {
+    var parent = room.parent;
+    switch (direction) {
+        case 'north':
+            if (parent.locY < room.height) return [];
+            break;
+        case 'south':
+            if (this.plot.height - parent.height - parent.locY < room.height) return [];
+            break;
+        case 'east':
+            if (this.plot.width - parent.width - parent.locX < room.width) return [];
+            break;
+        case 'west':
+            if (parent.locX < room.height) return [];
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
     var obstacles = this.getObstacles(room, direction);
     var openings = [];
     var sideLength;
-    var parent = room.parent;
     var parentSide;
     switch (direction) {
         case 'north':
@@ -479,7 +496,7 @@ Building.prototype.connectSubtrees = function () {
 Building.prototype.push = function (room) {
     this.roomList.push(room);
     this.allRooms.push(room);
-}
+};
 
 function bedBathAndBeyondRule(building) {
     var roomList = building.roomList;
