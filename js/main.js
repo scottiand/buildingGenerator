@@ -24,12 +24,13 @@ window.onload = function init() {
     // Create the first Building, from the default values
     currentBuilding = new Building();
 
-    while (!currentBuilding.build()) {
-       currentBuilding = new Building();
-       failures++;
-       initRandom(Math.random());
-    }
-    console.log("Failures: " + failures);
+    // while (!currentBuilding.build()) {
+    //    currentBuilding = new Building();
+    //    failures++;
+    //    initRandom(Math.random());
+    // }
+    // console.log("Failures: " + failures);
+    testRun(1);
 
     // Testing stuff
     //var roomType = new RoomType();

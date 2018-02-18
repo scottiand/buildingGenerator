@@ -13,6 +13,8 @@ function Building() {
     this.plot = {width:0, height:0, area: 0};
     this.minPlotPortion = 0;
     this.maxPlotPortion = 0;
+    this.plotSnap = 4;
+    this.roomSnap = 8;
     this.area = 0;
     this.roomTypes = [greatRoom,bathroom,bedroom,kitchen,diningRoom]; // Eventually get this from BuildingType
     this.rules = [bedBathAndBeyondRule, diningAndKitchenRule]; // Eventually get this from BuildingType
@@ -48,7 +50,7 @@ Building.prototype.addPlot = function (plotSize) {
     canvas.width = this.plot.width * scale;
     canvas.height = this.plot.height * scale;
     this.minPlotPortion = this.plot.area * 0.5; // Calculate this based on density at a later date
-    this.maxPlotPortion = this.plot.area * 0.8; // Calculate this based on density at a later date
+    this.maxPlotPortion = this.plot.area * 0.7; // Calculate this based on density at a later date
 };
 
 /**
@@ -57,9 +59,8 @@ Building.prototype.addPlot = function (plotSize) {
 Building.prototype.generateRoomList = function () {
     this.initializeRoomPrototypes();
     this.addRoomsToList();
-    //console.log(this.roomList);
     if (this.area > this.maxPlotPortion) {
-        this.trimSize(); // So far, does absolutely nothing
+        this.trimSize();
     }
 };
 
@@ -76,7 +77,6 @@ Building.prototype.generateConnectivityGraph = function () {
  */
 Building.prototype.placeRooms = function () {
     var roomQueue = [];
-
     // Place the first room
     var firstRoom = this.roomList.peek();
     var validPlacement = false;
@@ -92,6 +92,7 @@ Building.prototype.placeRooms = function () {
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
+    // Sort the rooms by the amount of space their children will require
     for (var i = 0; i< roomQueue.length;i++) {
         var current = roomQueue[i];
         current.calcTotalArea(usedRooms.slice());
@@ -132,6 +133,9 @@ Building.prototype.placeRooms = function () {
             roomQueue.push(children[i]);
         }
     }
+    for (var i = 0; i < this.allRooms.length; i++) {
+        this.snap(this.allRooms.get(i));
+    }
     return true;
 };
 
@@ -143,6 +147,7 @@ Building.prototype.placeRooms = function () {
  */
 Building.prototype.placeRoom = function (room, direction) {
     var openings = this.getOpenings(room, direction);
+    // If there are no openings, return false
     if (openings.length === 0) {
         return false;
     }
@@ -150,6 +155,7 @@ Building.prototype.placeRoom = function (room, direction) {
     var placeX;
     var placeY;
     var parent = room.parent;
+    // Places the rooms within a random valid opening
     switch (direction) {
         case 'north':
             placeY = parent.locY - room.height;
@@ -175,7 +181,176 @@ Building.prototype.placeRoom = function (room, direction) {
     }
     room.locX = placeX;
     room.locY = placeY;
+    //this.snap(room);
     return true;
+};
+
+/**
+ * Causes the room to align itself with other elements in the layout through three snapping processes
+ * @param room The room to snap
+ */
+Building.prototype.snap = function (room) {
+    this.snapPlot(room);
+    this.snapTo(room);
+    this.snapAlign(room);
+};
+
+/**
+ * Snaps the room to the edges of the plot if the room is within the plotSnap distance
+ * @param room The room to snap
+ */
+Building.prototype.snapPlot = function (room) {
+    // North
+    var empty = true;
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).intersection(this.getSpace(room, 'north'))) {
+            empty = false;
+            break;
+        }
+    }
+    if (empty && room.locY <= this.plotSnap) this.snapRoom(room, 'north', 0);
+    // South
+    empty = true;
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).intersection(this.getSpace(room, 'south'))) {
+            empty = false;
+            break;
+        }
+    }
+    if (empty && this.plot.height - (room.locY + room.height) <= this.plotSnap) this.snapRoom(room, 'south', this.plot.height);
+    // East
+    empty= true;
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).intersection(this.getSpace(room, 'east'))) {
+            empty = false;
+            break;
+        }
+    }
+    if (empty && this.plot.width - (room.locX + room.width) <= this.plotSnap) this.snapRoom(room, 'east', this.plot.width);
+    // West
+    empty = true;
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).intersection(this.getSpace(room, 'west'))) {
+            empty = false;
+            break;
+        }
+    }
+    if (empty && room.locX <= this.plotSnap) this.snapRoom(room, 'west', 0);
+};
+
+/**
+ * Snaps the room to touch nearby rooms within the roomSnap distance
+ * @param room The room to snap
+ */
+Building.prototype.snapTo = function (room) {
+    // North
+    var space = this.getSpace(room, 'north');
+    var list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.intersection(space) > 0) {
+            list.push(current.locY + current.height);
+        }
+    }
+    if (list.length > 0) {
+        list.sort();
+        list.reverse();
+        if (list[0] < room.locY && room.locY - list[0] <= this.roomSnap) this.snapRoom(room, 'north', list[0]);
+    }
+    // South
+    space = this.getSpace(room, 'south');
+    list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.intersection(space) > 0) {
+            list.push(current.locY);
+        }
+    }
+    if (list.length > 0) {
+        list.sort();
+        if (list[0] > room.locY + room.height && list[0] - (room.locY + room.height) <= this.roomSnap) this.snapRoom(room, 'south', list[0]);
+    }
+    // East
+    space = this.getSpace(room, 'east');
+    list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.intersection(space) > 0) {
+            list.push(current.locX);
+        }
+    }
+    if (list.length > 0) {
+        list.sort();
+        if (list[0] > room.locX + room.width && list[0] - (room.locX + room.width) <= this.roomSnap) this.snapRoom(room, 'east', list[0]);
+    }
+    // West
+    var space = this.getSpace(room, 'west');
+    var list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.intersection(space) > 0) {
+            list.push(current.locX + current.width);
+        }
+    }
+    if (list.length > 0) {
+        list.sort();
+        list.reverse();
+        if (list[0] < room.locX && room.locX - list[0] <= this.roomSnap) this.snapRoom(room, 'west', list[0]);
+    }
+};
+
+Building.prototype.snapRoom = function (room, direction, spot) {
+    switch (direction) {
+        case 'north':
+            var distance = room.locY - spot;
+            room.setLocation(room.locX, spot);
+            room.setSize(room.width, room.height + distance);
+            break;
+        case 'south':
+            var newHeight = spot - room.locY;
+            room.setSize(room.width, newHeight);
+            break;
+        case 'east':
+            var newWidth = spot - room.locX;
+            room.setSize(newWidth, room.height);
+            break;
+        case 'west':
+            var oldX = room.locX - spot;
+            room.setLocation(spot, room.locY);
+            room.setSize(room.width + oldX, room.height);
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+};
+
+/**
+ * Returns a rectangle representing the space in the direction of the given room.
+ * @param room The room to use
+ * @param direction 'north', 'south', 'east', or 'west'
+ * @returns {Rectangle} A rectangle representing the space in the direction of the given room.
+ */
+Building.prototype.getSpace = function (room, direction) {
+    switch (direction) {
+        case "north":
+            return new Rectangle(room.locX, 0, room.width, room.locY);
+        case "south":
+            return new Rectangle(room.locX, room.locY + room.height, room.width, this.plot.height);
+        case "east":
+            return new Rectangle(room.locX + room.width, room.locY, this.plot.width, room.height);
+        case "west":
+            return new Rectangle(0, room.locY, room.locX, room.height);
+        default:
+            throw("invalid direction: " + direction);
+    }
+};
+
+/**
+ * Snaps the room such that the sides align with other rooms, even across gaps
+ * @param room The room to snap
+ */
+Building.prototype.snapAlign = function (room) {
+
 };
 
 /**
@@ -258,8 +433,8 @@ Building.prototype.collapseObstacles= function (list, direction) {
                             var newHeight = Math.max(current.bottom, next.bottom) - newTop;
                             list[i] = new Rectangle(newLeft, newTop, newWidth, newHeight);
                             list[j] = 0;
-                            console.log(list[i]);
-                            console.log(list[j]);
+                            //console.log(list[i]);
+                            //console.log(list[j]);
                         }
                         break;
                     case 'east':
@@ -290,6 +465,7 @@ Building.prototype.collapseObstacles= function (list, direction) {
  */
 Building.prototype.getOpenings = function (room, direction) {
     var parent = room.parent;
+    // Return 0 openings if the room would extend outside the plot
     switch (direction) {
         case 'north':
             if (parent.locY < room.height) return [];
@@ -301,15 +477,17 @@ Building.prototype.getOpenings = function (room, direction) {
             if (this.plot.width - parent.width - parent.locX < room.width) return [];
             break;
         case 'west':
-            if (parent.locX < room.height) return [];
+            if (parent.locX < room.width) return [];
             break;
         default:
             throw("invalid direction: " + direction);
     }
+    // Obstacles are sorted according to the relevant direction, and overlapping obstacles are combined
     var obstacles = this.getObstacles(room, direction);
     var openings = [];
     var sideLength;
     var parentSide;
+    // Find all spaces between obstacles
     switch (direction) {
         case 'north':
         case 'south':
@@ -342,9 +520,8 @@ Building.prototype.getOpenings = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    //console.log("Openings (Before):");
-    //console.log(openings.toString());
     var toRemove = [];
+    // Remove openings that won't fit the room and do not align with the parent room
     for (var i = 0; i < openings.length; i++) {
         var opening = openings[i];
         if (opening.length < sideLength || opening.end - parentSide.start < 3 || parentSide.end - opening.start < 3) {
@@ -355,8 +532,6 @@ Building.prototype.getOpenings = function (room, direction) {
         var index = openings.indexOf(toRemove[i]);
         openings.splice(index, 1);
     }
-    //console.log("Openings (After):");
-    //console.log(openings);
     return openings;
 };
 
@@ -399,13 +574,32 @@ function queueRooms(room, list) {
  * @param context the context in which to draw the rooms
  */
 Building.prototype.drawRooms = function (context) {
+    // Draw the grid
+    context.strokeStyle = 'rgb(230, 243, 255)';
+    for (var i = 1; i < this.plot.width; i++) {
+        context.beginPath();
+        context.moveTo(i * scale, 0);
+        context.lineTo(i * scale, this.plot.height * scale);
+        context.closePath();
+        context.stroke();
+    }
+    for (var i = 1; i < this.plot.height; i++) {
+        context.beginPath();
+        context.moveTo(0, i * scale);
+        context.lineTo(this.plot.width * scale, i * scale);
+        context.closePath();
+        context.stroke();
+    }
+
     console.log("All Rooms:");
     console.log(this.allRooms);
     this.entry.printTree();
     console.log(this.entry);
+    // Draw the building
     for (var i = 0; i < this.allRooms.length; i++) {
         this.allRooms.get(i).draw(context);
     }
+
 };
 
 /**
@@ -423,7 +617,7 @@ Building.prototype.initializeRoomPrototypes = function () {
  */
 Building.prototype.addRoomsToList = function () {
     while (this.area < this.minPlotPortion) {
-        this.protoRooms.sort(ComparePriority);
+        this.protoRooms.sort(comparePriority);
         var room = new Room(this.protoRooms[0]);
         this.push(room);
         this.protoRooms[0].priority += this.protoRooms[0].delay;
@@ -435,7 +629,19 @@ Building.prototype.addRoomsToList = function () {
  * Trims the rooms to insure that they fit on the plot
  */
 Building.prototype.trimSize = function () {
-    // To do at a later date
+    var i = 0;
+    this.roomList.sort(comparePriority);
+    while (this.area > this.maxPlotPortion) {
+        this.area = 0;
+        for (var roomNum = 0; roomNum < this.roomList.length; roomNum++) {
+            var room = this.roomList.get(roomNum);
+            if (room.area > room.proto.avgArea() * (1.3 - (0.2 * i))) {
+                room.makeRectangle(room.width *= 0.9,room.height *= 0.9);
+            }
+            this.area += room.area;
+        }
+        i++;
+    }
 };
 
 /**
@@ -454,12 +660,9 @@ Building.prototype.connectSubtrees = function () {
     this.roomList.sort();
     //this.roomList.reverse();
     this.entry = this.roomList.peek();
-    //console.log("length " + this.roomList.length);
-    //console.log(this.roomList);
     for (var i = 1; i < this.roomList.length; i++) {
         var toConnect;
         var room = this.roomList.get(i);
-        //console.log("room " + room.name + " " + room.area);
         var lowScore = Infinity;
         for (var j = 0; j < this.roomList.length; j++) {
             if (j != i) {
@@ -479,11 +682,6 @@ Building.prototype.connectSubtrees = function () {
                 }
             }
         }
-        //console.log("toConnect " + toConnect.name + " " + toConnect.area);
-        //console.log("toConnect");
-        //console.log(toConnect);
-        //console.log("room");
-        //console.log(room);
         toConnect.connect(room);
 
     }

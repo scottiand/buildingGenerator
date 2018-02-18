@@ -17,6 +17,7 @@ function generateButtonOnClick() {
         initRandom(Math.random());
     }
     console.log("Failures: " + failures);
+    return failures;
 }
 
 /**

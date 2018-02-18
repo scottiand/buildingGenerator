@@ -58,9 +58,7 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
     }
     this.area = width * height;
     this.width = width;
-    //console.log(width);
     this.height = height;
-    //console.log(height);
     corners.push({x:0,y:0});
     corners.push({x:width,y:0});
     corners.push({x:width,y:height});
@@ -73,13 +71,16 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
  * @param {Context} context The context in which the room is drawn
  */
 Room.prototype.draw = function (context) {
+    context.beginPath();
+    context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
     for (var i = 0; i < this.corners.length; i++) {
         context.lineTo((this.locX + this.corners[i].x)  * scale, (this.locY + this.corners[i].y)  * scale)
     }
     context.lineTo(this.locX * scale, this.locY * scale);
+    context.closePath();
     context.stroke();
-    context.fillText(this.name, this.locX * scale, this.locY * scale);
+    context.fillText(this.name, (this.locX + 1) * scale, (this.locY + this.height / 2) * scale);
 };
 
 /**
@@ -180,4 +181,13 @@ Room.prototype.printTree = function(string) {
         var current = this.adjacent[i];
         current.printTree(tab + "   ");
     }
-}
+};
+
+/**
+ * Sets the new size for the room
+ * @param width New width
+ * @param height New Height
+ */
+Room.prototype.setSize = function(width, height) {
+    this.corners = this.makeRectangle(width, height);
+};
