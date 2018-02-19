@@ -6,17 +6,20 @@
 /**
  * Generates a new building based on the seed entry
  */
-function generateButtonOnClick() {
+function generateButtonOnClick(draw) {
+    draw = typeof draw === 'undefined' ? true : draw;
     initRandom(seedEntry.value);
     failures = 0;
     //var success = false;
     currentBuilding = new Building();
+    currentBuilding.draw = draw;
     while (!currentBuilding.build()) {
         currentBuilding = new Building();
+        currentBuilding.draw = draw;
         failures++;
         initRandom(Math.random());
     }
-    console.log("Failures: " + failures);
+    if (currentBuilding.draw) console.log("Failures: " + failures);
     return failures;
 }
 

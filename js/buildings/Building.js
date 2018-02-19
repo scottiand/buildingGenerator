@@ -22,6 +22,8 @@ function Building() {
     this.roomList = new RoomList();
     this.allRooms = new RoomList();
     this.entry;
+    this.doors = [];
+    this.draw = true;
 }
 
 /**
@@ -32,7 +34,7 @@ Building.prototype.build = function () {
     this.generateRoomList();
     this.generateConnectivityGraph();
     if (this.placeRooms()) {
-        this.drawRooms(context);
+        if (this.draw) this.drawRooms(context);
         return true;
     } else {
         return false;
@@ -111,7 +113,7 @@ Building.prototype.placeRooms = function () {
             current.rotate();
             if (this.placeRoom(current, sides[i].direction)) break;
             if (i === 3) {
-                console.log("Failed to place room");
+                if (this.draw) console.log("Failed to place room");
                 return false;
             }
         }
@@ -181,6 +183,7 @@ Building.prototype.placeRoom = function (room, direction) {
     }
     room.locX = placeX;
     room.locY = placeY;
+    this.doors.push(new Door(room, room.parent, direction));
     //this.snap(room);
     return true;
 };
@@ -299,6 +302,12 @@ Building.prototype.snapTo = function (room) {
     }
 };
 
+/**
+ * Stretches a given room to match the given location in the given direction
+ * @param room
+ * @param direction
+ * @param spot
+ */
 Building.prototype.snapRoom = function (room, direction, spot) {
     switch (direction) {
         case 'north':
@@ -350,6 +359,66 @@ Building.prototype.getSpace = function (room, direction) {
  * @param room The room to snap
  */
 Building.prototype.snapAlign = function (room) {
+    // North
+    var topSide = room.locY - this.roomSnap;
+    var botSide = room.locY + this.roomSnap;
+    var list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.locY >= topSide && current.locY <= botSide && current !== room) list.push(new Line1D(room.locY, current.locY));
+    }
+    if (list.length > 0) {
+        list.sort(compareLength);
+        var near = list[0];
+        var empty = true;
+        var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+        for (var i = 0; i < this.allRooms.length; i++) {
+            if (this.allRooms.get(i).intersection(rect) > 0 && room !== this.allRooms.get(i)) {
+                empty = false;
+                break;
+            }
+        }
+        if (near.end !== near.start && empty) {
+            var spot = near.end;
+            if (spot > room.locY) {
+                if (!(room.height - near.length < room.proto.minSize)){
+                    this.snapRoom(room, 'north', spot);
+                }
+            } else {
+                this.snapRoom(room, 'north', spot);
+            }
+        }
+    }
+    // South (NEEDS DOORS)
+    topSide = room.locY + room.height - this.roomSnap;
+    botSide = room.locY + room.height + this.roomSnap;
+    list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.locY + current.height >= topSide && current.locY + current.height <= botSide && current !== room) list.push(new Line1D(room.locY + room.height, current.locY + current.height));
+    }
+    if (list.length > 0) {
+        list.sort(compareLength);
+        near = list[0];
+        empty = true;
+        rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+        for (var i = 0; i < this.allRooms.length; i++) {
+            if (this.allRooms.get(i).intersection(rect) > 0 && room !== this.allRooms.get(i)) {
+                empty = false;
+                break;
+            }
+        }
+        if (near.end !== near.start && empty) {
+            var spot = near.end;
+            if (spot < room.locY) {
+                if (!(room.height - near.length < room.proto.minSize)){
+                    this.snapRoom(room, 'south', spot);
+                }
+            } else {
+                this.snapRoom(room, 'south', spot);
+            }
+        }
+    }
 
 };
 
@@ -363,9 +432,7 @@ Building.prototype.getPlacement = function (opening, sideLength, parentSide) {
     var availableSpace = new Line1D(opening.start, opening.end);
     availableSpace.trimEnd(sideLength);
     var validSpace = new Line1D(Math.max(availableSpace.start, 3 + parentSide.start - sideLength), Math.min(availableSpace.end, parentSide.end - 3));
-    //console.log('offset: ' + offset);
     var offset = randDoub(validSpace.length);
-    //console.log('offset: ' + offset);
     return validSpace.start + offset;
 };
 
@@ -403,7 +470,6 @@ Building.prototype.getObstacles = function(room, direction) {
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
         if (current.intersection(range) > 0) {
-            //console.log(current.name);
             obstacles.push(new Rectangle(current.locX, current.locY, current.width, current.height));
         }
     }
@@ -433,8 +499,6 @@ Building.prototype.collapseObstacles= function (list, direction) {
                             var newHeight = Math.max(current.bottom, next.bottom) - newTop;
                             list[i] = new Rectangle(newLeft, newTop, newWidth, newHeight);
                             list[j] = 0;
-                            //console.log(list[i]);
-                            //console.log(list[j]);
                         }
                         break;
                     case 'east':
@@ -590,7 +654,6 @@ Building.prototype.drawRooms = function (context) {
         context.closePath();
         context.stroke();
     }
-
     console.log("All Rooms:");
     console.log(this.allRooms);
     this.entry.printTree();
@@ -599,7 +662,9 @@ Building.prototype.drawRooms = function (context) {
     for (var i = 0; i < this.allRooms.length; i++) {
         this.allRooms.get(i).draw(context);
     }
-
+    for (var i = 0; i < this.doors.length; i++) {
+        this.doors[i].draw(context);
+    }
 };
 
 /**
@@ -609,7 +674,6 @@ Building.prototype.initializeRoomPrototypes = function () {
     for (var i = 0; i< this.roomTypes.length; i++) {
         this.protoRooms.push(new ProtoRoom(this.roomTypes[i]));
     }
-    //console.log(this.protoRooms);
 };
 
 /**

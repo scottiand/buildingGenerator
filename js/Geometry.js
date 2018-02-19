@@ -77,3 +77,13 @@ function compareTop(a, b) {
     }
     return 0;
 }
+
+function compareLength(a, b) {
+    if (a.length < b.length) {
+        return -1;
+    }
+    if (a.length > b.length) {
+        return 1;
+    }
+    return 0;
+}

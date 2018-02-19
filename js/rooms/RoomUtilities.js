@@ -65,3 +65,34 @@ function comparePriority(a, b) {
     }
     return 0;
 }
+
+/**
+ * Returns a line that represents the overlap between the two rooms in the given direction
+ * @param room1
+ * @param room2
+ * @param direction
+ * @returns {Line1D}
+ */
+function getOverlap(room1, room2, direction) {
+    var line1;
+    var line2;
+    switch (direction) {
+        case 'north':
+        case 'south':
+            line1 = new Line1D(room1.locX, room1.locX + room1.width);
+            line2 = new Line1D(room2.locX, room2.locX + room2.width);
+            break;
+        case 'east':
+        case 'west':
+            line1 = new Line1D(room1.locY, room1.locY + room1.height);
+            line2 = new Line1D(room2.locY, room2.locY + room2.height);
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+    if (line1.end < line2.start || line2.end < line1.start) {
+        return new Line1D(0,0);
+    } else {
+        return new Line1D(Math.max(line1.start, line2.start), Math.min(line1.end, line2.end));
+    }
+}
