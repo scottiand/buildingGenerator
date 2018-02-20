@@ -161,19 +161,19 @@ Building.prototype.placeRoom = function (room, direction) {
     switch (direction) {
         case 'north':
             placeY = parent.locY - room.height;
-            placeX = this.getPlacement(opening, room.width, new Line1D(parent.locX, parent.locX + parent.width));
+            placeX = this.getPlacement(opening, room.width, new Line1D(parent.locX, parent.right()));
             break;
         case 'south':
-            placeY = parent.locY + parent.height;
-            placeX = this.getPlacement(opening, room.width, new Line1D(parent.locX, parent.locX + parent.width));
+            placeY = parent.bottom();
+            placeX = this.getPlacement(opening, room.width, new Line1D(parent.locX, parent.right()));
             break;
         case 'east':
-            placeX = parent.locX + parent.width;
-            placeY = this.getPlacement(opening, room.height, new Line1D(parent.locY, parent.locY + parent.height));
+            placeX = parent.right();
+            placeY = this.getPlacement(opening, room.height, new Line1D(parent.locY, parent.bottom()));
             break;
         case 'west':
             placeX = parent.locX - room.width;
-            placeY = this.getPlacement(opening, room.height, new Line1D(parent.locY, parent.locY + parent.height));
+            placeY = this.getPlacement(opening, room.height, new Line1D(parent.locY, parent.bottom()));
             break;
         default:
             throw("invalid direction: " + direction);
@@ -220,7 +220,7 @@ Building.prototype.snapPlot = function (room) {
             break;
         }
     }
-    if (empty && this.plot.height - (room.locY + room.height) <= this.plotSnap) this.snapRoom(room, 'south', this.plot.height);
+    if (empty && this.plot.height - room.bottom() <= this.plotSnap) this.snapRoom(room, 'south', this.plot.height);
     // East
     empty= true;
     for (var i = 0; i < this.allRooms.length; i++) {
@@ -229,7 +229,7 @@ Building.prototype.snapPlot = function (room) {
             break;
         }
     }
-    if (empty && this.plot.width - (room.locX + room.width) <= this.plotSnap) this.snapRoom(room, 'east', this.plot.width);
+    if (empty && this.plot.width - room.right() <= this.plotSnap) this.snapRoom(room, 'east', this.plot.width);
     // West
     empty = true;
     for (var i = 0; i < this.allRooms.length; i++) {
@@ -252,7 +252,7 @@ Building.prototype.snapTo = function (room) {
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
         if (current.intersection(space) > 0) {
-            list.push(current.locY + current.height);
+            list.push(current.bottom());
         }
     }
     if (list.length > 0) {
@@ -272,8 +272,8 @@ Building.prototype.snapTo = function (room) {
     }
     if (list.length > 0) {
         list.sort();
-        var rect = new Rectangle(room.locX, room.locY + room.height, room.width, list[0] - (room.locY + room.height));
-        if (list[0] > room.locY + room.height && list[0] - (room.locY + room.height) <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'south', list[0]);
+        var rect = new Rectangle(room.locX, room.bottom(), room.width, list[0] - room.bottom());
+        if (list[0] > room.bottom() && list[0] - room.bottom() <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'south', list[0]);
     }
     // East
     space = this.getSpace(room, 'east');
@@ -286,8 +286,8 @@ Building.prototype.snapTo = function (room) {
     }
     if (list.length > 0) {
         list.sort();
-        var rect = new Rectangle(room.locX + room.width, room.locY, list[0] - (room.locX + room.width), room.width);
-        if (list[0] > room.locX + room.width && list[0] - (room.locX + room.width) <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'east', list[0]);
+        var rect = new Rectangle(room.right(), room.locY, list[0] - room.right(), room.width);
+        if (list[0] > room.right() && list[0] - room.right() <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'east', list[0]);
     }
     // West
     var space = this.getSpace(room, 'west');
@@ -295,7 +295,7 @@ Building.prototype.snapTo = function (room) {
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
         if (current.intersection(space) > 0) {
-            list.push(current.locX + current.width);
+            list.push(current.right());
         }
     }
     if (list.length > 0) {
@@ -512,11 +512,11 @@ Building.prototype.getObstacles = function(room, direction) {
             sortFunction = compareLeft;
             break;
         case 'south':
-            range = new Rectangle(0, parent.locY + parent.height, this.plot.width, room.height);
+            range = new Rectangle(0, parent.bottom(), this.plot.width, room.height);
             sortFunction = compareLeft;
             break;
         case 'east':
-            range = new Rectangle(parent.locX + parent.width, 0, room.width, this.plot.height);
+            range = new Rectangle(parent.right(), 0, room.width, this.plot.height);
             sortFunction = compareTop;
             break;
         case 'west':
@@ -624,7 +624,7 @@ Building.prototype.getOpenings = function (room, direction) {
                 openings.push(new Line1D(obstacles[obstacles.length - 1].right, this.plot.width));
             }
             sideLength = room.width;
-            parentSide = new Line1D(parent.locX, parent.locX + parent.width);
+            parentSide = new Line1D(parent.locX, parent.right());
             break;
         case 'east':
         case 'west':
@@ -638,7 +638,7 @@ Building.prototype.getOpenings = function (room, direction) {
                 openings.push(new Line1D(obstacles[obstacles.length - 1].bottom, this.plot.height));
             }
             sideLength = room.height;
-            parentSide = new Line1D(parent.locY, parent.locY + parent.height);
+            parentSide = new Line1D(parent.locY, parent.bottom());
             break;
         default:
             throw("invalid direction: " + direction);
@@ -665,11 +665,9 @@ Building.prototype.getOpenings = function (room, direction) {
  */
 Building.prototype.getSideSpace = function(parent) {
     var northRect = new Rectangle(0,0, this.plot.width,parent.locY);
-    var southRect = new Rectangle(0, parent.locY + parent.height, this.plot.width,this.plot.height - (parent.locY + parent.height));
-    var eastRect = new Rectangle(parent.locX + parent.width, 0, this.plot.width - (parent.locX + parent.width), this.plot.height);
+    var southRect = new Rectangle(0, parent.bottom(), this.plot.width,this.plot.height - parent.bottom());
+    var eastRect = new Rectangle(parent.right(), 0, this.plot.width - parent.right(), this.plot.height);
     var westRect = new Rectangle(0, 0, parent.locX, this.plot.height);
-    //context.fillRect(southRect.left * scale, southRect.top* scale, southRect.width * scale, southRect.height * scale);
-    //context.fillRect(eastRect.left * scale - 500, eastRect.top* scale, eastRect.width * scale, eastRect.height * scale);
     var sides = [northRect,southRect,eastRect,westRect];
     for (var i = 0; i < this.roomList.length;i++) {
         var current = this.roomList.get(i);
