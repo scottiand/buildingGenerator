@@ -32,6 +32,10 @@ function Room(proto) {
         this.adjacent = [];
         this.parent = null;
         this.isPlaced = false;
+        this.northDoors = [];
+        this.southDoors = [];
+        this.eastDoors = [];
+        this.westDoors = [];
     } else {
         throw "no ProtoRoom provided";
     }
@@ -190,4 +194,64 @@ Room.prototype.printTree = function(string) {
  */
 Room.prototype.setSize = function(width, height) {
     this.corners = this.makeRectangle(width, height);
+};
+
+/**
+ * Returns true if there is at least one door in the given direction
+ * @param direction
+ * @returns {boolean}
+ */
+Room.prototype.hasDoor = function(direction) {
+    switch (direction) {
+        case 'north':
+            return this.northDoors.length > 0;
+        case 'south':
+            return this.southDoors.length > 0;
+        case 'east':
+            return this.eastDoors.length > 0;
+        case 'west':
+            return this.westDoors.length > 0;
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};
+
+/**
+ * Adds a door to this room in the given direction
+ * @param door
+ * @param direction
+ */
+Room.prototype.addDoor = function (door, direction) {
+    switch (direction) {
+        case 'north':
+            this.northDoors.push(door);
+            break;
+        case 'south':
+            this.southDoors.push(door);
+            break;
+        case 'east':
+            this.eastDoors.push(door);
+            break;
+        case 'west':
+            this.westDoors.push(door);
+            break;
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};
+
+/**
+ * Returns the location of the right side of the room
+ * @returns {*}
+ */
+Room.prototype.right = function() {
+    return this.locX + this.width;
+};
+
+/**
+ * Returns the location of the bottom side of the room
+ * @returns {*}
+ */
+Room.prototype.bottom = function () {
+    return this.locY + this.height;
 };

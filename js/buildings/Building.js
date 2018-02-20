@@ -184,7 +184,7 @@ Building.prototype.placeRoom = function (room, direction) {
     room.locX = placeX;
     room.locY = placeY;
     this.doors.push(new Door(room, room.parent, direction));
-    //this.snap(room);
+    this.snapAlign(room);
     return true;
 };
 
@@ -258,7 +258,8 @@ Building.prototype.snapTo = function (room) {
     if (list.length > 0) {
         list.sort();
         list.reverse();
-        if (list[0] < room.locY && room.locY - list[0] <= this.roomSnap) this.snapRoom(room, 'north', list[0]);
+        var rect = new Rectangle(room.locX, list[0], room.width, room.locY - list[0]);
+        if (list[0] < room.locY && room.locY - list[0] <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'north', list[0]);
     }
     // South
     space = this.getSpace(room, 'south');
@@ -271,7 +272,8 @@ Building.prototype.snapTo = function (room) {
     }
     if (list.length > 0) {
         list.sort();
-        if (list[0] > room.locY + room.height && list[0] - (room.locY + room.height) <= this.roomSnap) this.snapRoom(room, 'south', list[0]);
+        var rect = new Rectangle(room.locX, room.locY + room.height, room.width, list[0] - (room.locY + room.height));
+        if (list[0] > room.locY + room.height && list[0] - (room.locY + room.height) <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'south', list[0]);
     }
     // East
     space = this.getSpace(room, 'east');
@@ -284,7 +286,8 @@ Building.prototype.snapTo = function (room) {
     }
     if (list.length > 0) {
         list.sort();
-        if (list[0] > room.locX + room.width && list[0] - (room.locX + room.width) <= this.roomSnap) this.snapRoom(room, 'east', list[0]);
+        var rect = new Rectangle(room.locX + room.width, room.locY, list[0] - (room.locX + room.width), room.width);
+        if (list[0] > room.locX + room.width && list[0] - (room.locX + room.width) <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'east', list[0]);
     }
     // West
     var space = this.getSpace(room, 'west');
@@ -298,7 +301,8 @@ Building.prototype.snapTo = function (room) {
     if (list.length > 0) {
         list.sort();
         list.reverse();
-        if (list[0] < room.locX && room.locX - list[0] <= this.roomSnap) this.snapRoom(room, 'west', list[0]);
+        var rect = new Rectangle(list[0], room.locY, room.locX - list[0], room.height);
+        if (list[0] < room.locX && room.locX - list[0] <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'west', list[0]);
     }
 };
 
@@ -360,66 +364,121 @@ Building.prototype.getSpace = function (room, direction) {
  */
 Building.prototype.snapAlign = function (room) {
     // North
-    var topSide = room.locY - this.roomSnap;
-    var botSide = room.locY + this.roomSnap;
-    var list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
-        if (current.locY >= topSide && current.locY <= botSide && current !== room) list.push(new Line1D(room.locY, current.locY));
-    }
-    if (list.length > 0) {
-        list.sort(compareLength);
-        var near = list[0];
-        var empty = true;
-        var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+    if (!room.hasDoor('north')) {
+        var topSide = room.locY - this.roomSnap;
+        var botSide = room.locY + this.roomSnap;
+        var list = [];
         for (var i = 0; i < this.allRooms.length; i++) {
-            if (this.allRooms.get(i).intersection(rect) > 0 && room !== this.allRooms.get(i)) {
-                empty = false;
-                break;
-            }
+            var current = this.allRooms.get(i);
+            if (current.locY >= topSide && current.locY <= botSide && current !== room) list.push(new Line1D(room.locY, current.locY));
         }
-        if (near.end !== near.start && empty) {
-            var spot = near.end;
-            if (spot > room.locY) {
-                if (!(room.height - near.length < room.proto.minSize)){
+        if (list.length > 0) {
+            list.sort(compareLength);
+            var near = list[0];
+            var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+            if (near.end !== near.start && this.empty(room, rect)) {
+                var spot = near.end;
+                if (spot > room.locY) {
+                    if (!(room.height - near.length < room.proto.minSize)) {
+                        this.snapRoom(room, 'north', spot);
+                    }
+                } else {
                     this.snapRoom(room, 'north', spot);
                 }
-            } else {
-                this.snapRoom(room, 'north', spot);
             }
         }
     }
-    // South (NEEDS DOORS)
-    topSide = room.locY + room.height - this.roomSnap;
-    botSide = room.locY + room.height + this.roomSnap;
-    list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
-        if (current.locY + current.height >= topSide && current.locY + current.height <= botSide && current !== room) list.push(new Line1D(room.locY + room.height, current.locY + current.height));
-    }
-    if (list.length > 0) {
-        list.sort(compareLength);
-        near = list[0];
-        empty = true;
-        rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+    // South
+    if (!room.hasDoor('south')) {
+        topSide = room.bottom() - this.roomSnap;
+        botSide = room.bottom() + this.roomSnap;
+        list = [];
         for (var i = 0; i < this.allRooms.length; i++) {
-            if (this.allRooms.get(i).intersection(rect) > 0 && room !== this.allRooms.get(i)) {
-                empty = false;
-                break;
-            }
+            var current = this.allRooms.get(i);
+            if (current.bottom() >= topSide && current.bottom() <= botSide && current !== room) list.push(new Line1D(room.bottom(), current.bottom()));
         }
-        if (near.end !== near.start && empty) {
-            var spot = near.end;
-            if (spot < room.locY) {
-                if (!(room.height - near.length < room.proto.minSize)){
+        if (list.length > 0) {
+            list.sort(compareLength);
+            near = list[0];
+            var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+            if (near.end !== near.start && this.empty(room, rect)) {
+                var spot = near.end;
+                if (spot < room.locY) {
+                    if (!(room.height - near.length < room.proto.minSize)) {
+                        this.snapRoom(room, 'south', spot);
+                    }
+                } else {
                     this.snapRoom(room, 'south', spot);
                 }
-            } else {
-                this.snapRoom(room, 'south', spot);
+            }
+        }
+    }
+    // East
+    if (!room.hasDoor('east')) {
+        var leftSide = room.right() - this.roomSnap;
+        var rightSide = room.right() + this.roomSnap;
+        list = [];
+        for (var i = 0; i < this.allRooms.length; i++) {
+            var current = this.allRooms.get(i);
+            if (current.right() >= leftSide && current.right() <= rightSide && current !== room) list.push(new Line1D(room.right(), current.right()));
+        }
+        if (list.length > 0) {
+            list.sort(compareLength);
+            near = list[0];
+            var rect = new Rectangle(Math.min(near.start, near.end), room.locY, near.length,  room.height);
+            if (near.end !== near.start && this.empty(room, rect)) {
+                var spot = near.end;
+                if (spot < room.locX) {
+                    if (!(room.width - near.length < room.proto.minSize)) {
+                        this.snapRoom(room, 'east', spot);
+                    }
+                } else {
+                    this.snapRoom(room, 'east', spot);
+                }
+            }
+        }
+    }
+    // West
+    if (!room.hasDoor('west')) {
+        var leftSide = room.locX - this.roomSnap;
+        var rightSide = room.locX + this.roomSnap;
+        list = [];
+        for (var i = 0; i < this.allRooms.length; i++) {
+            var current = this.allRooms.get(i);
+            if (current.locX >= leftSide && current.locX <= rightSide && current !== room) list.push(new Line1D(room.locX, current.locX));
+        }
+        if (list.length > 0) {
+            list.sort(compareLength);
+            near = list[0];
+            var rect = new Rectangle(Math.min(near.start, near.end), room.locY, near.length,  room.height);
+            if (near.end !== near.start && this.empty(room, rect)) {
+                var spot = near.end;
+                if (spot > room.locX) {
+                    if (!(room.width - near.length < room.proto.minSize)) {
+                        this.snapRoom(room, 'west', spot);
+                    }
+                } else {
+                    this.snapRoom(room, 'west', spot);
+                }
             }
         }
     }
 
+};
+
+/**
+ * Returns true is the given rectangle is empty, except for the given room
+ * @param room
+ * @param rectangle
+ * @returns {boolean}
+ */
+Building.prototype.empty = function(room, rectangle) {
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).intersection(rectangle) > 0 && room !== this.allRooms.get(i)) {
+            return false;
+        }
+    }
+    return true;
 };
 
 /**

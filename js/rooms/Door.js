@@ -34,12 +34,28 @@ Door.prototype.setLocation = function() {
             case 'north':
             case 'south':
                 this.x = placement;
-                this.y = this.room1.locY === this.room2.locY + this.room2.height ? this.room1.locY : this.room2.locY;
+                if (this.room1.locY === this.room2.locY + this.room2.height) {
+                    this.y = this.room1.locY;
+                    this.room1.addDoor(this, 'north');
+                    this.room2.addDoor(this, 'south');
+                } else {
+                    this.y = this.room2.locY;
+                    this.room1.addDoor(this, 'south');
+                    this.room2.addDoor(this, 'north');
+                }
                 break;
             case 'east':
             case 'west':
-                this.x = this.room1.locX === this.room2.locX + this.room2.width ? this.room1.locX : this.room2.locX;
                 this.y = placement;
+                if (this.room1.locX === this.room2.locX + this.room2.width) {
+                    this.x = this.room1.locX;
+                    this.room1.addDoor(this, 'west');
+                    this.room2.addDoor(this, 'east');
+                } else {
+                    this.x = this.room2.locX;
+                    this.room1.addDoor(this, 'east');
+                    this.room2.addDoor(this, 'west');
+                }
                 break;
             default:
                 throw("invalid direction: " + this.direction);
