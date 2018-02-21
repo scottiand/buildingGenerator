@@ -135,10 +135,20 @@ Building.prototype.placeRooms = function () {
             roomQueue.push(children[i]);
         }
     }
-    for (var i = 0; i < this.allRooms.length; i++) {
-        this.snap(this.allRooms.get(i));
-    }
+    //this.snapAllRooms(1);
     return true;
+};
+
+/**
+ * Snaps all the rooms, repeating the given number of times
+ * @param num
+ */
+Building.prototype.snapAllRooms = function(num){
+    for (var j = 0; j < num; j++) {
+        for (var i = 0; i < this.allRooms.length; i++) {
+            this.snap(this.allRooms.get(i));
+        }
+    }
 };
 
 /**
@@ -184,7 +194,7 @@ Building.prototype.placeRoom = function (room, direction) {
     room.locX = placeX;
     room.locY = placeY;
     this.doors.push(new Door(room, room.parent, direction));
-    this.snapAlign(room);
+    this.snap(room);
     return true;
 };
 
@@ -194,8 +204,15 @@ Building.prototype.placeRoom = function (room, direction) {
  */
 Building.prototype.snap = function (room) {
     this.snapPlot(room);
+    if (room.area === 0) {
+        throw("snapPlot");
+    }
     this.snapTo(room);
+    if (room.area === 0) {
+        throw("snapTo");
+    }
     this.snapAlign(room);
+
 };
 
 /**
@@ -388,6 +405,9 @@ Building.prototype.snapAlign = function (room) {
             }
         }
     }
+    if (room.area === 0) {
+        throw("north");
+    }
     // South
     if (!room.hasDoor('south')) {
         topSide = room.bottom() - this.roomSnap;
@@ -403,7 +423,7 @@ Building.prototype.snapAlign = function (room) {
             var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
             if (near.end !== near.start && this.empty(room, rect)) {
                 var spot = near.end;
-                if (spot < room.locY) {
+                if (spot < room.bottom()) {
                     if (!(room.height - near.length < room.proto.minSize)) {
                         this.snapRoom(room, 'south', spot);
                     }
@@ -412,6 +432,9 @@ Building.prototype.snapAlign = function (room) {
                 }
             }
         }
+    }
+    if (room.area === 0) {
+        throw("south " + near.length);
     }
     // East
     if (!room.hasDoor('east')) {
@@ -428,7 +451,7 @@ Building.prototype.snapAlign = function (room) {
             var rect = new Rectangle(Math.min(near.start, near.end), room.locY, near.length,  room.height);
             if (near.end !== near.start && this.empty(room, rect)) {
                 var spot = near.end;
-                if (spot < room.locX) {
+                if (spot < room.right()) {
                     if (!(room.width - near.length < room.proto.minSize)) {
                         this.snapRoom(room, 'east', spot);
                     }
@@ -437,6 +460,9 @@ Building.prototype.snapAlign = function (room) {
                 }
             }
         }
+    }
+    if (room.area === 0) {
+        throw("east");
     }
     // West
     if (!room.hasDoor('west')) {
@@ -463,7 +489,9 @@ Building.prototype.snapAlign = function (room) {
             }
         }
     }
-
+        if (room.area === 0) {
+            throw("west");
+        }
 };
 
 /**

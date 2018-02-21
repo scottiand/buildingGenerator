@@ -79,13 +79,13 @@ function getOverlap(room1, room2, direction) {
     switch (direction) {
         case 'north':
         case 'south':
-            line1 = new Line1D(room1.locX, room1.locX + room1.width);
-            line2 = new Line1D(room2.locX, room2.locX + room2.width);
+            line1 = new Line1D(room1.locX, room1.right());
+            line2 = new Line1D(room2.locX, room2.right());
             break;
         case 'east':
         case 'west':
-            line1 = new Line1D(room1.locY, room1.locY + room1.height);
-            line2 = new Line1D(room2.locY, room2.locY + room2.height);
+            line1 = new Line1D(room1.locY, room1.bottom());
+            line2 = new Line1D(room2.locY, room2.bottom());
             break;
         default:
             throw("invalid direction: " + direction);

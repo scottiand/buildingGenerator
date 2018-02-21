@@ -24,6 +24,9 @@ function Door(room1, room2, direction) {
  */
 Door.prototype.setLocation = function() {
     var overlap = getOverlap(this.room1, this.room2, this.direction);
+    // console.log(overlap);
+    // console.log(this.room1);
+    // console.log(this.room2);
     var spot = (overlap.start + overlap.end) / 2;
     if (overlap.length >= 3) {
         placement = Infinity;
