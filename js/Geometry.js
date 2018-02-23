@@ -3,7 +3,7 @@
 // functions involved in geometry
 
 /**\
- * A rectangle
+ * Creates a rectangle
  * @param left The x location of the left side
  * @param top The y location of the right side
  * @param width The width of the rectangle
@@ -58,6 +58,12 @@ Line1D.prototype.toString = function () {
     return "\nLine1D (" + this.start + " - " + this.end + ", Length: "+ this.length + ")";
 };
 
+/**
+ * A function for comparing based on the left edge for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
 function compareLeft(a, b) {
     if (a.left < b.left) {
         return -1;
@@ -68,6 +74,12 @@ function compareLeft(a, b) {
     return 0;
 }
 
+/**
+ * A function for comparing based on the top edge for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
 function compareTop(a, b) {
     if (a.top < b.top) {
         return -1;
@@ -78,6 +90,12 @@ function compareTop(a, b) {
     return 0;
 }
 
+/**
+ * A function for comparing based on the length for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
 function compareLength(a, b) {
     if (a.length < b.length) {
         return -1;

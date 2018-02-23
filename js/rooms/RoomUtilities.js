@@ -96,3 +96,48 @@ function getOverlap(room1, room2, direction) {
         return new Line1D(Math.max(line1.start, line2.start), Math.min(line1.end, line2.end));
     }
 }
+
+function getMaxDoor(doorList, direction) {
+    var maxDoor;
+    switch (direction) {
+        case 'north':
+            for (var i = 0; i < doorList.length; i++) {
+                if (typeof maxDoor === 'undefined') {
+                    maxDoor = doorList[i];
+                } else if (doorList[i].y <= maxDoor.y) {
+                    maxDoor = doorList[i];
+                }
+            }
+            break;
+        case 'south':
+            for (var i = 0; i < doorList.length; i++) {
+                if (typeof maxDoor === 'undefined') {
+                    maxDoor = doorList[i];
+                } else if (doorList[i].y >= maxDoor.y) {
+                    maxDoor = doorList[i];
+                }
+            }
+            break;
+        case 'east':
+            for (var i = 0; i < doorList.length; i++) {
+                if (typeof maxDoor === 'undefined') {
+                    maxDoor = doorList[i];
+                } else if (doorList[i].x >= maxDoor.x) {
+                    maxDoor = doorList[i];
+                }
+            }
+            break;
+        case 'west':
+            for (var i = 0; i < doorList.length; i++) {
+                if (typeof maxDoor === 'undefined') {
+                    maxDoor = doorList[i];
+                } else if (doorList[i].x <= maxDoor.x) {
+                    maxDoor = doorList[i];
+                }
+            }
+            break;
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+    return maxDoor;
+}

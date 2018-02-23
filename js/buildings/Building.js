@@ -397,7 +397,11 @@ Building.prototype.snapAlign = function (room) {
                 var spot = near.end;
                 if (spot > room.locY) {
                     if (!(room.height - near.length < room.proto.minSize)) {
-                        this.snapRoom(room, 'north', spot);
+                        var doors = room.getDoors('east').concat(room.getDoors('west'));
+                        var max = doors.length > 0 ? getMaxDoor(doors, 'north').y - 0.5 : Infinity;
+                        if (spot <= max) {
+                            this.snapRoom(room, 'north', spot);
+                        }
                     }
                 } else {
                     this.snapRoom(room, 'north', spot);
@@ -425,7 +429,11 @@ Building.prototype.snapAlign = function (room) {
                 var spot = near.end;
                 if (spot < room.bottom()) {
                     if (!(room.height - near.length < room.proto.minSize)) {
-                        this.snapRoom(room, 'south', spot);
+                        var doors = room.getDoors('east').concat(room.getDoors('west'));
+                        var max = doors.length > 0 ? getMaxDoor(doors, 'south').end() + 0.5: 0;
+                        if (spot > max) {
+                            this.snapRoom(room, 'south', spot);
+                        }
                     }
                 } else {
                     this.snapRoom(room, 'south', spot);
@@ -453,7 +461,11 @@ Building.prototype.snapAlign = function (room) {
                 var spot = near.end;
                 if (spot < room.right()) {
                     if (!(room.width - near.length < room.proto.minSize)) {
-                        this.snapRoom(room, 'east', spot);
+                        var doors = room.getDoors('north').concat(room.getDoors('south'));
+                        var max = doors.length > 0 ? getMaxDoor(doors, 'east').end() + 0.5 : 0;
+                        if (spot > max) {
+                            this.snapRoom(room, 'east', spot);
+                        }
                     }
                 } else {
                     this.snapRoom(room, 'east', spot);
@@ -481,7 +493,11 @@ Building.prototype.snapAlign = function (room) {
                 var spot = near.end;
                 if (spot > room.locX) {
                     if (!(room.width - near.length < room.proto.minSize)) {
-                        this.snapRoom(room, 'west', spot);
+                        var doors = room.getDoors('north').concat(room.getDoors('south'));
+                        var max = doors.length > 0 ? getMaxDoor(doors, 'west').x - 0.5 : Infinity;
+                        if (spot < max) {
+                            this.snapRoom(room, 'west', spot);
+                        }
                     }
                 } else {
                     this.snapRoom(room, 'west', spot);

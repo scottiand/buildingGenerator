@@ -255,3 +255,23 @@ Room.prototype.right = function() {
 Room.prototype.bottom = function () {
     return this.locY + this.height;
 };
+
+/**
+ * Returns a list of doors in the given direction
+ * @param direction
+ * @returns {Array}
+ */
+Room.prototype.getDoors = function(direction) {
+    switch (direction) {
+        case 'north':
+            return this.northDoors;
+        case 'south':
+            return this.southDoors;
+        case 'east':
+            return this.eastDoors;
+        case 'west':
+            return this.westDoors;
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};

@@ -89,3 +89,21 @@ Door.prototype.draw = function(context) {
             throw("invalid direction: " + this.direction);
     }
 };
+
+/**
+ * Returns the endpoint of the door (right or bottom side, depending on the orientation)
+ * @returns {*}
+ */
+Door.prototype.end = function () {
+    switch (this.direction) {
+        case 'north':
+        case 'south':
+            return this.x + this.size;
+        case 'east':
+        case 'west':
+            return this.y + this.size;
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};
+
