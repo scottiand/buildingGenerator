@@ -12,7 +12,7 @@
 function Door(room1, room2, direction) {
     this.room1 = room1;
     this.room2 = room2;
-    this.x = 0;
+    this.x = 0;// The location of the center of the door
     this.y = 0;
     this.size = 0;
     this.direction = direction;
@@ -107,3 +107,34 @@ Door.prototype.end = function () {
     }
 };
 
+/**
+ * Returns the point that the door ends at
+ */
+Door.prototype.endPoint = function () {
+    switch (this.direction) {
+        case 'north':
+        case 'south':
+            return {x: this.x + (this.size / 2), y: this.y};
+        case 'east':
+        case 'west':
+            return {x: this.x, y: this.y + (this.size / 2)};
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};
+
+/**
+ * Returns the point that the door starts at
+ */
+Door.prototype.startPoint = function() {
+    switch (this.direction) {
+        case 'north':
+        case 'south':
+            return {x: this.x - (this.size / 2), y: this.y};
+        case 'east':
+        case 'west':
+            return {x: this.x, y: this.y - (this.size / 2)};
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};

@@ -97,6 +97,12 @@ function getOverlap(room1, room2, direction) {
     }
 }
 
+/**
+ * From a given list of doors, returns the door that is farthest in the given direction
+ * @param doorList
+ * @param direction
+ * @returns {*}
+ */
 function getMaxDoor(doorList, direction) {
     var maxDoor;
     switch (direction) {

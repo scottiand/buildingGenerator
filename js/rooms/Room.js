@@ -2,6 +2,8 @@
 // Room
 // Setup for Rooms, which represent individual rooms
 
+var directions = ['north', 'east', 'south', 'west'];
+
 /**
  * Generates a room based on a given room proto, with randomized size
  * privacy: determines the order of placement of rooms
@@ -16,8 +18,7 @@
  * @param {ProtoRoom} proto Gives the room attributes based on the RoomType
  */
 function Room(proto) {
-
-    if (typeof proto != 'undefined') {
+    if (typeof proto !== 'undefined') {
         this.proto = Object.assign(proto);
         this.name = this.proto.name;
         this.purpose = this.proto.purpose;
@@ -26,6 +27,7 @@ function Room(proto) {
         this.totalArea = 0;
         this.width = 0;
         this.height = 0;
+        this.pointsByDirection = [0, 0, 0, 0]; //[North, East, South, West]
         this.corners = this.makeRectangle();
         this.locX = -99999;
         this.locY = -99999;
@@ -36,6 +38,7 @@ function Room(proto) {
         this.southDoors = [];
         this.eastDoors = [];
         this.westDoors = [];
+
     } else {
         throw "no ProtoRoom provided";
     }
@@ -60,6 +63,7 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
         width = newWidth;
         height = newHeight;
     }
+    this.pointsByDirection = [1, 1, 1, 1];
     this.area = width * height;
     this.width = width;
     this.height = height;
@@ -78,13 +82,53 @@ Room.prototype.draw = function (context) {
     context.beginPath();
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
-    for (var i = 0; i < this.corners.length; i++) {
-        context.lineTo((this.locX + this.corners[i].x)  * scale, (this.locY + this.corners[i].y)  * scale)
+    //For each direction: North, east, south, then west
+    for (var i = 0; i < 4; i++) {
+        var direction = directions[i];
+        // Get the list of doors in the given direction
+        var doors = this.getDoors(direction);
+        // Returns the index of the corner in which the room changes direction
+        var cornerNumber = this.getCornerNumber(i + 1);
+        // For each door on the current side
+        for (var j = 0; j < doors.length; j++) {
+            switch (direction) {
+                case 'north':
+                case 'east':
+                    context.lineTo(doors[j].startPoint().x * scale, doors[j].startPoint().y * scale);
+                    context.moveTo(doors[j].endPoint().x * scale, doors[j].endPoint().y * scale);
+                    break;
+                case 'south':
+                case 'west':
+                    context.lineTo(doors[j].endPoint().x * scale, doors[j].endPoint().y * scale);
+                    context.moveTo(doors[j].startPoint().x * scale, doors[j].startPoint().y * scale);
+                    break;
+                default:
+                    throw("invalid direction: " + this.direction);
+            }
+        }
+        context.lineTo((this.locX + this.corners[cornerNumber].x) * scale, (this.locY + this.corners[cornerNumber].y) * scale);
     }
-    context.lineTo(this.locX * scale, this.locY * scale);
-    context.closePath();
     context.stroke();
     context.fillText(this.name, (this.locX + 1) * scale, (this.locY + this.height / 2) * scale);
+};
+
+/**
+ * Returns the index of the corner that starts the side of the given number
+ * 0 - North
+ * 1 - East
+ * 2 - South
+ * 3 - West
+ * The value is put througha mod function such that 5 corresponds to north, 6 to East, and so on
+ * @param directionNumber
+ * @returns {number}
+ */
+Room.prototype.getCornerNumber = function(directionNumber) {
+    var toReturn = 0;
+    directionNumber = directionNumber % 4;
+    for (var i = 0; i < directionNumber; i++) {
+        toReturn += this.pointsByDirection[i];
+    }
+    return toReturn;
 };
 
 /**

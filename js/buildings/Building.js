@@ -91,7 +91,9 @@ Building.prototype.placeRooms = function () {
         validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
     }
     firstRoom.isPlaced = true;
+    //console.log(firstRoom.pointsByDirection);
     queueRooms(firstRoom, roomQueue);
+    //console.log(roomQueue[1].pointsByDirection);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
     // Sort the rooms by the amount of space their children will require
@@ -763,9 +765,9 @@ Building.prototype.drawRooms = function (context) {
     for (var i = 0; i < this.allRooms.length; i++) {
         this.allRooms.get(i).draw(context);
     }
-    for (var i = 0; i < this.doors.length; i++) {
-        this.doors[i].draw(context);
-    }
+    // for (var i = 0; i < this.doors.length; i++) {
+    //     this.doors[i].draw(context);
+    // }
 };
 
 /**

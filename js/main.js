@@ -12,7 +12,9 @@ var currentBuilding;
 var scale = 8;
 var failures = 0;
 
-// Start here
+/**
+ * Setup function; initializes global variables and generates the default building
+ */
 window.onload = function init() {
     // Initialize global variables, DO NOT DELETE
     canvas = document.getElementById("canvas");
@@ -30,7 +32,7 @@ window.onload = function init() {
     //    initRandom(Math.random());
     // }
     // console.log("Failures: " + failures);
-    testRun(1000);
+    testRun(1);
 
     // Testing stuff
     //var roomType = new RoomType();
@@ -41,6 +43,12 @@ window.onload = function init() {
     // var test = [canvas, seedEntry, currentBuilding, scale];
     // console.log(test.includes(currentBuilding));
     // console.log(test.includes(new Building()));
+
+    // context.moveTo(30, 30);
+    // context.lineTo(30, 35);
+    // context.moveTo(30, 40);
+    // context.lineTo(30,50);
+    // context.stroke();
 };
 
 
