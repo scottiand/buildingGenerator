@@ -24,6 +24,7 @@ function Building() {
     this.entry;
     this.doors = [];
     this.draw = true;
+    this.doorSpace = 0.5;
 }
 
 /**
@@ -36,9 +37,8 @@ Building.prototype.build = function () {
     if (this.placeRooms()) {
         if (this.draw) this.drawRooms(context);
         return true;
-    } else {
-        return false;
     }
+    return false;
 };
 
 /**
@@ -91,9 +91,7 @@ Building.prototype.placeRooms = function () {
         validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
     }
     firstRoom.isPlaced = true;
-    //console.log(firstRoom.pointsByDirection);
     queueRooms(firstRoom, roomQueue);
-    //console.log(roomQueue[1].pointsByDirection);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
     // Sort the rooms by the amount of space their children will require
@@ -161,10 +159,8 @@ Building.prototype.snapAllRooms = function(num){
  */
 Building.prototype.placeRoom = function (room, direction) {
     var openings = this.getOpenings(room, direction);
-    // If there are no openings, return false
-    if (openings.length === 0) {
-        return false;
-    }
+    // If there are no openings, the room cannot be placed on this side
+    if (openings.length === 0) return false;
     var opening = openings[randInt(openings.length)];
     var placeX;
     var placeY;
@@ -214,7 +210,6 @@ Building.prototype.snap = function (room) {
         throw("snapTo");
     }
     this.snapAlign(room);
-
 };
 
 /**
@@ -222,42 +217,41 @@ Building.prototype.snap = function (room) {
  * @param room The room to snap
  */
 Building.prototype.snapPlot = function (room) {
-    // North
-    var empty = true;
-    for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).intersection(this.getSpace(room, 'north'))) {
-            empty = false;
-            break;
-        }
+    for (var i = 0; i < 4; i++) {
+        this.snapPlotSingleDirection(room, directions[i]);
     }
-    if (empty && room.locY <= this.plotSnap) this.snapRoom(room, 'north', 0);
-    // South
-    empty = true;
-    for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).intersection(this.getSpace(room, 'south'))) {
-            empty = false;
+};
+
+/**
+ * Snaps the room to the given edge of the plot, if it is within the plotSnap distance
+ * @param room
+ * @param direction
+ */
+Building.prototype.snapPlotSingleDirection = function(room, direction) {
+    var empty = !this.intersection(this.getSpace(room, direction));
+    var closeEnough;
+    var spot;
+    switch (direction) {
+        case 'north':
+            closeEnough = empty && room.locY <= this.plotSnap;
+            spot = 0;
             break;
-        }
-    }
-    if (empty && this.plot.height - room.bottom() <= this.plotSnap) this.snapRoom(room, 'south', this.plot.height);
-    // East
-    empty= true;
-    for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).intersection(this.getSpace(room, 'east'))) {
-            empty = false;
+        case 'south':
+            closeEnough = this.plot.height - room.bottom() <= this.plotSnap;
+            spot = this.plot.height;
             break;
-        }
-    }
-    if (empty && this.plot.width - room.right() <= this.plotSnap) this.snapRoom(room, 'east', this.plot.width);
-    // West
-    empty = true;
-    for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).intersection(this.getSpace(room, 'west'))) {
-            empty = false;
+        case 'east':
+            closeEnough = this.plot.width - room.right() <= this.plotSnap;
+            spot = this.plot.width;
             break;
-        }
+        case 'west':
+            closeEnough = room.locX <= this.plotSnap;
+            spot = 0;
+            break;
+        default:
+            throw("invalid direction: " + direction);
     }
-    if (empty && room.locX <= this.plotSnap) this.snapRoom(room, 'west', 0);
+    if (empty && closeEnough) room.stretch(spot, direction);//this.snapRoom(room, direction, spot);
 };
 
 /**
@@ -265,95 +259,52 @@ Building.prototype.snapPlot = function (room) {
  * @param room The room to snap
  */
 Building.prototype.snapTo = function (room) {
-    // North
-    var space = this.getSpace(room, 'north');
-    var list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
-        if (current.intersection(space) > 0) {
-            list.push(current.bottom());
-        }
-    }
-    if (list.length > 0) {
-        list.sort();
-        list.reverse();
-        var rect = new Rectangle(room.locX, list[0], room.width, room.locY - list[0]);
-        if (list[0] < room.locY && room.locY - list[0] <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'north', list[0]);
-    }
-    // South
-    space = this.getSpace(room, 'south');
-    list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
-        if (current.intersection(space) > 0) {
-            list.push(current.locY);
-        }
-    }
-    if (list.length > 0) {
-        list.sort();
-        var rect = new Rectangle(room.locX, room.bottom(), room.width, list[0] - room.bottom());
-        if (list[0] > room.bottom() && list[0] - room.bottom() <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'south', list[0]);
-    }
-    // East
-    space = this.getSpace(room, 'east');
-    list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
-        if (current.intersection(space) > 0) {
-            list.push(current.locX);
-        }
-    }
-    if (list.length > 0) {
-        list.sort();
-        var rect = new Rectangle(room.right(), room.locY, list[0] - room.right(), room.width);
-        if (list[0] > room.right() && list[0] - room.right() <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'east', list[0]);
-    }
-    // West
-    var space = this.getSpace(room, 'west');
-    var list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
-        if (current.intersection(space) > 0) {
-            list.push(current.right());
-        }
-    }
-    if (list.length > 0) {
-        list.sort();
-        list.reverse();
-        var rect = new Rectangle(list[0], room.locY, room.locX - list[0], room.height);
-        if (list[0] < room.locX && room.locX - list[0] <= this.roomSnap && this.empty(room, rect)) this.snapRoom(room, 'west', list[0]);
+    for (var i = 0; i < 4; i++) {
+        this.snapToSingleDirection(room, directions[i]);
     }
 };
 
 /**
- * Stretches a given room to match the given location in the given direction
+ * Snaps the room to the closest room withing the roomSnap distance in the given direction
  * @param room
  * @param direction
- * @param spot
  */
-Building.prototype.snapRoom = function (room, direction, spot) {
+Building.prototype.snapToSingleDirection = function (room, direction) {
+    var roomList = this.getIntersectingRooms(this.getSpace(room, direction));
+    var list = [];
+    if (roomList.length <= 0) return;
+    var validSnap;
     switch (direction) {
         case 'north':
-            var distance = room.locY - spot;
-            room.setLocation(room.locX, spot);
-            room.setSize(room.width, room.height + distance);
+            roomList.forEach(function (value) { list.push(value.bottom()) });
+            list.sort();
+            list.reverse();
+            var rect = new Rectangle(room.locX, list[0], room.width, room.locY - list[0]);
+            validSnap = list[0] < room.locY && room.locY - list[0] <= this.roomSnap && this.empty(room, rect);
             break;
         case 'south':
-            var newHeight = spot - room.locY;
-            room.setSize(room.width, newHeight);
+            roomList.forEach(function (value) { list.push(value.locY) });
+            list.sort();
+            var rect = new Rectangle(room.locX, room.bottom(), room.width, list[0] - room.bottom());
+            validSnap = list[0] > room.bottom() && list[0] - room.bottom() <= this.roomSnap && this.empty(room, rect);
             break;
         case 'east':
-            var newWidth = spot - room.locX;
-            room.setSize(newWidth, room.height);
+            roomList.forEach(function (value) { list.push(value.locX) });
+            list.sort();
+            var rect = new Rectangle(room.right(), room.locY, list[0] - room.right(), room.width);
+            validSnap = list[0] > room.right() && list[0] - room.right() <= this.roomSnap && this.empty(room, rect);
             break;
         case 'west':
-            var oldX = room.locX - spot;
-            room.setLocation(spot, room.locY);
-            room.setSize(room.width + oldX, room.height);
+            roomList.forEach(function (value) { list.push(value.right()) });
+            list.sort();
+            list.reverse();
+            var rect = new Rectangle(list[0], room.locY, room.locX - list[0], room.height);
+            validSnap = list[0] < room.locX && room.locX - list[0] <= this.roomSnap && this.empty(room, rect);
             break;
         default:
             throw("invalid direction: " + direction);
     }
+    if (validSnap) room.stretch(list[0], direction);//this.snapRoom(room, direction, list[0]);
 };
 
 /**
@@ -382,134 +333,65 @@ Building.prototype.getSpace = function (room, direction) {
  * @param room The room to snap
  */
 Building.prototype.snapAlign = function (room) {
-    // North
-    if (!room.hasDoor('north')) {
-        var topSide = room.locY - this.roomSnap;
-        var botSide = room.locY + this.roomSnap;
-        var list = [];
-        for (var i = 0; i < this.allRooms.length; i++) {
-            var current = this.allRooms.get(i);
-            if (current.locY >= topSide && current.locY <= botSide && current !== room) list.push(new Line1D(room.locY, current.locY));
-        }
-        if (list.length > 0) {
-            list.sort(compareLength);
-            var near = list[0];
-            var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
-            if (near.end !== near.start && this.empty(room, rect)) {
-                var spot = near.end;
-                if (spot > room.locY) {
-                    if (!(room.height - near.length < room.proto.minSize)) {
-                        var doors = room.getDoors('east').concat(room.getDoors('west'));
-                        var max = doors.length > 0 ? getMaxDoor(doors, 'north').y - 0.5 : Infinity;
-                        if (spot <= max) {
-                            this.snapRoom(room, 'north', spot);
-                        }
-                    }
-                } else {
-                    this.snapRoom(room, 'north', spot);
-                }
-            }
-        }
+    for (var i = 0; i < 4;i++) {
+        this.snapAlignSingleDirection(room, directions[i]);
     }
-    if (room.area === 0) {
-        throw("north");
+};
+
+/**
+ * Snaps the room to line up with rooms within the roomSnap distance in the given direction
+ * @param room
+ * @param direction
+ */
+Building.prototype.snapAlignSingleDirection = function(room, direction) {
+    if (room.hasDoor(direction)) return; //Do not snap if it would disconnect rooms connected by a door
+    var nearSide = room.getSide(direction) - this.roomSnap;
+    var farSide = room.getSide(direction) + this.roomSnap;
+    var list = [];
+    // Get all room that fall within the snap distance
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.getSide(direction) >= nearSide && current.getSide(direction) <= farSide && current !== room) list.push(new Line1D(room.getSide(direction), current.getSide(direction)));
     }
-    // South
-    if (!room.hasDoor('south')) {
-        topSide = room.bottom() - this.roomSnap;
-        botSide = room.bottom() + this.roomSnap;
-        list = [];
-        for (var i = 0; i < this.allRooms.length; i++) {
-            var current = this.allRooms.get(i);
-            if (current.bottom() >= topSide && current.bottom() <= botSide && current !== room) list.push(new Line1D(room.bottom(), current.bottom()));
-        }
-        if (list.length > 0) {
-            list.sort(compareLength);
-            near = list[0];
-            var rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
-            if (near.end !== near.start && this.empty(room, rect)) {
-                var spot = near.end;
-                if (spot < room.bottom()) {
-                    if (!(room.height - near.length < room.proto.minSize)) {
-                        var doors = room.getDoors('east').concat(room.getDoors('west'));
-                        var max = doors.length > 0 ? getMaxDoor(doors, 'south').end() + 0.5: 0;
-                        if (spot > max) {
-                            this.snapRoom(room, 'south', spot);
-                        }
-                    }
-                } else {
-                    this.snapRoom(room, 'south', spot);
-                }
-            }
-        }
+    if (list.length <= 0) return; // If there are no matches, we're done!
+    list.sort(compareLength);
+    var near = list[0]; // Find the shortest line segment
+    if (near.length === 0) return; // Snapping is unnecessary already aligned
+    var rect;
+    var doors = [];
+    var max;
+    var spot = near.end;
+    //var shrinking = room.isShrinking(direction, spot);
+    switch (direction) {
+        case 'north':
+            rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
+            doors = room.getDoors('east').concat(room.getDoors('west'));
+            max = doors.length > 0 ? getMaxDoor(doors, direction).y - this.doorSpace : Infinity;
+            if (spot > max) return; // Do not snap if it would move past a door
+            break;
+        case 'south':
+            rect = new Rectangle(room.locX, Math.max(near.start, near.end), room.width, near.length);
+            doors = room.getDoors('east').concat(room.getDoors('west'));
+            max = doors.length > 0 ? getMaxDoor(doors, 'south').end() + this.doorSpace: 0;
+            if (spot < max) return; // Do not snap if it would move past a door
+            break;
+        case 'east':
+            rect = new Rectangle(Math.max(near.start, near.end), room.locY, near.length,  room.height);
+            doors = room.getDoors('north').concat(room.getDoors('south'));
+            max = doors.length > 0 ? getMaxDoor(doors, 'east').end() + this.doorSpace : 0;
+            if (spot < max) return; // Do not snap if it would move past a door
+            break;
+        case 'west':
+            rect = new Rectangle(Math.min(near.start, near.end), room.locY, near.length,  room.height);
+            doors = room.getDoors('north').concat(room.getDoors('south'));
+            max = doors.length > 0 ? getMaxDoor(doors, 'west').x - this.doorSpace : Infinity;
+            if (spot > max) return; // Do not snap if it would move past a door
+            break;
+        default:
+            throw("invalid direction: " + this.direction);
     }
-    if (room.area === 0) {
-        throw("south " + near.length);
-    }
-    // East
-    if (!room.hasDoor('east')) {
-        var leftSide = room.right() - this.roomSnap;
-        var rightSide = room.right() + this.roomSnap;
-        list = [];
-        for (var i = 0; i < this.allRooms.length; i++) {
-            var current = this.allRooms.get(i);
-            if (current.right() >= leftSide && current.right() <= rightSide && current !== room) list.push(new Line1D(room.right(), current.right()));
-        }
-        if (list.length > 0) {
-            list.sort(compareLength);
-            near = list[0];
-            var rect = new Rectangle(Math.min(near.start, near.end), room.locY, near.length,  room.height);
-            if (near.end !== near.start && this.empty(room, rect)) {
-                var spot = near.end;
-                if (spot < room.right()) {
-                    if (!(room.width - near.length < room.proto.minSize)) {
-                        var doors = room.getDoors('north').concat(room.getDoors('south'));
-                        var max = doors.length > 0 ? getMaxDoor(doors, 'east').end() + 0.5 : 0;
-                        if (spot > max) {
-                            this.snapRoom(room, 'east', spot);
-                        }
-                    }
-                } else {
-                    this.snapRoom(room, 'east', spot);
-                }
-            }
-        }
-    }
-    if (room.area === 0) {
-        throw("east");
-    }
-    // West
-    if (!room.hasDoor('west')) {
-        var leftSide = room.locX - this.roomSnap;
-        var rightSide = room.locX + this.roomSnap;
-        list = [];
-        for (var i = 0; i < this.allRooms.length; i++) {
-            var current = this.allRooms.get(i);
-            if (current.locX >= leftSide && current.locX <= rightSide && current !== room) list.push(new Line1D(room.locX, current.locX));
-        }
-        if (list.length > 0) {
-            list.sort(compareLength);
-            near = list[0];
-            var rect = new Rectangle(Math.min(near.start, near.end), room.locY, near.length,  room.height);
-            if (near.end !== near.start && this.empty(room, rect)) {
-                var spot = near.end;
-                if (spot > room.locX) {
-                    if (!(room.width - near.length < room.proto.minSize)) {
-                        var doors = room.getDoors('north').concat(room.getDoors('south'));
-                        var max = doors.length > 0 ? getMaxDoor(doors, 'west').x - 0.5 : Infinity;
-                        if (spot < max) {
-                            this.snapRoom(room, 'west', spot);
-                        }
-                    }
-                } else {
-                    this.snapRoom(room, 'west', spot);
-                }
-            }
-        }
-    }
-        if (room.area === 0) {
-            throw("west");
-        }
+    if (!this.empty(room, rect)) return; // If the space is occupied, do not snap
+    room.stretch(spot, direction);//this.snapRoom(room, direction, spot);
 };
 
 /**
@@ -774,7 +656,7 @@ Building.prototype.drawRooms = function (context) {
  *  Creates ProtoRooms for use in addRoomsToList
  */
 Building.prototype.initializeRoomPrototypes = function () {
-    for (var i = 0; i< this.roomTypes.length; i++) {
+    for (var i = 0; i < this.roomTypes.length; i++) {
         this.protoRooms.push(new ProtoRoom(this.roomTypes[i]));
     }
 };
@@ -825,7 +707,6 @@ Building.prototype.createSubtrees = function () {
  */
 Building.prototype.connectSubtrees = function () {
     this.roomList.sort();
-    //this.roomList.reverse();
     this.entry = this.roomList.peek();
     for (var i = 1; i < this.roomList.length; i++) {
         var toConnect;
@@ -850,7 +731,6 @@ Building.prototype.connectSubtrees = function () {
             }
         }
         toConnect.connect(room);
-
     }
 };
 
@@ -861,6 +741,38 @@ Building.prototype.connectSubtrees = function () {
 Building.prototype.push = function (room) {
     this.roomList.push(room);
     this.allRooms.push(room);
+};
+
+/**
+ * Returns true if any rooms in the building intersect the given rectangle
+ * @param rectangle
+ * @returns {boolean}
+ */
+Building.prototype.intersection = function(rectangle) {
+    var inters = false;
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).intersection(rectangle)) {
+            inters = true;
+            break;
+        }
+    }
+    return  inters;
+};
+
+/**
+ * Returns an array of rooms that intersect the given rectangle
+ * @param rectangle
+ * @returns {Array}
+ */
+Building.prototype.getIntersectingRooms = function (rectangle) {
+    var list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var current = this.allRooms.get(i);
+        if (current.intersection(rectangle) > 0) {
+            list.push(current);
+        }
+    }
+    return list;
 };
 
 function bedBathAndBeyondRule(building) {

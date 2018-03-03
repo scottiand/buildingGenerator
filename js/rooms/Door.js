@@ -2,6 +2,9 @@
 // Door
 // A door between two rooms
 
+var CHANCE_TO_REMOVE_WALL = 25;
+var MIN_PRIVACY_TO_REMOVE_WALL = 50;
+
 /**
  * Creates a door between two rooms, in the given direction
  * @param room1
@@ -24,48 +27,59 @@ function Door(room1, room2, direction) {
  */
 Door.prototype.setLocation = function() {
     var overlap = getOverlap(this.room1, this.room2, this.direction);
-    // console.log(overlap);
-    // console.log(this.room1);
-    // console.log(this.room2);
     var spot = (overlap.start + overlap.end) / 2;
     if (overlap.length >= 3) {
+        // if (percentChance(CHANCE_TO_REMOVE_WALL) && Math.max(this.room1.privacy, this.room2.privacy) <= 50) {
+        //     this.size = overlap.length / 2;
+        //     this.setExactLocation(spot, this.direction);
+        //     return;
+        // }
         placement = Infinity;
         while (placement < (1.5 + overlap.start) || placement > (overlap.end - 1.5)) {
             var placement = randGauss(spot, overlap.length / 6);
         }
-        switch (this.direction) {
-            case 'north':
-            case 'south':
-                this.x = placement;
-                if (this.room1.locY === this.room2.locY + this.room2.height) {
-                    this.y = this.room1.locY;
-                    this.room1.addDoor(this, 'north');
-                    this.room2.addDoor(this, 'south');
-                } else {
-                    this.y = this.room2.locY;
-                    this.room1.addDoor(this, 'south');
-                    this.room2.addDoor(this, 'north');
-                }
-                break;
-            case 'east':
-            case 'west':
-                this.y = placement;
-                if (this.room1.locX === this.room2.locX + this.room2.width) {
-                    this.x = this.room1.locX;
-                    this.room1.addDoor(this, 'west');
-                    this.room2.addDoor(this, 'east');
-                } else {
-                    this.x = this.room2.locX;
-                    this.room1.addDoor(this, 'east');
-                    this.room2.addDoor(this, 'west');
-                }
-                break;
-            default:
-                throw("invalid direction: " + this.direction);
-        }
+        this.setExactLocation(placement, this.direction);
         this.size = 2;
     } else {
         throw("Could not place door between " + this.room1.name + " and " + this.room2.name + ".");
+    }
+};
+
+/**
+ * Sets the x and y location of the door depending on the direction
+ * @param placement
+ * @param direction
+ */
+Door.prototype.setExactLocation = function (placement, direction) {
+    switch (direction) {
+        case 'north':
+        case 'south':
+            this.x = placement;
+            if (this.room1.locY === this.room2.locY + this.room2.height) {
+                this.y = this.room1.locY;
+                this.room1.addDoor(this, 'north');
+                this.room2.addDoor(this, 'south');
+            } else {
+                this.y = this.room2.locY;
+                this.room1.addDoor(this, 'south');
+                this.room2.addDoor(this, 'north');
+            }
+            break;
+        case 'east':
+        case 'west':
+            this.y = placement;
+            if (this.room1.locX === this.room2.locX + this.room2.width) {
+                this.x = this.room1.locX;
+                this.room1.addDoor(this, 'west');
+                this.room2.addDoor(this, 'east');
+            } else {
+                this.x = this.room2.locX;
+                this.room1.addDoor(this, 'east');
+                this.room2.addDoor(this, 'west');
+            }
+            break;
+        default:
+            throw("invalid direction: " + direction);
     }
 };
 

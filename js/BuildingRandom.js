@@ -58,3 +58,14 @@ function randInt(max) {
 function randDoub(max) {
     return Math.random() * max;
 }
+
+/**
+ * Has a chance of returning true based on the given percentage
+ * A random number is generated. If it is lower than the given percentage, it returns true.
+ * @param percent
+ * @returns {boolean}
+ */
+function percentChance(percent) {
+    var num = randDoub(100);
+    return percent < num;
+}

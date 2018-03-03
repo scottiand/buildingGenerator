@@ -38,7 +38,6 @@ function Room(proto) {
         this.southDoors = [];
         this.eastDoors = [];
         this.westDoors = [];
-
     } else {
         throw "no ProtoRoom provided";
     }
@@ -83,6 +82,7 @@ Room.prototype.draw = function (context) {
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
     //For each direction: North, east, south, then west
+    console.log(this.name);
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
         // Get the list of doors in the given direction
@@ -90,7 +90,12 @@ Room.prototype.draw = function (context) {
         // Returns the index of the corner in which the room changes direction
         var cornerNumber = this.getCornerNumber(i + 1);
         // For each door on the current side
+
+        console.log(direction);
+        //console.log(doors);
+
         for (var j = 0; j < doors.length; j++) {
+            console.log(doors[j]);
             switch (direction) {
                 case 'north':
                 case 'east':
@@ -319,3 +324,104 @@ Room.prototype.getDoors = function(direction) {
             throw("invalid direction: " + this.direction);
     }
 };
+
+/**
+ * Returns the value of the side of this room in the given direction
+ * @param direction
+ * @returns {*}
+ */
+Room.prototype.getSide = function (direction) {
+    switch (direction) {
+        case 'north':
+            return this.locY;
+        case 'south':
+            return this.bottom();
+        case 'east':
+            return this.locX;
+        case 'west':
+            return this.right();
+        default:
+            throw("invalid direction: " + this.direction);
+    }
+};
+
+/**
+ * Stretches the room in the given direction to the given location, if possible
+ * @param spot
+ * @param direction
+ */
+Room.prototype.stretch = function (spot, direction) {
+    var newHeight;
+    var newWidth;
+    var newX;
+    var newY;
+    switch (direction) {
+        case 'north':
+            var distance = this.locY - spot;
+            newWidth = this.width;
+            newHeight = this.height + distance;
+            newX = this.locX;
+            newY = spot;
+            break;
+        case 'south':
+            newWidth = this.width;
+            newHeight = spot - this.locY;
+            newX = this.locX;
+            newY = this.locY;
+            break;
+        case 'east':
+            newWidth = spot - this.locX;
+            newHeight = this.height;
+            newX = this.locX;
+            newY = this.locY;
+            break;
+        case 'west':
+            var distance = this.locX - spot;
+            newWidth = this.width + distance;
+            newHeight = this.height;
+            newX = spot;
+            newY = this.locY;
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+    //console.log("before " + this.isValidSize(newWidth, newHeight));
+    //console.log("width: " + newWidth + " max: " +this.maxSize + " min: " + this.minSize);
+    //console.log("height:" + newHeight);
+    if (!this.isValidSize(newWidth, newHeight)) return;
+    //console.log("after");
+    this.setLocation(newX, newY);
+    this.setSize(newWidth, newHeight);
+};
+
+/**
+ * Returns true if the new size is within the limits of the room
+ * @param newWidth
+ * @param newHeight
+ * @returns {boolean}
+ */
+Room.prototype.isValidSize = function(newWidth, newHeight){
+    return (newHeight <= this.proto.maxSize) && (newHeight >= this.proto.minSize) && (newWidth <= this.proto.maxSize) && (newWidth >= this.proto.minSize);
+   // return !(newHeight > this.maxSize || newHeight < this.minSize) || !(newWidth > this.maxSize || newWidth < this.minSize);
+};
+
+/**
+ * Returns true if the newLocation would cause the room to shrink if the side at the given direction were moved to that point
+ * @param direction
+ * @param newLocation
+ * @returns {boolean}
+ */
+// Room.prototype.isShrinking = function (direction, newLocation) {
+//     switch (direction) {
+//         case 'north':
+//             return newLocation > this.locY;
+//         case 'south':
+//             return newLocation < this.bottom();
+//         case 'east':
+//             return newLocation < this.right();
+//         case 'west':
+//             return newLocation > this.locX;
+//         default:
+//             throw("invalid direction: " + this.direction);
+//     }
+// };
