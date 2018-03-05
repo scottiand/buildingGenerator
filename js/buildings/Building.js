@@ -45,20 +45,6 @@ Building.prototype.build = function () {
 };
 
 /**
- * Randomly generates the size of the plot
- * @param plotSize The desired average plot size
- */
-Building.prototype.addPlot = function (plotSize) {
-    this.plot.width = randGauss(plotSize,5);
-    this.plot.height = randGauss(plotSize,5);
-    this.plot.area = this.plot.width * this.plot.height;
-    canvas.width = this.plot.width * scale;
-    canvas.height = this.plot.height * scale;
-    this.minPlotPortion = this.plot.area * 0.5; // Calculate this based on density at a later date
-    this.maxPlotPortion = this.plot.area * 0.7; // Calculate this based on density at a later date
-};
-
-/**
  * Creates a list of rooms to be placed into the building
  */
 Building.prototype.generateRoomList = function () {
@@ -778,89 +764,113 @@ Building.prototype.getIntersectingRooms = function (rectangle) {
     return list;
 };
 
+/**
+ * Adds at least one door to each yard area
+ * A yard area is any section of outdoor space on the plot defined by the edges of the plot and the wall of the house
+ * If there is only one yard space, we may add a front door and a back door
+ */
 Building.prototype.addOutsideDoors = function () {
-    //console.log('here');
     var roomsTouchingEdge = [];
     for (var i = 0; i < this.allRooms.length; i++) {
         var room = this.allRooms.get(i);
         if (room.touchingSides(this.plot).length > 0) {
             roomsTouchingEdge.push(room);
         }
+    } // Get all rooms that are touching an edge
+
+    var northLines = [];
+    this.getFreeOuterLines(roomsTouchingEdge, 'north').forEach(function (value) { northLines.push(value.to2DPlotEdge(currentBuilding.plot,'north')) });
+    var eastLines = [];
+    this.getFreeOuterLines(roomsTouchingEdge, 'east').forEach(function (value) { eastLines.push(value.to2DPlotEdge(currentBuilding.plot,'east')) });
+    var southLines = [];
+    this.getFreeOuterLines(roomsTouchingEdge, 'south').forEach(function (value) { southLines.push(value.to2DPlotEdge(currentBuilding.plot,'south')) });
+    var westLines = [];
+    this.getFreeOuterLines(roomsTouchingEdge, 'west').forEach(function (value) { westLines.push(value.to2DPlotEdge(currentBuilding.plot,'west')) });
+
+    var yardList = northLines.concat(eastLines, southLines, westLines);
+    while (!this.isConnected(yardList) && yardList.length > 1) {
+        console.log('here');
+        for (var i = 0; i < yardList.length; i++) {
+            var i2 = (i + 1) % yardList.length;
+            if (yardList[i].x2 === yardList[i2].x1 && yardList[i].y2 === yardList[i2].y1) {
+                yardList[i] = new Line2D(yardList[i].x1, yardList[i].y1, yardList[i2].x2, yardList[i2].y2);
+                yardList.splice(i2, 1);
+                break;
+            }
+        }
     }
-
-    console.log(roomsTouchingEdge);
-
-    var northLines = this.getFreeOuterLines(roomsTouchingEdge, 'north');
-    var eastLines = this.getFreeOuterLines(roomsTouchingEdge, 'east');
-    var southLines = this.getFreeOuterLines(roomsTouchingEdge, 'south');
-    var westLines = this.getFreeOuterLines(roomsTouchingEdge, 'west');
-    console.log(northLines.toString());
-    console.log(eastLines.toString());
-    console.log(southLines.toString());
-    console.log(westLines.toString());
-
-    // var northLines = [new Line1D(0, this.plot.width)];
-    // var eastLines = [new Line1D(0, this.plot.height)];
-    // var southLines = [new Line1D(this.plot.width, 0)];
-    // var westLines = [new Line1D(this.plot.height, 0)];
-    //
-    // for (var i = 0; i < roomsTouchingEdge.length; i++) {
-    //     var room = roomsTouchingEdge[i];
-    //     if (room.locY === 0) {
-    //         for (var j = 0; j < northLines.length; j++) {
-    //             var split = northLines[j].split(new Line1D(room.locX, room.right()));
-    //             if (split.line1 != null) northLines[j] = split.line1;
-    //             if (split.line2 != null) northLines.push(split.line2);
-    //         }
-    //     }
-    // }
-    // northLines = northLines.filter(function (value) { return value.length > 0 });
-    // console.log(northLines.toString());
-    // for (var i = 0; i < roomsTouchingEdge.length; i++) {
-    //     var room = roomsTouchingEdge[i];
-    //     if (room.right() === this.plot.width) {
-    //         for (var j = 0; j < eastLines.length; j++) {
-    //             var split = eastLines[j].split(new Line1D(room.locY, room.bottom()));
-    //             if (split.line1 != null) eastLines[j] = split.line1;
-    //             if (split.line2 != null) eastLines.push(split.line2);
-    //         }
-    //     }
-    // }
-    // eastLines = eastLines.filter(function (value) { return value.length > 0 });
-    //console.log(eastLines.toString());
-
-
-
-    // var startPoint = {x: 0, y: 0};
-    // var startOccupied = false;
-    // var currentRoom;
-    // for (var i = 0; i < roomsTouchingEdge.length; i++) {
-    //     var room = roomsTouchingEdge[i];
-    //     if (room.locY === 0 && room.locX === 0) {
-    //         startOccupied = true;
-    //         currentRoom = room;
-    //     }
-    // }
-    //
-    // if (startOccupied) {
-    //     startPoint = {x: 0, y: currentRoom.right()};
-    // }
-    //
-    //
-
-
-// asdfghj - room touches 0, 0
+    if (yardList.length === 1) {
+        this.addOutsideDoorsSingleYard();
+    } else {
+        this.addOutsideDoorsMultipleYards(yardList);
+    }
+    console.log(yardList);
 };
 
+/**
+ * Adds a door to each yard in the yardList
+ * The yards in the yardList are represented as a Line2D that marks the points where the yard contacts the house
+ * @param yardList
+ */
+Building.prototype.addOutsideDoorsMultipleYards = function (yardList) {
+    for (var i = 0; i < yardList.length; i++) {
+        this.addDoorToYard(yardList[i]);
+    }
+};
+
+Building.prototype.addDoorToYard = function(yard) {
+    var currentLocation = {x: yard.x2, y: yard.y2};
+    var adjacentRooms = [];
+    var currentRoom = this.getRoomAtPoint(currentLocation.x, currentLocation.y);
+    console.log(currentRoom);
+    if (currentRoom === null) return;
+    // while (currentLocation.x !== yard.x1 && currentLocation.y !== yard.y2) {
+    //
+    // }
+};
+
+Building.prototype.addOutsideDoorsSingleYard = function () {
+
+};
+
+/**
+ * Returns the first room it finds in the building that intersects the given point
+ * @param x
+ * @param y
+ * @returns {*}
+ */
+Building.prototype.getRoomAtPoint = function (x, y) {
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).containsPoint(x, y)) return this.allRooms.get(i);
+    }
+    return null;
+};
+
+/**
+ * Takes a list of Line2D and returns false if the end of one line is the same as the beginning of the next.
+ * The list is treating as a cycle, so the last element will be compared with the first
+ * @param listOfLine2D
+ * @returns {boolean}
+ */
+Building.prototype.isConnected = function(listOfLine2D) {
+    for (var i = 0; i < listOfLine2D.length; i++) {
+        var i2 = (i + 1) % listOfLine2D.length;
+        if (listOfLine2D[i].x2 === listOfLine2D[i2].x1 && listOfLine2D[i].y2 === listOfLine2D[i2].y1) return false;
+    }
+    return true;
+};
+
+/**
+ * Returns a list of Line1D that represent areas on the given edge of the plot that do not intersect any of the room in the given list
+ * @param roomList
+ * @param direction
+ * @returns {*[]}
+ */
 Building.prototype.getFreeOuterLines = function (roomList, direction) {
     var lineList = [new Line1D(this.plot.getSide(getNextDirection(direction, false)),this.plot.getSide(getNextDirection(direction)))];
-
-    //console.log(getNextDirection(direction));
     for (var i = 0; i < roomList.length; i++) {
         var room = roomList[i];
-        console.log(room);
-        if (room.getSide(direction) === this.plot.getSide(direction)) { // This is never true????
-            console.log('inside');
+        if (room.getSide(direction) === this.plot.getSide(direction)) {
             for (var j = 0; j < lineList.length; j++) {
                 var split = lineList[j].split(new Line1D(room.getSide(getNextDirection(direction, false)), room.getSide(getNextDirection(direction))));
                 if (split.line1 != null) lineList[j] = split.line1;

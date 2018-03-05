@@ -55,7 +55,7 @@ Door.prototype.setExactLocation = function (placement, direction) {
         case 'north':
         case 'south':
             this.x = placement;
-            if (this.room1.locY === this.room2.locY + this.room2.height) {
+            if (this.room1.locY === this.room2.bottom()) {
                 this.y = this.room1.locY;
                 this.room1.addDoor(this, 'north');
                 this.room2.addDoor(this, 'south');
@@ -68,7 +68,7 @@ Door.prototype.setExactLocation = function (placement, direction) {
         case 'east':
         case 'west':
             this.y = placement;
-            if (this.room1.locX === this.room2.locX + this.room2.width) {
+            if (this.room1.locX === this.room2.right()) {
                 this.x = this.room1.locX;
                 this.room1.addDoor(this, 'west');
                 this.room2.addDoor(this, 'east');

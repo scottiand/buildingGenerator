@@ -108,6 +108,24 @@ Line1D.prototype.split = function (line) {
 };
 
 /**
+ * Returns a Line2D that represents the given line if it were layed on the given edge of the plot
+ * @param plot
+ * @param direction
+ */
+Line1D.prototype.to2DPlotEdge = function (plot, direction) {
+    switch (direction) {
+        case 'north':
+        case 'south':
+            return new Line2D(this.start, plot.getSide(direction), this.end, plot.getSide(direction));
+        case 'east':
+        case 'west':
+            return new Line2D(plot.getSide(direction), this.start, plot.getSide(direction), this.end);
+        default:
+            throw("invalid direction: " + direction);
+    }
+};
+
+/**
  * A two-dimensional line segment
  * @param x1 The x value of the first point
  * @param y1 The y value of the first point
@@ -122,6 +140,14 @@ function Line2D(x1, y1, x2, y2) {
     this.y2 = y2;
     this.length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
+
+/**
+ * Returns a string representation of the object
+ * @returns {string}
+ */
+Line2D.prototype.toString = function () {
+    return "Line2D {(" + this.x1 + ", " + this.y1 + ") - (" + this.x2 + ", " + this.y2 + ")}";
+};
 
 /**
  * A function for comparing based on the left edge for sorting

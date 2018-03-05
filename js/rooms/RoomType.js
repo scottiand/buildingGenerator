@@ -19,11 +19,11 @@ var hallway;
 function initRoomTypes() {
     testRoomType = new RoomType("Test","test",0,0,10,10,10,100,10,1);
     testRoomTypeEmpty = new RoomType();
-    greatRoom = new RoomType("Great Room","lounge",20,20,9999, 20, 10, 50, 4, 1);
-    bathroom = new RoomType("Bathroom","bathroom",80,0,60,8, 4, 12, 1, 1);
-    bedroom = new RoomType("Bedroom","bedroom",100, 0,40, 12, 8, 18, 2, 1);
-    kitchen = new RoomType("Kitchen","kitchen",40,0,9999,15,10,40,2,1);
-    diningRoom = new RoomType("Dining Room","dining",30,0,200,20,10,40,3,1);
+    greatRoom = new RoomType("Great Room","lounge",20,20,9999, 18, 15, 30, 4, 1);
+    bathroom = new RoomType("Bathroom","bathroom",80,0,60,6, 5, 12, 1, 1);
+    bedroom = new RoomType("Bedroom","bedroom",100, 0,40, 10, 8, 16, 2, 1);
+    kitchen = new RoomType("Kitchen","kitchen",40,0,9999,10,5,20,2,1);
+    diningRoom = new RoomType("Dining Room","dining",30,0,200,13,10,20,3,1);
     hallway = new RoomType("Hallway","hallway",60,200,100,6,4,8,1,1);
 }
 

@@ -216,6 +216,17 @@ Room.prototype.intersection = function (rectangle) {
 };
 
 /**
+ * Returns true if the room contains the given point
+ * Includes the edges of the rooms
+ * @param x
+ * @param y
+ * @returns {boolean}
+ */
+Room.prototype.containsPoint = function (x, y) {
+    return (x >= this.locX && x <= this.right() && y >= this.locY && y <= this.bottom());
+};
+
+/**
  * Rotates the room by 90 degrees
  */
 Room.prototype.rotate = function () {
@@ -335,9 +346,9 @@ Room.prototype.getSide = function (direction) {
         case 'south':
             return this.bottom();
         case 'east':
-            return this.locX;
-        case 'west':
             return this.right();
+        case 'west':
+            return this.locX;
         default:
             throw("invalid direction: " + this.direction);
     }
