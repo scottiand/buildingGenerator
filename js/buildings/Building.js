@@ -10,9 +10,9 @@ var plotSize = 50;
  * @constructor
  */
 function Building() {
-    this.plot = {width:0, height:0, area: 0};
-    this.minPlotPortion = 0;
-    this.maxPlotPortion = 0;
+    this.plot = new Plot(50);
+    this.minPlotPortion = this.plot.area * 0.5; // Calculate this based on density at a later date
+    this.maxPlotPortion = this.plot.area * 0.7; // Calculate this based on density at a later date
     this.plotSnap = 4;
     this.roomSnap = 8;
     this.area = 0;
@@ -31,10 +31,13 @@ function Building() {
  * Creates and draws the building
  */
 Building.prototype.build = function () {
-    this.addPlot(plotSize);
+    //this.addPlot(plotSize);
+    canvas.width = this.plot.width * scale;
+    canvas.height = this.plot.height * scale;
     this.generateRoomList();
     this.generateConnectivityGraph();
     if (this.placeRooms()) {
+        this.addOutsideDoors();
         if (this.draw) this.drawRooms(context);
         return true;
     }
@@ -773,6 +776,100 @@ Building.prototype.getIntersectingRooms = function (rectangle) {
         }
     }
     return list;
+};
+
+Building.prototype.addOutsideDoors = function () {
+    //console.log('here');
+    var roomsTouchingEdge = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var room = this.allRooms.get(i);
+        if (room.touchingSides(this.plot).length > 0) {
+            roomsTouchingEdge.push(room);
+        }
+    }
+
+    console.log(roomsTouchingEdge);
+
+    var northLines = this.getFreeOuterLines(roomsTouchingEdge, 'north');
+    var eastLines = this.getFreeOuterLines(roomsTouchingEdge, 'east');
+    var southLines = this.getFreeOuterLines(roomsTouchingEdge, 'south');
+    var westLines = this.getFreeOuterLines(roomsTouchingEdge, 'west');
+    console.log(northLines.toString());
+    console.log(eastLines.toString());
+    console.log(southLines.toString());
+    console.log(westLines.toString());
+
+    // var northLines = [new Line1D(0, this.plot.width)];
+    // var eastLines = [new Line1D(0, this.plot.height)];
+    // var southLines = [new Line1D(this.plot.width, 0)];
+    // var westLines = [new Line1D(this.plot.height, 0)];
+    //
+    // for (var i = 0; i < roomsTouchingEdge.length; i++) {
+    //     var room = roomsTouchingEdge[i];
+    //     if (room.locY === 0) {
+    //         for (var j = 0; j < northLines.length; j++) {
+    //             var split = northLines[j].split(new Line1D(room.locX, room.right()));
+    //             if (split.line1 != null) northLines[j] = split.line1;
+    //             if (split.line2 != null) northLines.push(split.line2);
+    //         }
+    //     }
+    // }
+    // northLines = northLines.filter(function (value) { return value.length > 0 });
+    // console.log(northLines.toString());
+    // for (var i = 0; i < roomsTouchingEdge.length; i++) {
+    //     var room = roomsTouchingEdge[i];
+    //     if (room.right() === this.plot.width) {
+    //         for (var j = 0; j < eastLines.length; j++) {
+    //             var split = eastLines[j].split(new Line1D(room.locY, room.bottom()));
+    //             if (split.line1 != null) eastLines[j] = split.line1;
+    //             if (split.line2 != null) eastLines.push(split.line2);
+    //         }
+    //     }
+    // }
+    // eastLines = eastLines.filter(function (value) { return value.length > 0 });
+    //console.log(eastLines.toString());
+
+
+
+    // var startPoint = {x: 0, y: 0};
+    // var startOccupied = false;
+    // var currentRoom;
+    // for (var i = 0; i < roomsTouchingEdge.length; i++) {
+    //     var room = roomsTouchingEdge[i];
+    //     if (room.locY === 0 && room.locX === 0) {
+    //         startOccupied = true;
+    //         currentRoom = room;
+    //     }
+    // }
+    //
+    // if (startOccupied) {
+    //     startPoint = {x: 0, y: currentRoom.right()};
+    // }
+    //
+    //
+
+
+// asdfghj - room touches 0, 0
+};
+
+Building.prototype.getFreeOuterLines = function (roomList, direction) {
+    var lineList = [new Line1D(this.plot.getSide(getNextDirection(direction, false)),this.plot.getSide(getNextDirection(direction)))];
+
+    //console.log(getNextDirection(direction));
+    for (var i = 0; i < roomList.length; i++) {
+        var room = roomList[i];
+        console.log(room);
+        if (room.getSide(direction) === this.plot.getSide(direction)) { // This is never true????
+            console.log('inside');
+            for (var j = 0; j < lineList.length; j++) {
+                var split = lineList[j].split(new Line1D(room.getSide(getNextDirection(direction, false)), room.getSide(getNextDirection(direction))));
+                if (split.line1 != null) lineList[j] = split.line1;
+                if (split.line2 != null) lineList.push(split.line2);
+            }
+        }
+    }
+    lineList = lineList.filter(function (value) { return value.length > 0 });
+    return lineList;
 };
 
 function bedBathAndBeyondRule(building) {

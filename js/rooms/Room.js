@@ -2,8 +2,6 @@
 // Room
 // Setup for Rooms, which represent individual rooms
 
-var directions = ['north', 'east', 'south', 'west'];
-
 /**
  * Generates a room based on a given room proto, with randomized size
  * privacy: determines the order of placement of rooms
@@ -82,7 +80,7 @@ Room.prototype.draw = function (context) {
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
     //For each direction: North, east, south, then west
-    console.log(this.name);
+    //console.log(this.name);
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
         // Get the list of doors in the given direction
@@ -91,11 +89,11 @@ Room.prototype.draw = function (context) {
         var cornerNumber = this.getCornerNumber(i + 1);
         // For each door on the current side
 
-        console.log(direction);
+        //console.log(direction);
         //console.log(doors);
 
         for (var j = 0; j < doors.length; j++) {
-            console.log(doors[j]);
+            //console.log(doors[j]);
             switch (direction) {
                 case 'north':
                 case 'east':
@@ -206,8 +204,8 @@ Room.prototype.calcTotalArea = function(usedRooms) {
  */
 Room.prototype.intersection = function (rectangle) {
     if (this.locX < -9999 || this.locY < -9999) return 0;
-    var right = this.width + this.locX;
-    var bottom = this.height + this.locY;
+    var right = this.right();
+    var bottom = this.bottom();
     var top = this.locY;
     var left = this.locX;
 
@@ -385,11 +383,7 @@ Room.prototype.stretch = function (spot, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    //console.log("before " + this.isValidSize(newWidth, newHeight));
-    //console.log("width: " + newWidth + " max: " +this.maxSize + " min: " + this.minSize);
-    //console.log("height:" + newHeight);
     if (!this.isValidSize(newWidth, newHeight)) return;
-    //console.log("after");
     this.setLocation(newX, newY);
     this.setSize(newWidth, newHeight);
 };
@@ -402,26 +396,20 @@ Room.prototype.stretch = function (spot, direction) {
  */
 Room.prototype.isValidSize = function(newWidth, newHeight){
     return (newHeight <= this.proto.maxSize) && (newHeight >= this.proto.minSize) && (newWidth <= this.proto.maxSize) && (newWidth >= this.proto.minSize);
-   // return !(newHeight > this.maxSize || newHeight < this.minSize) || !(newWidth > this.maxSize || newWidth < this.minSize);
 };
 
 /**
- * Returns true if the newLocation would cause the room to shrink if the side at the given direction were moved to that point
- * @param direction
- * @param newLocation
- * @returns {boolean}
+ * Returns a list of the sides that contact the edge of the plot
+ * @param plot
+ * @returns {Array}
  */
-// Room.prototype.isShrinking = function (direction, newLocation) {
-//     switch (direction) {
-//         case 'north':
-//             return newLocation > this.locY;
-//         case 'south':
-//             return newLocation < this.bottom();
-//         case 'east':
-//             return newLocation < this.right();
-//         case 'west':
-//             return newLocation > this.locX;
-//         default:
-//             throw("invalid direction: " + this.direction);
-//     }
-// };
+Room.prototype.touchingSides = function (plot) {
+    var sides = [];
+    if (this.locX === 0) sides.push('west');
+    if (this.locY === 0) sides.push('north');
+    if (this.right() === plot.width) sides.push('east');
+    if (this.bottom() === plot.height) sides.push('south');
+    return sides;
+};
+
+
