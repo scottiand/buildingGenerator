@@ -350,7 +350,7 @@ Room.prototype.getSide = function (direction) {
         case 'west':
             return this.locX;
         default:
-            throw("invalid direction: " + this.direction);
+            throw("invalid direction: " + direction);
     }
 };
 
@@ -421,6 +421,76 @@ Room.prototype.touchingSides = function (plot) {
     if (this.right() === plot.width) sides.push('east');
     if (this.bottom() === plot.height) sides.push('south');
     return sides;
+};
+
+/**
+ * Returns an array of edges that represent the area that the room touches the outside
+ * @param building
+ * @returns {Array}
+ */
+Room.prototype.getOutsideEdges = function (building) {
+    var list = [];
+    //console.log(this.name);
+    for (var i = 0; i < 4; i++) {
+        var direction = directions[i];
+        var lines = [new Line1D(this.getSide(getNextDirection(direction)), this.getSide(getNextDirection(direction, false)))];
+        var contactingRooms = this.getContactingRooms(building, direction);
+        for (var j = 0; j < contactingRooms.length; j++) {
+            var room = contactingRooms[j];
+            for (var k = 0; k < lines.length; k++) {
+                var split = lines[k].split(new Line1D(room.getSide(getNextDirection(direction, false)), room.getSide(getNextDirection(direction))));
+                if (split.line1 != null) {
+                    lines[k] = split.line1;
+                } else {
+                    lines[k] = new Line1D(0, 0);
+                }
+                if (split.line2 != null) lines.push(split.line2);
+            }
+        }
+        lines = lines.filter(function (value) { return value.length > 0 });
+        for (var j = 0; j < lines.length; j++) {
+            var edge = new Edge(lines[j].to2DRoomEdge(this, direction), this);
+            if (!edge.contacts(building.plot)) list.push(edge);
+        }
+    }
+    return list;
+};
+
+/**
+ * Returns a list or rooms that contact this one on the given side
+ * @param building
+ * @param direction
+ * @returns {Array}
+ */
+Room.prototype.getContactingRooms = function(building, direction) {
+    var list = [];
+    var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction));
+    // find all rooms that contact this one
+    for (var j = 0; j < possibleRooms.length; j++) {
+        if (possibleRooms[j].getSide(getOppositeDirection(direction)) === this.getSide(direction)) list.push(possibleRooms[j]);
+    }
+    return list;
+};
+
+/**
+ * Returns a rectangle representing the space in the given direction
+ * @param plot THe building's plot
+ * @param direction 'north', 'south', 'east', or 'west'
+ * @returns {Rectangle} A rectangle representing the space in the direction of the given room.
+ */
+Room.prototype.getSpace = function (plot, direction) {
+    switch (direction) {
+        case "north":
+            return new Rectangle(this.locX, 0, this.width, this.locY);
+        case "south":
+            return new Rectangle(this.locX, this.locY + this.height, this.width, plot.height);
+        case "east":
+            return new Rectangle(this.locX + this.width, this.locY, plot.width, this.height);
+        case "west":
+            return new Rectangle(0, this.locY, this.locX, this.height);
+        default:
+            throw("invalid direction: " + direction);
+    }
 };
 
 

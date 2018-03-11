@@ -29,7 +29,7 @@ function testRun(tries) {
  * @returns {string}
  */
 function getNextDirection(direction, clockwise) {
-    clockwise = typeof clockwise != 'undefined' ? clockwise : true;
+    clockwise = typeof clockwise !== 'undefined' ? clockwise : true;
     var i = directions.indexOf(direction);
     if (clockwise) {
         i++;
@@ -39,5 +39,33 @@ function getNextDirection(direction, clockwise) {
         i--;
         if (i < 0) i = 3;
         return directions[i];
+    }
+}
+
+/**
+ * Returns the opposite direction of the given (North returns South, etc.)
+ * @param direction
+ * @returns {string}
+ */
+function getOppositeDirection(direction) {
+    var i = directions.indexOf(direction);
+    return directions[(i + 2) % 4];
+}
+
+/**
+ * Returns true if the direction is 'north' of 'south' and false if it is 'east' or 'west'
+ * @param direction
+ * @returns {boolean}
+ */
+function vertical(direction) {
+    switch (direction) {
+        case 'north':
+        case 'south':
+            return true;
+        case 'east':
+        case 'west':
+            return false;
+        default:
+            throw("invalid direction: " + direction);
     }
 }

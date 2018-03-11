@@ -126,6 +126,27 @@ Line1D.prototype.to2DPlotEdge = function (plot, direction) {
 };
 
 /**
+ * Returns a Line2D that represents the given line if it were layed on the given edge of the proom
+ * @param room
+ * @param direction
+ * @returns {Line2D}
+ */
+Line1D.prototype.to2DRoomEdge = function (room, direction) {
+    switch (direction) {
+        case 'north':
+        case 'south':
+            return new Line2D(this.start, room.getSide(direction), this.end,room.getSide(direction));
+            //if (line.x1 > 13 && line.x1 < 14 && line.y1 > 13 && line.y1 < 14) console.log(room.name);
+            //return line;
+        case 'east':
+        case 'west':
+            return new Line2D(room.getSide(direction), this.start, room.getSide(direction), this.end);
+        default:
+            throw("invalid direction: " + direction);
+    }
+};
+
+/**
  * A two-dimensional line segment
  * @param x1 The x value of the first point
  * @param y1 The y value of the first point
@@ -146,7 +167,7 @@ function Line2D(x1, y1, x2, y2) {
  * @returns {string}
  */
 Line2D.prototype.toString = function () {
-    return "Line2D {(" + this.x1 + ", " + this.y1 + ") - (" + this.x2 + ", " + this.y2 + ")}";
+    return "(" + this.x1 + ", " + this.y1 + ") - (" + this.x2 + ", " + this.y2 + ")";
 };
 
 /**
@@ -195,4 +216,112 @@ function compareLength(a, b) {
         return 1;
     }
     return 0;
+}
+
+/**
+ * Represents an edge connected to a room. Contains a Line2D, a room, and a direction representing the side of the edge the room is on
+ * @param line
+ * @param room
+ * @constructor
+ */
+function Edge(line, room) {
+    this.line = line;
+    this.room = room;
+    if (this.line.x1 === this.line.x2) {
+        this.vertical = true;
+        this.location = this.line.x1;
+    } else if (this.line.y1 === this.line.y2) {
+        this.vertical = false;
+        this.location = this.line.y1;
+    } else {
+        throw("Edge must be a strait line");
+    }
+    if (this.vertical) {
+        if (this.room.locX === this.location) {
+            this.directionOfRoom = 'east';
+        } else if (this.room.right() === this.location) {
+            this.directionOfRoom = 'west';
+        } else {
+            throw("Edge must connect to room");
+        }
+    } else {
+        if (this.room.locY === this.location) {
+            this.directionOfRoom = 'south';
+        } else if (this.room.bottom() === this.location) {
+            this.directionOfRoom = 'north';
+        } else {
+            throw("Edge must connect to room");
+        }
+    }
+}
+
+/**
+ * Returns true if either point on the edge equals the given point
+ * @param x
+ * @param y
+ * @returns {boolean}
+ */
+Edge.prototype.hasPoint = function (x, y) {
+    return (this.line.x1 === x && this.line.y1 === y) || (this.line.x2 === x && this.line.y2 === y);
+};
+
+/**
+ * Given one of the points on the edge, returns the other point
+ * @param point
+ * @returns {{x: *|number|SVGAnimatedLength, y: *|SVGAnimatedLength|number}}
+ */
+Edge.prototype.getOtherPoint = function (point) {
+    if (this.hasPoint(point.x, point.y)) {
+        if (this.line.x1 === point.x && this.line.y1 === point.y) return {x: this.line.x2, y: this.line.y2};
+        if (this.line.x2 === point.x && this.line.y2 === point.y) return {x: this.line.x1, y: this.line.y1};
+    } else {
+        throw("Edge does not contain point (" + point.x + ", " + point.y + ")");
+    }
+};
+
+/**
+ * Returns true if the edge runs along the given structure
+ * Works for Room and Plot
+ * @param structure
+ * @returns {boolean}
+ */
+Edge.prototype.contacts = function(structure) {
+    if (this.vertical) {
+        return (this.location === structure.getSide('east') || this.location === structure.getSide('west'));
+    } else {
+        return (this.location === structure.getSide('north') || this.location === structure.getSide('south'));
+    }
+};
+
+Edge.prototype.toString = function () {
+    return this.line.toString() + "\n";
+};
+
+/**
+ * Returns the first edge in the list that contains the given point
+ * @param edgeList
+ * @param point
+ * @returns {*}
+ */
+function getEdge(edgeList, point) {
+    //console.log("-------------------------")
+    for (var i = 0; i < edgeList.length; i++) {
+        // console.log("getEdge");
+        // console.log(edgeList[i]);
+        // console.log(point);
+        if (edgeList[i].hasPoint(point.x, point.y)) return edgeList[i];
+    }
+    return null;
+}
+
+/**
+ * Removes and returns the first edge in the list that contains the given point
+ * @param edgeList
+ * @param point
+ * @returns {*}
+ */
+function removeEdge(edgeList, point) {
+    var edge = getEdge(edgeList, point);
+    edgeList.splice(edgeList.indexOf(edge), 1);
+    return edge;
 }

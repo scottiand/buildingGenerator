@@ -217,7 +217,7 @@ Building.prototype.snapPlot = function (room) {
  * @param direction
  */
 Building.prototype.snapPlotSingleDirection = function(room, direction) {
-    var empty = !this.intersection(this.getSpace(room, direction));
+    var empty = !this.intersection(room.getSpace(this.plot, direction));
     var closeEnough;
     var spot;
     switch (direction) {
@@ -259,7 +259,7 @@ Building.prototype.snapTo = function (room) {
  * @param direction
  */
 Building.prototype.snapToSingleDirection = function (room, direction) {
-    var roomList = this.getIntersectingRooms(this.getSpace(room, direction));
+    var roomList = this.getIntersectingRooms(room.getSpace(this.plot, direction));
     var list = [];
     if (roomList.length <= 0) return;
     var validSnap;
@@ -294,27 +294,6 @@ Building.prototype.snapToSingleDirection = function (room, direction) {
             throw("invalid direction: " + direction);
     }
     if (validSnap) room.stretch(list[0], direction);//this.snapRoom(room, direction, list[0]);
-};
-
-/**
- * Returns a rectangle representing the space in the direction of the given room.
- * @param room The room to use
- * @param direction 'north', 'south', 'east', or 'west'
- * @returns {Rectangle} A rectangle representing the space in the direction of the given room.
- */
-Building.prototype.getSpace = function (room, direction) {
-    switch (direction) {
-        case "north":
-            return new Rectangle(room.locX, 0, room.width, room.locY);
-        case "south":
-            return new Rectangle(room.locX, room.locY + room.height, room.width, this.plot.height);
-        case "east":
-            return new Rectangle(room.locX + room.width, room.locY, this.plot.width, room.height);
-        case "west":
-            return new Rectangle(0, room.locY, room.locX, room.height);
-        default:
-            throw("invalid direction: " + direction);
-    }
 };
 
 /**
@@ -789,7 +768,7 @@ Building.prototype.addOutsideDoors = function () {
 
     var yardList = northLines.concat(eastLines, southLines, westLines);
     while (!this.isConnected(yardList) && yardList.length > 1) {
-        console.log('here');
+        //console.log('here');
         for (var i = 0; i < yardList.length; i++) {
             var i2 = (i + 1) % yardList.length;
             if (yardList[i].x2 === yardList[i2].x1 && yardList[i].y2 === yardList[i2].y1) {
@@ -804,7 +783,7 @@ Building.prototype.addOutsideDoors = function () {
     } else {
         this.addOutsideDoorsMultipleYards(yardList);
     }
-    console.log(yardList);
+    //console.log(yardList);
 };
 
 /**
@@ -820,17 +799,36 @@ Building.prototype.addOutsideDoorsMultipleYards = function (yardList) {
 
 Building.prototype.addDoorToYard = function(yard) {
     var currentLocation = {x: yard.x2, y: yard.y2};
-    var adjacentRooms = [];
-    var currentRoom = this.getRoomAtPoint(currentLocation.x, currentLocation.y);
-    console.log(currentRoom);
-    if (currentRoom === null) return;
-    // while (currentLocation.x !== yard.x1 && currentLocation.y !== yard.y2) {
-    //
-    // }
+    var adjacentEdges = [];
+    var edges = this.getOutsideEdges();
+    var currentEdge = removeEdge(edges, currentLocation);
+    // console.log("Edges");
+    // console.log(edges.toString());
+    while (currentLocation.x !== yard.x1 && currentLocation.y !== yard.y1) {
+        //if (currentEdge === null) break;
+        adjacentEdges.push(currentEdge);
+        currentLocation = currentEdge.getOtherPoint(currentLocation);
+        currentEdge = removeEdge(edges, currentLocation);
+    }
+    adjacentEdges.push(currentEdge);
+    console.log(adjacentEdges);
 };
 
 Building.prototype.addOutsideDoorsSingleYard = function () {
 
+};
+
+Building.prototype.getOutsideEdges = function () {
+    var list = [];
+    for (var i = 0; i < this.allRooms.length; i++) {
+        var roomEdges = this.allRooms.get(i).getOutsideEdges(this);
+        for (var j = 0; j < roomEdges.length; j++) {
+            list.push(roomEdges[j])
+        }
+        //list.concat(roomEdges);
+    }
+    //console.log(list);
+    return list;
 };
 
 /**
