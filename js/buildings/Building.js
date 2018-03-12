@@ -783,6 +783,7 @@ Building.prototype.addOutsideDoors = function () {
     } else {
         this.addOutsideDoorsMultipleYards(yardList);
     }
+    console.log(this.doors);
     //console.log(yardList);
 };
 
@@ -804,14 +805,23 @@ Building.prototype.addDoorToYard = function(yard) {
     var currentEdge = removeEdge(edges, currentLocation);
     // console.log("Edges");
     // console.log(edges.toString());
-    while (currentLocation.x !== yard.x1 && currentLocation.y !== yard.y1) {
+    while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
         //if (currentEdge === null) break;
         adjacentEdges.push(currentEdge);
         currentLocation = currentEdge.getOtherPoint(currentLocation);
         currentEdge = removeEdge(edges, currentLocation);
     }
-    adjacentEdges.push(currentEdge);
-    console.log(adjacentEdges);
+    adjacentEdges.sort(sortEdgesByRoomPrivacy);
+    var publicEdges = [adjacentEdges[0]];
+    var count = 1;
+    while (count < adjacentEdges.length && adjacentEdges[0].room.privacy === adjacentEdges[count].room.privacy) {
+        publicEdges.push(adjacentEdges[count]);
+        count++;
+    }
+    var edgeToPlaceDoor = publicEdges[randInt(publicEdges.length)];
+
+    addOutsideDoor(edgeToPlaceDoor);
+    //console.log(publicEdges);
 };
 
 Building.prototype.addOutsideDoorsSingleYard = function () {

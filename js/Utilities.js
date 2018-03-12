@@ -69,3 +69,48 @@ function vertical(direction) {
             throw("invalid direction: " + direction);
     }
 }
+
+function sortByLocationClockwise(list, direction) {
+    switch (direction) {
+        case 'north':
+            list.sort(compareX);
+            break;
+        case 'south':
+            list.sort(compareX);
+            list.reverse();
+            break;
+        case 'east':
+            list.sort(compareY);
+            list.reverse();
+            break;
+        case 'west':
+            list.sort(compareY);
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+}
+
+function compareX (a, b) {
+    if (a.x < b.x) {
+        return -1;
+    }
+    if (a.x > b.x) {
+        return 1;
+    }
+    return 0;
+}
+
+function compareY (a, b) {
+    if (a.y < b.y) {
+        return -1;
+    }
+    if (a.y > b.y) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+

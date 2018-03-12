@@ -325,3 +325,15 @@ function removeEdge(edgeList, point) {
     edgeList.splice(edgeList.indexOf(edge), 1);
     return edge;
 }
+
+function sortEdgesByRoomPrivacy(a, b) {
+    var aPriv = a.room.privacy;
+    var bPriv = b.room.privacy;
+    if (aPriv < bPriv) {
+        return -1;
+    }
+    if (aPriv > bPriv) {
+        return 1;
+    }
+    return 0;
+}

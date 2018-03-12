@@ -91,8 +91,14 @@ Room.prototype.draw = function (context) {
 
         //console.log(direction);
         //console.log(doors);
-
+        sortByLocationClockwise(doors, direction);
         for (var j = 0; j < doors.length; j++) {
+            if (this.name === "Great Room") {
+                console.log(direction);
+                console.log(doors[j]);
+                console.log(doors[j].startPoint());
+                console.log(doors[j].endPoint());
+            }
             //console.log(doors[j]);
             switch (direction) {
                 case 'north':
