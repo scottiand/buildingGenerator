@@ -798,6 +798,10 @@ Building.prototype.addOutsideDoorsMultipleYards = function (yardList) {
     }
 };
 
+/**
+ * Adds a door to the least private room that contacts the given yard
+ * @param yard
+ */
 Building.prototype.addDoorToYard = function(yard) {
     var currentLocation = {x: yard.x2, y: yard.y2};
     var adjacentEdges = [];
@@ -805,27 +809,34 @@ Building.prototype.addDoorToYard = function(yard) {
     var currentEdge = removeEdge(edges, currentLocation);
     // console.log("Edges");
     // console.log(edges.toString());
-    while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
-        //if (currentEdge === null) break;
-        adjacentEdges.push(currentEdge);
-        currentLocation = currentEdge.getOtherPoint(currentLocation);
-        currentEdge = removeEdge(edges, currentLocation);
+    if (currentEdge !== null) {
+        while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
+            if (currentEdge === null) break;
+            adjacentEdges.push(currentEdge);
+            currentLocation = currentEdge.getOtherPoint(currentLocation);
+            currentEdge = removeEdge(edges, currentLocation);
+        }
+        adjacentEdges.sort(sortEdgesByRoomPrivacy);
+        var publicEdges = [adjacentEdges[0]];
+        var count = 1;
+        while (count < adjacentEdges.length && adjacentEdges[0].room.privacy === adjacentEdges[count].room.privacy) {
+            publicEdges.push(adjacentEdges[count]);
+            count++;
+        }
+        var edgeToPlaceDoor = publicEdges[randInt(publicEdges.length)];
+        addOutsideDoor(edgeToPlaceDoor);
     }
-    adjacentEdges.sort(sortEdgesByRoomPrivacy);
-    var publicEdges = [adjacentEdges[0]];
-    var count = 1;
-    while (count < adjacentEdges.length && adjacentEdges[0].room.privacy === adjacentEdges[count].room.privacy) {
-        publicEdges.push(adjacentEdges[count]);
-        count++;
-    }
-    var edgeToPlaceDoor = publicEdges[randInt(publicEdges.length)];
-
-    addOutsideDoor(edgeToPlaceDoor);
-    //console.log(publicEdges);
 };
 
+/**
+ * Adds one or two doors to a building with a single yard.
+ */
 Building.prototype.addOutsideDoorsSingleYard = function () {
-
+    var edges = this.getOutsideEdges();
+    edges.sort(sortEdgesByRoomPrivacy);
+    addOutsideDoor(edges[0]);
+    edges.splice(0,1);
+    addOutsideDoor(edges[0]);
 };
 
 Building.prototype.getOutsideEdges = function () {

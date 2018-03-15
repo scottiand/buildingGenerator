@@ -163,6 +163,16 @@ function Line2D(x1, y1, x2, y2) {
 }
 
 /**
+ *  If the line is facing in a cardinal direction, return it as a Line1D, otherwise return null
+ * @returns {*}
+ */
+Line2D.prototype.toLine1D = function() {
+    if (this.x1 === this.x2) return new Line1D(Math.min(this.y1, this.y2), Math.max(this.y1, this.y2));
+    if (this.y1 === this.y2) return new Line1D(Math.min(this.x1, this.x2), Math.max(this.x1, this.x2));
+    return null;
+};
+
+/**
  * Returns a string representation of the object
  * @returns {string}
  */
@@ -291,6 +301,14 @@ Edge.prototype.contacts = function(structure) {
     } else {
         return (this.location === structure.getSide('north') || this.location === structure.getSide('south'));
     }
+};
+
+/**
+ * Returns this edge as a Line1D
+ * @returns {*}
+ */
+Edge.prototype.getLine1D = function () {
+    return this.line.toLine1D();
 };
 
 Edge.prototype.toString = function () {

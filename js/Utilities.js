@@ -81,10 +81,11 @@ function sortByLocationClockwise(list, direction) {
             break;
         case 'east':
             list.sort(compareY);
-            list.reverse();
+            //list.reverse();
             break;
         case 'west':
             list.sort(compareY);
+            list.reverse();
             break;
         default:
             throw("invalid direction: " + direction);

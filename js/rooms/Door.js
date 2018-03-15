@@ -167,8 +167,9 @@ function DoorStartPoint(door) {
  * @param direction
  * @constructor
  */
-function OutsideDoor(room, direction) {
+function OutsideDoor(room, edge, direction) {
     this.room1 = room;
+    this.edge = edge;
     this.room2 = null;
     this.x = 0;// The location of the center of the door
     this.y = 0;
@@ -181,13 +182,16 @@ function OutsideDoor(room, direction) {
  * Sets the door's location to a random spot within the allotted space
  */
 OutsideDoor.prototype.setLocation = function() {
-    var space = new Line1D(this.room1.getSide(getNextDirection(this.direction, false)), this.room1.getSide(getNextDirection(this.direction)));
+    //var space = new Line1D(this.room1.getSide(getNextDirection(this.direction, false)), this.room1.getSide(getNextDirection(this.direction)));
+   var space = this.edge.getLine1D();
+   console.log("Outside Door");
+   console.log(space);
     if (space.length >= 3) {
         var spot = (space.start + space.end) / 2;
         placement = Infinity;
-        //while (placement < (1.5 + space.start) || placement > (space.end - 1.5)) {
+        while (placement < (1.5 + space.start) || placement > (space.end - 1.5)) {
             var placement = randGauss(spot, space.length / 6);
-        //}
+        }
         this.setExactLocation(placement, this.direction);
         this.size = 2;
     }
@@ -233,8 +237,8 @@ OutsideDoor.prototype.endPoint = function () {
 
 function addOutsideDoor(edge) {
     var room = edge.room;
-    console.log(room);
+    //console.log(room);
     var direction = getOppositeDirection(edge.directionOfRoom);
-    currentBuilding.doors.push(new OutsideDoor(room, direction));
+    currentBuilding.doors.push(new OutsideDoor(room, edge, direction));
 
 }
