@@ -38,6 +38,7 @@ Building.prototype.build = function () {
     this.generateConnectivityGraph();
     if (this.placeRooms()) {
         this.addOutsideDoors();
+        this.expandDoors();
         if (this.draw) this.drawRooms(context);
         return true;
     }
@@ -783,7 +784,7 @@ Building.prototype.addOutsideDoors = function () {
     } else {
         this.addOutsideDoorsMultipleYards(yardList);
     }
-    console.log(this.doors);
+    //console.log(this.doors);
     //console.log(yardList);
 };
 
@@ -836,9 +837,13 @@ Building.prototype.addOutsideDoorsSingleYard = function () {
     edges.sort(sortEdgesByRoomPrivacy);
     addOutsideDoor(edges[0]);
     edges.splice(0,1);
-    addOutsideDoor(edges[0]);
+    if (Math.random() > 0.5) addOutsideDoor(edges[0]);
 };
 
+/**
+ * Returns of list of room edges that line the outside of the building
+ * @returns {Array}
+ */
 Building.prototype.getOutsideEdges = function () {
     var list = [];
     for (var i = 0; i < this.allRooms.length; i++) {
@@ -899,6 +904,12 @@ Building.prototype.getFreeOuterLines = function (roomList, direction) {
     }
     lineList = lineList.filter(function (value) { return value.length > 0 });
     return lineList;
+};
+
+Building.prototype.expandDoors = function() {
+    for (var i = 0; i < this.doors.length; i++) {
+        this.doors[i].expand();
+    }
 };
 
 function bedBathAndBeyondRule(building) {

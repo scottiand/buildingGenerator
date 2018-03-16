@@ -2,7 +2,7 @@
 // Door
 // A door between two rooms
 
-var CHANCE_TO_REMOVE_WALL = 25;
+var CHANCE_TO_REMOVE_WALL = 20;
 var MIN_PRIVACY_TO_REMOVE_WALL = 50;
 
 /**
@@ -19,30 +19,59 @@ function Door(room1, room2, direction) {
     this.y = 0;
     this.size = 0;
     this.direction = direction;
+    this.privacy = Math.max(this.room1.privacy, this.room2.privacy);
+    this.overlap;
+    this.removalChance = CHANCE_TO_REMOVE_WALL;
     this.setLocation();
+    this.doorTypes = [smallDoor, singleDoor, doubleDoor];
+    this.doorType = smallDoor;
 }
 
 /**
  * Sets the door's location to a random spot within the allotted space
  */
 Door.prototype.setLocation = function() {
-    var overlap = getOverlap(this.room1, this.room2, this.direction);
+    var overlap = this.calcOverlap();
     var spot = (overlap.start + overlap.end) / 2;
     if (overlap.start > overlap.end) {console.log("Ohhhhh nooooooo")}
     if (overlap.length >= 3) {
-        // if (percentChance(CHANCE_TO_REMOVE_WALL) && Math.max(this.room1.privacy, this.room2.privacy) <= 50) {
-        //     this.size = overlap.length / 2;
-        //     this.setExactLocation(spot, this.direction);
-        //     return;
-        // }
+        this.overlap = overlap;
         placement = Infinity;
         while (placement < (1.5 + overlap.start) || placement > (overlap.end - 1.5)) {
             var placement = randGauss(spot, overlap.length / 6);
         }
         this.setExactLocation(placement, this.direction);
+        this.addDoorToRooms(this.direction);
         this.size = 2;
     } else {
         throw("Could not place door between " + this.room1.name + " and " + this.room2.name + ".");
+    }
+};
+
+Door.prototype.addDoorToRooms = function(direction) {
+    switch (direction) {
+        case 'north':
+        case 'south':
+            if (this.room1.locY === this.room2.bottom()) {
+                this.room1.addDoor(this, 'north');
+                this.room2.addDoor(this, 'south');
+            } else {
+                this.room1.addDoor(this, 'south');
+                this.room2.addDoor(this, 'north');
+            }
+            break;
+        case 'east':
+        case 'west':
+            if (this.room1.locX === this.room2.right()) {
+                this.room1.addDoor(this, 'west');
+                this.room2.addDoor(this, 'east');
+            } else {
+                this.room1.addDoor(this, 'east');
+                this.room2.addDoor(this, 'west');
+            }
+            break;
+        default:
+            throw("invalid direction: " + direction);
     }
 };
 
@@ -58,12 +87,8 @@ Door.prototype.setExactLocation = function (placement, direction) {
             this.x = placement;
             if (this.room1.locY === this.room2.bottom()) {
                 this.y = this.room1.locY;
-                this.room1.addDoor(this, 'north');
-                this.room2.addDoor(this, 'south');
             } else {
                 this.y = this.room2.locY;
-                this.room1.addDoor(this, 'south');
-                this.room2.addDoor(this, 'north');
             }
             break;
         case 'east':
@@ -71,12 +96,8 @@ Door.prototype.setExactLocation = function (placement, direction) {
             this.y = placement;
             if (this.room1.locX === this.room2.right()) {
                 this.x = this.room1.locX;
-                this.room1.addDoor(this, 'west');
-                this.room2.addDoor(this, 'east');
             } else {
                 this.x = this.room2.locX;
-                this.room1.addDoor(this, 'east');
-                this.room2.addDoor(this, 'west');
             }
             break;
         default:
@@ -136,6 +157,38 @@ Door.prototype.startPoint = function() {
     return DoorStartPoint(this);
 };
 
+/**
+ * Calls the expand function with this door as a parameter
+ */
+Door.prototype.expand = function () {
+  expand(this);
+};
+
+/**
+ * Calculates the shared space between the
+ * @returns {Line1D}
+ */
+Door.prototype.calcOverlap = function() {
+    return getOverlap(this.room1, this.room2, this.direction);
+};
+
+function expand(door) {
+    door.overlap = door.calcOverlap();
+    if (percentChance(door.removalChance) && door.privacy <= 50) {
+        door.size = door.overlap.length;
+        door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
+         return;
+    }
+    var validDoors = [];
+    for (var i = 0; i < door.doorTypes.length; i++) {
+        var current = door.doorTypes[i];
+        if (current.privacy >= door.privacy && current.size <= door.overlap.length + 1) validDoors.push(current);
+    }
+    door.doorType = validDoors[randInt(validDoors.length)];
+    //console.log(door.doorType);
+    door.size = door.doorType.size;
+}
+
 function DoorEndPoint(door) {
     switch (door.direction) {
         case 'north':
@@ -164,6 +217,7 @@ function DoorStartPoint(door) {
 /**
  * Creates a new door to the outside at on the given side of the given room
  * @param room
+ * @param edge
  * @param direction
  * @constructor
  */
@@ -175,7 +229,11 @@ function OutsideDoor(room, edge, direction) {
     this.y = 0;
     this.size = 0;
     this.direction = direction;
+    this.privacy = 0;
+    this.removalChance = 0;
     this.setLocation();
+    this.doorTypes = [singleDoor, singleDoorSideLight, singleDoorDoubleSidelight, doubleDoor];
+    this.doorType = singleDoor;
 }
 
 /**
@@ -183,10 +241,11 @@ function OutsideDoor(room, edge, direction) {
  */
 OutsideDoor.prototype.setLocation = function() {
     //var space = new Line1D(this.room1.getSide(getNextDirection(this.direction, false)), this.room1.getSide(getNextDirection(this.direction)));
-   var space = this.edge.getLine1D();
-   console.log("Outside Door");
-   console.log(space);
+   var space = this.calcOverlap();
+   //console.log("Outside Door");
+   //console.log(space);
     if (space.length >= 3) {
+        this.overlap = space;
         var spot = (space.start + space.end) / 2;
         placement = Infinity;
         while (placement < (1.5 + space.start) || placement > (space.end - 1.5)) {
@@ -217,7 +276,7 @@ OutsideDoor.prototype.setExactLocation = function(placement, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    console.log(this);
+    //console.log(this);
     this.room1.addDoor(this, direction);
 };
 
@@ -233,6 +292,17 @@ OutsideDoor.prototype.startPoint = function() {
  */
 OutsideDoor.prototype.endPoint = function () {
     return DoorEndPoint(this);
+};
+
+/**
+ * Calls the expand function with this door as a parameter
+ */
+OutsideDoor.prototype.expand = function() {
+    expand(this);
+};
+
+OutsideDoor.prototype.calcOverlap = function () {
+  return this.edge.getLine1D();
 };
 
 function addOutsideDoor(edge) {

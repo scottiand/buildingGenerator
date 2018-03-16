@@ -22,6 +22,7 @@ window.onload = function init() {
     seedEntry = document.getElementById("seedEntry")
     initRoomTypes();
     initRandom(seedEntry.value);
+    initDoorTypes();
 
     // Create the first Building, from the default values
     currentBuilding = new Building();

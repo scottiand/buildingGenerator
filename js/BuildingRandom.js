@@ -67,5 +67,5 @@ function randDoub(max) {
  */
 function percentChance(percent) {
     var num = randDoub(100);
-    return percent < num;
+    return num < percent;
 }
