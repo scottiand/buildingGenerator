@@ -44,6 +44,9 @@ Door.prototype.setLocation = function() {
         this.addDoorToRooms(this.direction);
         this.size = 2;
     } else {
+        console.log(this.room1);
+        console.log(this.room2);
+        currentBuilding.drawRooms(context);
         throw("Could not place door between " + this.room1.name + " and " + this.room2.name + ".");
     }
 };
@@ -172,6 +175,11 @@ Door.prototype.calcOverlap = function() {
     return getOverlap(this.room1, this.room2, this.direction);
 };
 
+/**
+ * Takes a default door and randomly assigns a door from the door's DoorType list
+ * Can also eliminate walls in less private areas
+ * @param door
+ */
 function expand(door) {
     door.overlap = door.calcOverlap();
     if (percentChance(door.removalChance) && door.privacy <= 50) {
@@ -184,9 +192,10 @@ function expand(door) {
         var current = door.doorTypes[i];
         if (current.privacy >= door.privacy && current.size <= door.overlap.length + 1) validDoors.push(current);
     }
-    door.doorType = validDoors[randInt(validDoors.length)];
-    //console.log(door.doorType);
-    door.size = door.doorType.size;
+    if (validDoors.length > 0) {
+        door.doorType = validDoors[randInt(validDoors.length)];
+        door.size = door.doorType.size;
+    }
 }
 
 function DoorEndPoint(door) {
@@ -301,6 +310,10 @@ OutsideDoor.prototype.expand = function() {
     expand(this);
 };
 
+/**
+ * Returns a Line1D that represents the available space on the outside edge of the room
+ * @returns {*}
+ */
 OutsideDoor.prototype.calcOverlap = function () {
   return this.edge.getLine1D();
 };

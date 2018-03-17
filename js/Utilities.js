@@ -70,6 +70,13 @@ function vertical(direction) {
     }
 }
 
+/**
+ * Sort a list of objects with x and y
+ * Objects are sorted based on the direction, such that the ordering is based on a clockwise traversal of a space,
+ * as opposed to a left/right or up/down.
+ * @param list
+ * @param direction
+ */
 function sortByLocationClockwise(list, direction) {
     switch (direction) {
         case 'north':
@@ -92,6 +99,12 @@ function sortByLocationClockwise(list, direction) {
     }
 }
 
+/**
+ * Compares a and b by x
+ * @param a
+ * @param b
+ * @returns {number}
+ */
 function compareX (a, b) {
     if (a.x < b.x) {
         return -1;
@@ -102,6 +115,12 @@ function compareX (a, b) {
     return 0;
 }
 
+/**
+ * Compares a and b by y
+ * @param a
+ * @param b
+ * @returns {number}
+ */
 function compareY (a, b) {
     if (a.y < b.y) {
         return -1;

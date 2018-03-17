@@ -33,7 +33,7 @@ window.onload = function init() {
     //    initRandom(Math.random());
     // }
     // console.log("Failures: " + failures);
-    testRun(1);
+    testRun(10000);
 
     // Testing stuff
     //var roomType = new RoomType();

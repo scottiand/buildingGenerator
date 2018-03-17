@@ -77,6 +77,7 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
  */
 Room.prototype.draw = function (context) {
     context.beginPath();
+    context.lineWidth = scale / 5;
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
     //For each direction: North, east, south, then west

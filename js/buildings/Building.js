@@ -92,7 +92,7 @@ Building.prototype.placeRooms = function () {
     roomQueue.sort(compareTotalArea);
     roomQueue.reverse();
     // Place each room
-    while (roomQueue.length != 0) {
+    while (roomQueue.length !== 0) {
         var current = roomQueue.shift();
         var parent = current.parent;
         var sides = this.getSideSpace(parent);
@@ -103,8 +103,17 @@ Building.prototype.placeRooms = function () {
             current.rotate();
             if (this.placeRoom(current, sides[i].direction)) break;
             if (i === 3) {
-                if (this.draw) console.log("Failed to place room");
-                return false;
+                if (current.height * 0.9 < current.proto.minSize && current.width * 0.9 < current.proto.minSize) {
+                    if (this.draw) console.log("Failed to place room");
+                    return false;
+                }
+                if (current.height * 0.9 >= current.proto.minSize) {
+                    current.height *= 0.9;
+                }
+                if (current.width * 0.9 >= current.proto.minSize) {
+                    current.width *= 0.9;
+                }
+                i = -1;
             }
         }
         usedRooms.push(current);
@@ -176,7 +185,7 @@ Building.prototype.placeRoom = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    if (isNaN(placeX) || isNaN(placeY)) {
+    if (isNaN(placeX) || isNaN(placeY) || this.intersection(new Rectangle(placeX, placeY, room.width, room.height))) {
         return false;
     }
     room.locX = placeX;
@@ -906,6 +915,9 @@ Building.prototype.getFreeOuterLines = function (roomList, direction) {
     return lineList;
 };
 
+/**
+ * Tells all doors to expand(), allowing for variety in doors
+ */
 Building.prototype.expandDoors = function() {
     for (var i = 0; i < this.doors.length; i++) {
         this.doors[i].expand();
