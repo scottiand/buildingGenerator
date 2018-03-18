@@ -147,3 +147,97 @@ function getMaxDoor(doorList, direction) {
     }
     return maxDoor;
 }
+
+/**
+ * Sorts the given list of rooms by the position of the given side
+ * @param list
+ * @param direction
+ */
+function sortByGivenSide(list, direction) {
+    switch (direction) {
+        case 'north':
+            list.sort(compareLocY);
+            //list.reverse();
+            break;
+        case 'south':
+            list.sort(compareBottom);
+            break;
+        case 'east':
+            list.sort(compareRight);
+            break;
+        case 'west':
+            list.sort(compareLocX);
+            //list.reverse();
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+}
+
+/**
+ * A function for comparing based on locX for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ * @constructor
+ */
+function compareLocX(a, b) {
+    if (a.locX < b.locX) {
+        return -1;
+    }
+    if (a.locX > b.locX) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on locY for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ * @constructor
+ */
+function compareLocY(a, b) {
+    if (a.locY < b.locY) {
+        return -1;
+    }
+    if (a.locY > b.locY) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on right() for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ * @constructor
+ */
+function compareRight(a, b) {
+    if (a.right() < b.right()) {
+        return -1;
+    }
+    if (a.right() > b.right()) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on bottom() for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ * @constructor
+ */
+function compareBottom(a, b) {
+    if (a.bottom() < b.bottom()) {
+        return -1;
+    }
+    if (a.bottom() > b.bottom()) {
+        return 1;
+    }
+    return 0;
+}

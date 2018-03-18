@@ -149,8 +149,8 @@ RoomList.prototype.removeFirstOf = function (purpose) {
 /**
  * Sorts the list by privacy
  */
-RoomList.prototype.sort = function () {
-    this.content.sort(ComparePrivacy);
+RoomList.prototype.sort = function (func) {
+    this.content.sort(func);
 };
 
 /**

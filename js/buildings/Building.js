@@ -657,7 +657,7 @@ Building.prototype.addRoomsToList = function () {
  */
 Building.prototype.trimSize = function () {
     var i = 0;
-    this.roomList.sort(comparePriority);
+    this.roomList.sort(ComparePrivacy);
     while (this.area > this.maxPlotPortion) {
         this.area = 0;
         for (var roomNum = 0; roomNum < this.roomList.length; roomNum++) {
@@ -684,7 +684,7 @@ Building.prototype.createSubtrees = function () {
  *  Connects the subtrees based on privacy
  */
 Building.prototype.connectSubtrees = function () {
-    this.roomList.sort();
+    this.roomList.sort(ComparePrivacy);
     this.entry = this.roomList.peek();
     for (var i = 1; i < this.roomList.length; i++) {
         var toConnect;
