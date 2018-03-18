@@ -168,6 +168,32 @@ Door.prototype.expand = function () {
 };
 
 /**
+ * Returns true if there is enough space to place the given type of door
+ * @param current
+ * @param door
+ * @returns {boolean}
+ */
+function doorFits(current, door) {
+    var halfSize = current.size / 2;
+    var placement;
+    switch (door.direction) {
+        case 'north':
+        case 'south':
+            placement = door.x;
+            break;
+        case 'east':
+        case 'west':
+            placement = door.y;
+            break;
+        default:
+            throw("invalid direction: " + door.direction);
+    }
+    var overlap = door.overlap;
+    var extraSpace = Math.min(placement - overlap.start, overlap.end - placement) - 0.5;
+    return halfSize <= extraSpace;
+}
+
+/**
  * Calculates the shared space between the
  * @returns {Line1D}
  */
@@ -185,12 +211,12 @@ function expand(door) {
     if (percentChance(door.removalChance) && door.privacy <= 50) {
         door.size = door.overlap.length;
         door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
-         return;
+        return;
     }
     var validDoors = [];
     for (var i = 0; i < door.doorTypes.length; i++) {
         var current = door.doorTypes[i];
-        if (current.privacy >= door.privacy && current.size <= door.overlap.length + 1) validDoors.push(current);
+        if (current.privacy >= door.privacy && doorFits(current, door)) validDoors.push(current);
     }
     if (validDoors.length > 0) {
         door.doorType = validDoors[randInt(validDoors.length)];
