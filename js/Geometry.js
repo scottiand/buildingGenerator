@@ -21,6 +21,26 @@ function Rectangle(left, top, width, height) {
 }
 
 /**
+ * Returns the location of the given side
+ * @param direction
+ * @returns {*}
+ */
+Rectangle.prototype.getSide = function (direction) {
+    switch (direction) {
+        case "south":
+            return this.bottom;
+        case "north":
+            return this.top;
+        case "west":
+            return this.left;
+        case "east":
+            return this.right;
+        default:
+            throw("invalid direction: " + direction);
+    }
+};
+
+/**
  * A 1 Dimensional line segment
  * @param start The line's start point
  * @param end THe lines end point
@@ -144,6 +164,15 @@ Line1D.prototype.to2DRoomEdge = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
+};
+
+/**
+ * Makes sure that the start value is lower than the end value
+ * If the end value is lower, the values are swapped
+ */
+Line1D.prototype.makeStartLowerThanEnd = function () {
+  this.start = Math.min(this.start, this.end);
+  this.end = Math.max(this.start, this.end);
 };
 
 /**
@@ -311,8 +340,32 @@ Edge.prototype.getLine1D = function () {
     return this.line.toLine1D();
 };
 
+/**
+ * Returns a string representation of the edge
+ * @returns {string}
+ */
 Edge.prototype.toString = function () {
     return this.line.toString() + "\n";
+};
+
+/**
+ * Returns a rectangle that spans from this edge to the edge of the plot
+ * @param plot
+ * @returns {Rectangle}
+ */
+Edge.prototype.getSpace = function(plot) {
+    switch (this.directionOfRoom) {
+        case "south":
+            return new Rectangle(Math.min(this.line.x1, this.line.x2), 0, this.line.length, this.location);
+        case "north":
+            return new Rectangle(Math.min(this.line.x1, this.line.x2), this.location, this.line.length, plot.height - this.location);
+        case "west":
+            return new Rectangle(this.location, Math.min(this.line.y1, this.line.y2), plot.width - this.location, this.line.length);
+        case "east":
+            return new Rectangle(0, Math.min(this.line.y1, this.line.y2), this.location, this.line.length);
+        default:
+            throw("invalid direction: " + this.directionOfRoom);
+    }
 };
 
 /**

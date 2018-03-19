@@ -13,6 +13,7 @@ var bedroom;
 var kitchen;
 var diningRoom;
 var hallway;
+var closet;
 
 // Must call to initialize global RoomType variables
 // ("Name", "Purpose", privacy, priority, delay, avgSize, minSize, maxSize, sizeVariance, scaleFactor)
@@ -24,7 +25,8 @@ function initRoomTypes() {
     bedroom = new RoomType("Bedroom","bedroom",100, 0,40, 10, 8, 16, 2, 1);
     kitchen = new RoomType("Kitchen","kitchen",40,0,9999,10,5,20,2,1);
     diningRoom = new RoomType("Dining Room","dining",30,0,200,13,10,20,3,1);
-    hallway = new RoomType("Hallway","hallway",60,200,100,6,4,8,1,1);
+    hallway = new RoomType("Hallway","hallway",50,200,100,6,4,8,1,1);
+    closet = new RoomType("Closet","storage", 80, 100, 50, 1.5, 1, 8, 1, 1);
 }
 
 // name: the name of the proto of room, e.g. "foyer", "dining room", "bedroom"

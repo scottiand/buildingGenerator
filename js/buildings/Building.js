@@ -37,10 +37,121 @@ Building.prototype.build = function () {
     this.generateRoomList();
     this.generateConnectivityGraph();
     if (this.placeRooms()) {
+        this.fillGaps();
         this.addOutsideDoors();
         this.expandDoors();
         if (this.draw) this.drawRooms(context);
         return true;
+    }
+    return false;
+};
+
+Building.prototype.fillGaps = function () {
+    //while (this.findGap() !== null) {
+    var gap = this.findGap();
+    //}
+};
+
+Building.prototype.findGap = function () {
+    var foundGap = false;
+    var edges = this.getOutsideEdges();
+    for (var i = 0; i < 4; i++) {
+        var direction = directions[i];
+        var oppositeDirection = getOppositeDirection(direction);
+        var thisSideEdges = [];
+        for (var j = 0; j < edges.length; j++) {
+            if (edges[j].directionOfRoom === oppositeDirection) thisSideEdges.push(edges[j]);
+        }
+        //console.log(thisSideEdges);
+        for (var j = 0; j < thisSideEdges.length; j++) {
+            var edge = thisSideEdges[j];
+            var space = edge.getSpace(this.plot);
+            var intersectingRooms = this.getIntersectingRooms(space);
+            sortByGivenSide(intersectingRooms, oppositeDirection);
+            if (direction === 'north' || direction === 'west') intersectingRooms.reverse();
+            if (intersectingRooms.length > 0) {
+                var closestRoom = intersectingRooms[0];
+                var gap = new Line1D(edge.location, closestRoom.getSide(oppositeDirection));
+                gap.makeStartLowerThanEnd();
+                var rect;
+                switch (direction) {
+                    case 'north':
+                    case 'south':
+                        rect = new Rectangle(Math.min(edge.line.x1, edge.line.x2), gap.start, edge.line.length, gap.length);
+                        break;
+                    case 'east':
+                    case 'west':
+                        rect = new Rectangle(gap.start, Math.min(edge.line.y1, edge.line.y2), gap.length, edge.line.length);
+                        break;
+                }
+                if (!this.rectangleIsOpen(rect)) {
+
+                    foundGap = true;
+                    this.fillGap(rect);
+                }
+            }
+        }
+    }
+    return foundGap;
+};
+
+/**
+ * Returns true if the given rectangle has no rooms contacting any of its sides
+ * @param rect
+ * @returns {boolean}
+ */
+Building.prototype.rectangleIsOpen = function (rect) {
+    for (var i = 0; i < 4; i++) {
+        //console.log('here');
+        var direction = directions[i];
+        var touchingSide = false;
+        for (var j = 0; j < this.allRooms.length; j++) {
+            var room = this.allRooms.get(j);
+            // console.log("-----------------------------")
+            // console.log(direction);
+            // console.log(room.getSide(getOppositeDirection(direction)));
+            // console.log(rect.getSide(direction));
+            if (room.getSide(getOppositeDirection(direction)) === rect.getSide(direction)) {
+                touchingSide = true;
+                break;
+            }
+        }
+        if (touchingSide === false) {
+            //console.log('true');
+            return true;
+        }
+    }
+    //console.log(false);
+    return false;
+};
+
+Building.prototype.fillGap = function(rect) {
+
+    if (rect.height < 1 || rect.width < 1) {
+
+        if (!this.tryToStretchRoomToFillGap(rect)) {
+            // Create a filler room in the empty space
+        }
+    } else if (rect.height < 4 || rect.width < 4) {
+        // Make some closets
+    } else {
+        // MOAR ROOMS
+    }
+};
+
+Building.prototype.tryToStretchRoomToFillGap = function (rect) {
+    for (var i = 0; i < 4; i++) {
+        var direction = directions[i];
+        var oppositeDirection = getOppositeDirection(direction);
+        for (var j = 0; j < this.allRooms.length; j++) {
+            var room = this.allRooms.get(j);
+            if (room.getSide(oppositeDirection) === rect.getSide(direction)) {
+                if (room.getSide(getNextDirection(direction)) === rect.getSide(getNextDirection(direction)) && room.getSide(getNextDirection(direction, false)) === rect.getSide(getNextDirection(direction, false))) {
+                    room.stretch(rect.getSide(oppositeDirection),oppositeDirection);
+                    return true;
+                }
+            }
+        }
     }
     return false;
 };
@@ -648,7 +759,7 @@ Building.prototype.addRoomsToList = function () {
         var room = new Room(this.protoRooms[0]);
         this.push(room);
         this.protoRooms[0].priority += this.protoRooms[0].delay;
-        this.area += room.area;
+        //this.area += room.area;
     }
 };
 
@@ -717,6 +828,7 @@ Building.prototype.connectSubtrees = function () {
  * @param room The room to add
  */
 Building.prototype.push = function (room) {
+    this.area += room.area;
     this.roomList.push(room);
     this.allRooms.push(room);
 };
@@ -949,7 +1061,7 @@ function bedBathAndBeyondRule(building) {
         }
         var hall = new Room(new ProtoRoom(hallway));
         hall.connectAll(shortList);
-        building.area += hall.area;
+        //building.area += hall.area;
         building.push(hall);
     }
 }

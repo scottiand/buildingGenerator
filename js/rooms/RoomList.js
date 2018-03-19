@@ -8,12 +8,17 @@ function RoomList() {
     this.length = this.content.length;
 }
 
-// Resets the length variable
+/**
+ * Resets the length variable
+ */
 RoomList.prototype.resetLength = function () {
     this.length = this.content.length;
 };
 
-// Pushes item into the list. Item should be a Room
+/**
+ * Pushes item into the list. Item should be a Room
+ * @param item
+ */
 RoomList.prototype.push = function (item) {
     this.content.push(item);
     this.resetLength();
