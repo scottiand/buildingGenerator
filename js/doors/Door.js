@@ -13,6 +13,7 @@ var MIN_PRIVACY_TO_REMOVE_WALL = 50;
  * @constructor
  */
 function Door(room1, room2, direction) {
+
     this.room1 = room1;
     this.room2 = room2;
     this.x = 0;// The location of the center of the door
@@ -209,8 +210,7 @@ Door.prototype.calcOverlap = function() {
 function expand(door) {
     door.overlap = door.calcOverlap();
     if (percentChance(door.removalChance) && door.privacy <= 50) {
-        door.size = door.overlap.length;
-        door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
+        takeDownWall(door);
         return;
     }
     var validDoors = [];
@@ -222,6 +222,11 @@ function expand(door) {
         door.doorType = validDoors[randInt(validDoors.length)];
         door.size = door.doorType.size;
     }
+}
+
+function takeDownWall(door) {
+    door.size = door.overlap.length;
+    door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
 }
 
 function DoorEndPoint(door) {

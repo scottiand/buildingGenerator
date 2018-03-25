@@ -131,6 +131,22 @@ function compareY (a, b) {
     return 0;
 }
 
+/**
+ * Compares a and b by score
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareScore(a, b) {
+    if (a.score < b.score) {
+        return -1;
+    }
+    if (a.score > b.score) {
+        return 1;
+    }
+    return 0;
+}
+
 
 
 

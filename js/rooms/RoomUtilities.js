@@ -74,6 +74,9 @@ function comparePriority(a, b) {
  * @returns {Line1D}
  */
 function getOverlap(room1, room2, direction) {
+    // console.log(room1);
+    // console.log(room2);
+    // console.log(direction)
     var line1;
     var line2;
     switch (direction) {
@@ -240,4 +243,45 @@ function compareBottom(a, b) {
         return 1;
     }
     return 0;
+}
+
+/**
+ * Returns true if the given array of rooms has any rooms of the given purpose
+ * @param list
+ * @param purpose
+ * @returns {boolean}
+ */
+function hasPurpose(list, purpose) {
+    for (var i = 0; i< list.length; i++) {
+        if (list[i].purpose === purpose) return true;
+    }
+    return false;
+}
+
+/**
+ * Returns a dummy room not meant to be placed in a house, but instead used for other types of calculations
+ * @param x
+ * @param y
+ * @param width
+ * @param height
+ * @returns {Room}
+ */
+function dummyRoom(x, y, width, height) {
+    var room = new Room(new ProtoRoom(dummy));
+    room.setLocation(x,y);
+    room.setSize(width, height);
+    return room;
+}
+
+function wallRoom(x, y, width, height) {
+    var newRoom = new dummyRoom(x, y, width, height);
+    newRoom.draw = function (context) {
+        context.strokeStyle = 'rgb(0, 0, 0)';
+        //context.moveTo(this.locX * scale, this.locY * scale);
+        context.fillRect(this.locX * scale, this.locY * scale, this.width * scale, this.height * scale);
+        context.stroke();
+    };
+    newRoom.name = '';
+    newRoom.purpose = 'wall';
+    return newRoom;
 }

@@ -36,6 +36,8 @@ function Room(proto) {
         this.southDoors = [];
         this.eastDoors = [];
         this.westDoors = [];
+
+        this.draw = drawRoom;
     } else {
         throw "no ProtoRoom provided";
     }
@@ -75,7 +77,7 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
  * Draws the room in the given context
  * @param {Context} context The context in which the room is drawn
  */
-Room.prototype.draw = function (context) {
+function drawRoom(context) {
     context.beginPath();
     context.lineWidth = scale / 5;
     context.strokeStyle = 'rgb(0, 0, 0)';
@@ -360,7 +362,8 @@ Room.prototype.getSide = function (direction) {
  * @param spot
  * @param direction
  */
-Room.prototype.stretch = function (spot, direction) {
+Room.prototype.stretch = function (spot, direction, force) {
+    if (typeof(force) === 'undefined') force = false;
     var newHeight;
     var newWidth;
     var newX;
@@ -395,7 +398,7 @@ Room.prototype.stretch = function (spot, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    if (!this.isValidSize(newWidth, newHeight)) return;
+    if (!this.isValidSize(newWidth, newHeight) && !force) return;
     this.setLocation(newX, newY);
     this.setSize(newWidth, newHeight);
 };
@@ -465,10 +468,16 @@ Room.prototype.getOutsideEdges = function (building) {
  */
 Room.prototype.getContactingRooms = function(building, direction) {
     var list = [];
-    var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction));
-    // find all rooms that contact this one
-    for (var j = 0; j < possibleRooms.length; j++) {
-        if (possibleRooms[j].getSide(getOppositeDirection(direction)) === this.getSide(direction)) list.push(possibleRooms[j]);
+    if (typeof(direction) === 'undefined') {
+        for (var i = 0; i < 4; i++) {
+            list = list.concat(this.getContactingRooms(building, directions[i]));
+        }
+    } else {
+        var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction));
+        // find all rooms that contact this one
+        for (var j = 0; j < possibleRooms.length; j++) {
+            if (possibleRooms[j].getSide(getOppositeDirection(direction)) === this.getSide(direction)) list.push(possibleRooms[j]);
+        }
     }
     return list;
 };
@@ -493,5 +502,45 @@ Room.prototype.getSpace = function (plot, direction) {
             throw("invalid direction: " + direction);
     }
 };
+
+/**
+ * Returns the direction that this room is in compared to the given room.
+ * If multiple directions apply, this method prefers the directions in this order: north, east, south, west
+ * @param room
+ * @returns {string}
+ */
+Room.prototype.getDirectionFrom = function (room) {
+    if (this.bottom() <= room.locY) {
+        return 'north';
+    } else if (this.locX >= room.right()) {
+        return 'east';
+    } else if (this.locY >= room.bottom()) {
+        return 'south';
+    } else if (this.right() <= room.locX) {
+        return 'west';
+    } else {
+        throw('Intersecting Rooms! (' + this.name + " and " + room.name + ")");
+    }
+};
+
+/**
+ * Returns the number of doors this room has on a given side
+ * If no direction is given, returns the total number of doors
+ * @param direction
+ * @returns {number}
+ */
+Room.prototype.doorCount = function(direction) {
+    var count = 0;
+    if (typeof(direction) === 'undefined') {
+        for (var i = 0; i < 4; i++) {
+            count += this.doorCount(directions[i]);
+        }
+    } else {
+        count = this.getDoors(direction).length;
+    }
+    return count;
+};
+
+
 
 

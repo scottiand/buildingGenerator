@@ -46,6 +46,8 @@ Building.prototype.build = function () {
     return false;
 };
 
+//mmpmnbnkommml
+
 Building.prototype.fillGaps = function () {
     //while (this.findGap() !== null) {
     var gap = this.findGap();
@@ -71,6 +73,10 @@ Building.prototype.findGap = function () {
             if (direction === 'north' || direction === 'west') intersectingRooms.reverse();
             if (intersectingRooms.length > 0) {
                 var closestRoom = intersectingRooms[0];
+                // console.log("------------------------------");
+                // console.log(edge);
+                // console.log(direction);
+                // console.log(closestRoom);
                 var gap = new Line1D(edge.location, closestRoom.getSide(oppositeDirection));
                 gap.makeStartLowerThanEnd();
                 var rect;
@@ -84,7 +90,7 @@ Building.prototype.findGap = function () {
                         rect = new Rectangle(gap.start, Math.min(edge.line.y1, edge.line.y2), gap.length, edge.line.length);
                         break;
                 }
-                if (!this.rectangleIsOpen(rect)) {
+                if (this.rectangleIsClosed(rect, 1)) {
 
                     foundGap = true;
                     this.fillGap(rect);
@@ -96,11 +102,13 @@ Building.prototype.findGap = function () {
 };
 
 /**
- * Returns true if the given rectangle has no rooms contacting any of its sides
+ * Returns true if the number of open sides is less than or equal to the given number.
+ * Always true if number is 4 or greater
  * @param rect
  * @returns {boolean}
  */
-Building.prototype.rectangleIsOpen = function (rect) {
+Building.prototype.rectangleIsClosed = function (rect, number) {
+    var openSides = 0;
     for (var i = 0; i < 4; i++) {
         //console.log('here');
         var direction = directions[i];
@@ -111,34 +119,107 @@ Building.prototype.rectangleIsOpen = function (rect) {
             // console.log(direction);
             // console.log(room.getSide(getOppositeDirection(direction)));
             // console.log(rect.getSide(direction));
-            if (room.getSide(getOppositeDirection(direction)) === rect.getSide(direction)) {
+            var dummy = dummyRoom(rect.left, rect.top, rect.width, rect.height);
+            var overlap = getOverlap(room, dummy,direction);
+            console.log(overlap);
+            console.log(overlap.length);
+            if (room.getSide(getOppositeDirection(direction)) === rect.getSide(direction) && overlap.length > 0) {
                 touchingSide = true;
                 break;
             }
         }
         if (touchingSide === false) {
-            //console.log('true');
-            return true;
+            openSides++;
         }
     }
     //console.log(false);
-    return false;
+    return openSides <= number;
 };
 
+//tqwwwttttttttttttttttttt
+
+/**
+ * Fills the given gap by expanding or adding rooms
+ * @param rect
+ */
 Building.prototype.fillGap = function(rect) {
-
     if (rect.height < 1 || rect.width < 1) {
-
         if (!this.tryToStretchRoomToFillGap(rect)) {
+            this.push(wallRoom(rect.left, rect.top, rect.width, rect.height));
             // Create a filler room in the empty space
         }
     } else if (rect.height < 4 || rect.width < 4) {
         // Make some closets
+        this.fillGapWithClosets(rect);
     } else {
         // MOAR ROOMS
     }
 };
 
+/**
+ * Takes a given Rectangle and fill it with closet spaces
+ * @param rect
+ */
+Building.prototype.fillGapWithClosets = function (rect) {
+
+    while (rect.area > 0) {
+    //for (var i = 0; i < 3; i++) {
+        var newRoom = new Room(new ProtoRoom(closet));
+        newRoom.setLocation(rect.left, rect.top);
+        //console.log(newRoom.proto.maxSize);
+        var filledGap = false;
+        if (rect.width <= newRoom.proto.maxSize) {
+            newRoom.stretch(rect.right, 'east', true);
+            filledGap = true;
+        } else {
+            rect = new Rectangle(newRoom.right(), rect.top, rect.width - newRoom.width, rect.height);
+        }
+        if (rect.height <= newRoom.proto.maxSize) {
+            newRoom.stretch(rect.bottom, 'south', true);
+            if (filledGap) {
+                rect = new Rectangle(0,0,0,0);
+            }
+        } else {
+            rect = new Rectangle(rect.left, newRoom.bottom(), rect.width, rect.height - newRoom.height);
+        }
+        this.push(newRoom);
+        var connectedRooms = newRoom.getContactingRooms(this);
+        var candidates = [];
+        for (var i = 0; i < connectedRooms.length; i++) {
+            var room = connectedRooms[i];
+            var direction = room.getDirectionFrom(newRoom);
+            //console.log(direction);
+            var overlap = getOverlap(newRoom, room, direction);
+            if (overlap.length >= 3) {
+                var score = 0;
+                if (room.purpose === 'bedroom') score += 10;
+                if (room.purpose === 'kitchen') score += 20;
+                if (room.purpose === 'hallway') score += 20;
+                if (room.purpose === 'storage') score -= 1000;
+                if (room.purpose === 'bathroom') score -= 20;
+                if (hasPurpose(room.adjacent, 'storage')) score -= 50;
+                score -= room.doorCount() * 10;
+                candidates.push({room: room, score: score});
+            }
+        }
+        if (candidates.length > 0) {
+            candidates.sort(compareScore);
+            candidates.reverse();
+            var choice = candidates[0].room;
+            var newDoor = new Door(choice, newRoom,  choice.getDirectionFrom(newRoom));
+            this.doors.push(newDoor);
+            choice.connect(newRoom);
+            if (choice.purpose === 'kitchen' || choice.purpose === 'dining') newRoom.name = 'Pantry';
+        }
+        //newRoom.addDoor();
+    }
+};
+
+/**
+ * Attempts to stretch a nearby room to fill the gap defined by rect
+ * @param rect
+ * @returns {boolean}
+ */
 Building.prototype.tryToStretchRoomToFillGap = function (rect) {
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
@@ -147,7 +228,7 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
             var room = this.allRooms.get(j);
             if (room.getSide(oppositeDirection) === rect.getSide(direction)) {
                 if (room.getSide(getNextDirection(direction)) === rect.getSide(getNextDirection(direction)) && room.getSide(getNextDirection(direction, false)) === rect.getSide(getNextDirection(direction, false))) {
-                    room.stretch(rect.getSide(oppositeDirection),oppositeDirection);
+                    room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
                     return true;
                 }
             }
