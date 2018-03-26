@@ -121,8 +121,8 @@ Building.prototype.rectangleIsClosed = function (rect, number) {
             // console.log(rect.getSide(direction));
             var dummy = dummyRoom(rect.left, rect.top, rect.width, rect.height);
             var overlap = getOverlap(room, dummy,direction);
-            console.log(overlap);
-            console.log(overlap.length);
+            //console.log(overlap);
+            //console.log(overlap.length);
             if (room.getSide(getOppositeDirection(direction)) === rect.getSide(direction) && overlap.length > 0) {
                 touchingSide = true;
                 break;
@@ -207,13 +207,29 @@ Building.prototype.fillGapWithClosets = function (rect) {
             candidates.reverse();
             var choice = candidates[0].room;
             var newDoor = new Door(choice, newRoom,  choice.getDirectionFrom(newRoom));
+            if (choice.purpose === 'kitchen' || choice.purpose === 'dining') newRoom.name = 'Pantry';
+            if (purposeCount(choice.adjacent, 'storage') > 0) { // If a room would gain additional closet, expand that room instead
+                //console.log('here');
+                newDoor.expanded = true;
+                newRoom.name = "";
+                newRoom.purpose = choice.purpose;
+                if (!(rect.area === 0)) {
+                    if (rect.width !== newRoom.width) newRoom.stretch(newRoom.getSide('east') + rect.width, 'east',true);
+                    if (rect.height !== newRoom.height) newRoom.stretch(newRoom.getSide('south') + rect.height, 'south',true);
+                    rect = new Rectangle(0,0,0,0);
+                }
+                newDoor.overlap = newDoor.calcOverlap();
+                takeDownWall(newDoor);
+            }
             this.doors.push(newDoor);
             choice.connect(newRoom);
-            if (choice.purpose === 'kitchen' || choice.purpose === 'dining') newRoom.name = 'Pantry';
+
         }
         //newRoom.addDoor();
     }
 };
+
+//Scottir
 
 /**
  * Attempts to stretch a nearby room to fill the gap defined by rect

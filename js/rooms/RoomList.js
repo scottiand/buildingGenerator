@@ -24,17 +24,28 @@ RoomList.prototype.push = function (item) {
     this.resetLength();
 };
 
-// Returns the Room at the given index
+/**
+ *  Returns the Room at the given index
+ * @param index
+ * @returns {*}
+ */
 RoomList.prototype.get = function (index) {
     return this.content[index];
 };
 
-// Returns the first Room (at index 0)
+/**
+ * Returns the first Room (at index 0)
+ * @returns {*}
+ */
 RoomList.prototype.peek = function () {
     return this.content[0];
 };
 
-// Returns true if any Room has the given purpose
+/**
+ * Returns true if any Room has the given purpose
+ * @param purpose
+ * @returns {boolean}
+ */
 RoomList.prototype.contains = function (purpose) {
     for (var i = 0; i < this.length; i++) {
         if (this.content[i].purpose === purpose) {
@@ -44,7 +55,11 @@ RoomList.prototype.contains = function (purpose) {
     return false;
 };
 
-// Returns a list of all Rooms with the given purpose
+/**
+ * Returns a list of all Rooms with the given purpose
+ * @param purpose
+ * @returns {Array}
+ */
 RoomList.prototype.getAllOf = function (purpose) {
     var toReturn = [];
     for (var i = 0; i < this.length; i++) {
@@ -55,14 +70,22 @@ RoomList.prototype.getAllOf = function (purpose) {
     return toReturn;
 };
 
-// Removes and returns the Room at the given index
+/**
+ * Removes and returns the Room at the given index
+ * @param index
+ * @returns {*}
+ */
 RoomList.prototype.remove = function (index) {
     var toReturn = this.content.splice(index,1)[0];
     this.resetLength();
     return toReturn;
 };
 
-// Removes and returns a list of all Rooms with the given purpose
+/**
+ * Removes and returns a list of all Rooms with the given purpose
+ * @param purpose
+ * @returns {Array}
+ */
 RoomList.prototype.removeAllOf = function (purpose) {
     var toReturn = [];
     for (var i = 0; i < this.length; i++) {
@@ -75,7 +98,11 @@ RoomList.prototype.removeAllOf = function (purpose) {
     return toReturn;
 };
 
-// Returns a count of all the Rooms with the given purpose
+/**
+ * Returns a count of all the Rooms with the given purpose
+ * @param purpose
+ * @returns {number}
+ */
 RoomList.prototype.countAllOf = function (purpose) {
     var toReturn = 0;
     for (var i = 0; i < this.length; i++) {

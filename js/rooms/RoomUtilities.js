@@ -258,6 +258,14 @@ function hasPurpose(list, purpose) {
     return false;
 }
 
+function purposeCount(list, purpose) {
+    var count = 0;
+    for (var i = 0; i< list.length; i++) {
+        if (list[i].purpose === purpose) count++;
+    }
+    return count;
+}
+
 /**
  * Returns a dummy room not meant to be placed in a house, but instead used for other types of calculations
  * @param x

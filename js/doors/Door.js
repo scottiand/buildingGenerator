@@ -26,6 +26,7 @@ function Door(room1, room2, direction) {
     this.setLocation();
     this.doorTypes = [smallDoor, singleDoor, doubleDoor];
     this.doorType = smallDoor;
+    this.expanded = false;
 }
 
 /**
@@ -208,6 +209,7 @@ Door.prototype.calcOverlap = function() {
  * @param door
  */
 function expand(door) {
+    if (door.expanded) return;
     door.overlap = door.calcOverlap();
     if (percentChance(door.removalChance) && door.privacy <= 50) {
         takeDownWall(door);
@@ -222,6 +224,7 @@ function expand(door) {
         door.doorType = validDoors[randInt(validDoors.length)];
         door.size = door.doorType.size;
     }
+    door.expanded = true;
 }
 
 function takeDownWall(door) {
