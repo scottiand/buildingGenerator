@@ -281,11 +281,20 @@ function dummyRoom(x, y, width, height) {
     return room;
 }
 
+/**
+ * Returns a room that has a special draw function, so that it is filled in black like a wall.
+ * @param x
+ * @param y
+ * @param width
+ * @param height
+ * @returns {dummyRoom}
+ */
 function wallRoom(x, y, width, height) {
     var newRoom = new dummyRoom(x, y, width, height);
     newRoom.draw = function (context) {
         context.strokeStyle = 'rgb(0, 0, 0)';
         //context.moveTo(this.locX * scale, this.locY * scale);
+        context.rect(this.locX * scale, this.locY * scale, this.width * scale, this.height * scale);
         context.fillRect(this.locX * scale, this.locY * scale, this.width * scale, this.height * scale);
         context.stroke();
     };

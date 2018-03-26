@@ -115,7 +115,10 @@ function drawRoom(context) {
         context.lineTo((this.locX + this.corners[cornerNumber].x) * scale, (this.locY + this.corners[cornerNumber].y) * scale);
     }
     context.stroke();
-    context.fillText(this.name, (this.locX + 1) * scale, (this.locY + this.height / 2) * scale);
+    context.textAlign = 'center';
+    if (context.measureText(this.name).width < this.width * scale) {
+        context.fillText(this.name, (this.locX + this.width / 2) * scale, (this.locY + this.height / 2) * scale);
+    }
 };
 
 /**

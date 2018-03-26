@@ -29,3 +29,15 @@ function generateButtonOnClick(draw) {
 function canvasClicked(event) {
     console.log("X: " + event.clientX / scale + " Y: " + event.clientY / scale);
 }
+
+function initControls() {
+    var slider = document.getElementById("myRange");
+    slider.oninput = function () {
+        scale = this.value / 10;
+        canvas.width = currentBuilding.plot.width * scale;
+        canvas.height =  currentBuilding.plot.height * scale;
+        //canvas.clear();
+        currentBuilding.drawRooms(context);
+    };
+
+}
