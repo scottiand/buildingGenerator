@@ -46,14 +46,21 @@ Building.prototype.build = function () {
     return false;
 };
 
-//mmpmnbnkommml
-
+/**
+ * Fills the gaps in the building.
+ * Gives up after 100 tries.
+ */
 Building.prototype.fillGaps = function () {
-    //while (this.findGap() !== null) {
-    var gap = this.findGap();
-    //}
+    for (var i = 0; i < 100; i++) {
+        console.log(i);
+        if (!this.findGap()) break;
+    }
 };
 
+/**
+ * Finds and fills gaps in the plot
+ * @returns {boolean}
+ */
 Building.prototype.findGap = function () {
     var foundGap = false;
     var edges = this.getOutsideEdges();
@@ -64,7 +71,6 @@ Building.prototype.findGap = function () {
         for (var j = 0; j < edges.length; j++) {
             if (edges[j].directionOfRoom === oppositeDirection) thisSideEdges.push(edges[j]);
         }
-        //console.log(thisSideEdges);
         for (var j = 0; j < thisSideEdges.length; j++) {
             var edge = thisSideEdges[j];
             var space = edge.getSpace(this.plot);
@@ -73,10 +79,6 @@ Building.prototype.findGap = function () {
             if (direction === 'north' || direction === 'west') intersectingRooms.reverse();
             if (intersectingRooms.length > 0) {
                 var closestRoom = intersectingRooms[0];
-                // console.log("------------------------------");
-                // console.log(edge);
-                // console.log(direction);
-                // console.log(closestRoom);
                 var gap = new Line1D(edge.location, closestRoom.getSide(oppositeDirection));
                 gap.makeStartLowerThanEnd();
                 var rect;
@@ -91,8 +93,7 @@ Building.prototype.findGap = function () {
                         break;
                 }
                 if (this.rectangleIsClosed(rect, 1)) {
-
-                    foundGap = true;
+                    if (this.rectangleIsClosed(rect, 0)) foundGap = true;
                     this.fillGap(rect);
                 }
             }
@@ -136,8 +137,6 @@ Building.prototype.rectangleIsClosed = function (rect, number) {
     return openSides <= number;
 };
 
-//tqwwwttttttttttttttttttt
-
 /**
  * Fills the given gap by expanding or adding rooms
  * @param rect
@@ -159,7 +158,59 @@ Building.prototype.fillGap = function(rect) {
             }
         }
     } else {
-        // MOAR ROOMS
+        if (this.rectangleIsClosed(rect, 0)) {
+            this.fillRectWithRoom(rect);
+        }
+    }
+};
+
+/**
+ * Files the given rect with the next possible room in the proto rooms list.
+ * @param rect
+ */
+Building.prototype.fillRectWithRoom = function(rect) {
+    this.protoRooms.sort(comparePriority);
+    var current = 0;
+    var room = new Room(this.protoRooms[0]);
+    while (room.proto.minSize >= rect.width && room.proto.minSize >= rect.height) {
+        current++;
+        if (this.protoRooms.length > current) {
+            room = new Room(this.protoRooms[current]);
+        } else {
+            return;//throw('Couldnt find room to put in gap' );
+        }
+    }
+    room.setLocation(rect.left, rect.top);
+    var newWidth = room.width;
+    var newHeight = room.height;
+    if (rect.width <= room.proto.maxSize) newWidth = rect.width;
+    if (rect.height <= room.proto.maxSize) newHeight = rect.height;
+    room.setSize(newWidth, newHeight);
+    this.protoRooms[current].priority += this.protoRooms[current].delay;
+    this.push(room);
+
+    var connectedRooms = room.getContactingRooms(this);
+    var candidates = [];
+    for (var i = 0; i < connectedRooms.length; i++) {
+        var roomToConnect = connectedRooms[i];
+        var direction = roomToConnect.getDirectionFrom(room);
+        var overlap = getOverlap(room, roomToConnect, direction);
+        if (overlap.length >= 3) {
+            var score = roomToConnect.privacy;
+            if (roomToConnect.purpose === 'storage') score += 1000;
+            if (roomToConnect.purpose === 'bathroom') score += 50;
+            if (hasPurpose(roomToConnect.adjacent, 'storage')) score -= 50;
+            score += roomToConnect.doorCount() * 10;
+            candidates.push({room: roomToConnect, score: score});
+        }
+    }
+    if (candidates.length > 0) {
+        candidates.sort(compareScore);
+        var choice = candidates[0].room;
+        var newDoor = new Door(choice, room,  choice.getDirectionFrom(room));
+        this.doors.push(newDoor);
+        choice.connect(room);
+        console.log(room);
     }
 };
 
@@ -237,7 +288,6 @@ Building.prototype.fillGapWithClosets = function (rect) {
     }
 };
 
-//fgggggghhgggg
 /**
  * Attempts to stretch a nearby room to fill the gap defined by rect
  * @param rect
@@ -251,11 +301,11 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
             var room = this.allRooms.get(j);
             if (room.getSide(oppositeDirection) === rect.getSide(direction)) {
                 var overlap = getOverlap(room, dummyRoom(rect.left, rect.top, rect.width, rect.height), direction);
-                console.log(room);
-                console.log(room.bottom());
-                console.log(direction);
-                console.log(overlap);
-                console.log(rect);
+                // console.log(room);
+                // console.log(room.bottom());
+                // console.log(direction);
+                // console.log(overlap);
+                // console.log(rect);
                 switch (direction) {
                     case 'north':
                     case 'south':
