@@ -145,12 +145,19 @@ Building.prototype.rectangleIsClosed = function (rect, number) {
 Building.prototype.fillGap = function(rect) {
     if (rect.height < 1 || rect.width < 1) {
         if (!this.tryToStretchRoomToFillGap(rect)) {
-            this.push(wallRoom(rect.left, rect.top, rect.width, rect.height));
             // Create a filler room in the empty space
+            this.push(wallRoom(rect.left, rect.top, rect.width, rect.height));
         }
     } else if (rect.height < 4 || rect.width < 4) {
-        // Make some closets
-        this.fillGapWithClosets(rect);
+        if (rect.width >= 3 || rect.height >=3) { // Only add a closet if a door ca fit
+            // Make some closets
+            this.fillGapWithClosets(rect);
+        } else {
+            if (!this.tryToStretchRoomToFillGap(rect)) {
+                // Create a filler room in the empty space
+                this.push(wallRoom(rect.left, rect.top, rect.width, rect.height));
+            }
+        }
     } else {
         // MOAR ROOMS
     }
@@ -163,11 +170,12 @@ Building.prototype.fillGap = function(rect) {
 Building.prototype.fillGapWithClosets = function (rect) {
 
     while (rect.area > 0) {
-    //for (var i = 0; i < 3; i++) {
+        // Create a closet room to put into the gap
         var newRoom = new Room(new ProtoRoom(closet));
         newRoom.setLocation(rect.left, rect.top);
-        //console.log(newRoom.proto.maxSize);
         var filledGap = false;
+
+        // If the closet can fill the space, stretch it to fit and move on
         if (rect.width <= newRoom.proto.maxSize) {
             newRoom.stretch(rect.right, 'east', true);
             filledGap = true;
@@ -183,12 +191,13 @@ Building.prototype.fillGapWithClosets = function (rect) {
             rect = new Rectangle(rect.left, newRoom.bottom(), rect.width, rect.height - newRoom.height);
         }
         this.push(newRoom);
+
+        // Select an adjacent room and add a door
         var connectedRooms = newRoom.getContactingRooms(this);
         var candidates = [];
         for (var i = 0; i < connectedRooms.length; i++) {
             var room = connectedRooms[i];
             var direction = room.getDirectionFrom(newRoom);
-            //console.log(direction);
             var overlap = getOverlap(newRoom, room, direction);
             if (overlap.length >= 3) {
                 var score = 0;
@@ -225,12 +234,10 @@ Building.prototype.fillGapWithClosets = function (rect) {
             choice.connect(newRoom);
 
         }
-        //newRoom.addDoor();
     }
 };
 
-//Scottir
-
+//fgggggghhgggg
 /**
  * Attempts to stretch a nearby room to fill the gap defined by rect
  * @param rect
@@ -243,10 +250,36 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
         for (var j = 0; j < this.allRooms.length; j++) {
             var room = this.allRooms.get(j);
             if (room.getSide(oppositeDirection) === rect.getSide(direction)) {
-                if (room.getSide(getNextDirection(direction)) === rect.getSide(getNextDirection(direction)) && room.getSide(getNextDirection(direction, false)) === rect.getSide(getNextDirection(direction, false))) {
-                    room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
-                    return true;
+                var overlap = getOverlap(room, dummyRoom(rect.left, rect.top, rect.width, rect.height), direction);
+                console.log(room);
+                console.log(room.bottom());
+                console.log(direction);
+                console.log(overlap);
+                console.log(rect);
+                switch (direction) {
+                    case 'north':
+                    case 'south':
+                        if (overlap.length === room.width) {
+                            room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
+                            return true;
+                        }
+                        break;
+                    case 'east':
+                    case 'west':
+                        if (overlap.length === room.height) {
+                            console.log('true');
+                            room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
+                            return true;
+                        }
+                        break;
+                    default:
+                        throw("invalid direction: " + direction);
                 }
+
+                // if (room.getSide(getNextDirection(direction)) === rect.getSide(getNextDirection(direction)) && room.getSide(getNextDirection(direction, false)) === rect.getSide(getNextDirection(direction, false))) {
+                //     room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
+                //     return true;
+                // }
             }
         }
     }

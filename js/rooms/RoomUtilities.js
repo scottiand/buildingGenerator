@@ -74,9 +74,6 @@ function comparePriority(a, b) {
  * @returns {Line1D}
  */
 function getOverlap(room1, room2, direction) {
-    // console.log(room1);
-    // console.log(room2);
-    // console.log(direction)
     var line1;
     var line2;
     switch (direction) {
@@ -258,6 +255,12 @@ function hasPurpose(list, purpose) {
     return false;
 }
 
+/**
+ * Returns the number of rooms in the list with the given purpose
+ * @param list
+ * @param purpose
+ * @returns {number}
+ */
 function purposeCount(list, purpose) {
     var count = 0;
     for (var i = 0; i< list.length; i++) {

@@ -27,7 +27,8 @@ function generateButtonOnClick(draw) {
  * Prints the mouse location out when the canvas is clicked
  */
 function canvasClicked(event) {
-    console.log("X: " + event.clientX / scale + " Y: " + event.clientY / scale);
+    var rect = canvas.getBoundingClientRect();
+    console.log("X: " + (event.clientX - rect.left - 3) / scale + " Y: " + (event.clientY - rect.top - 3)/ scale);
 }
 
 function initControls() {

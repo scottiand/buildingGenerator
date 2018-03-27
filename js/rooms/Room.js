@@ -91,12 +91,8 @@ function drawRoom(context) {
         // Returns the index of the corner in which the room changes direction
         var cornerNumber = this.getCornerNumber(i + 1);
         // For each door on the current side
-
-        //console.log(direction);
-        //console.log(doors);
         sortByLocationClockwise(doors, direction);
         for (var j = 0; j < doors.length; j++) {
-            //console.log(doors[j]);
             switch (direction) {
                 case 'north':
                 case 'east':
@@ -116,7 +112,7 @@ function drawRoom(context) {
     }
     context.stroke();
     context.textAlign = 'center';
-    if (context.measureText(this.name).width < this.width * scale) {
+    if (context.measureText(this.name).width < this.width * scale && this.height * scale > 20) {
         context.fillText(this.name, (this.locX + this.width / 2) * scale, (this.locY + this.height / 2) * scale);
     }
 };
