@@ -42,12 +42,15 @@ index
 
         <div style="width:700px; height: 400px;overflow: auto">
             <canvas id="canvas" width="600" height="400"
-                    style="border:3px solid #000000;" onclick="canvasClicked(event)"></canvas>
+                    style="border:3px solid #000000;" onclick="canvasClicked(event)" onmousemove="canvasMouseOver(event)"></canvas>
         </div>
         <input type="text" name="seed" id="seedEntry" value="Seed">
         <button id="generateButton" onclick="generateButtonOnClick()">Generate!</button>
         <div class="slidecontainer">
             <input type="range" min="10" max="100" value="80" class="slider" id="myRange">
+        </div>
+        <div id="output">
+
         </div>
        <!-- <script src="js/vendor/modernizr-3.5.0.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>

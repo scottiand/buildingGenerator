@@ -31,6 +31,21 @@ function canvasClicked(event) {
     console.log("X: " + (event.clientX - rect.left - 3) / scale + " Y: " + (event.clientY - rect.top - 3)/ scale);
 }
 
+function canvasMouseOver(event) {
+    var output = document.getElementById('output');
+    var rect = canvas.getBoundingClientRect();
+    var room = currentBuilding.getRoomAtPoint((event.clientX - rect.left - 3) / scale, (event.clientY - rect.top - 3)/ scale);
+    if (room != null) {
+        output.innerText = room.name;
+    } else {
+        output.innerText = "Outside";
+    }
+
+}
+
+/**
+ * Initializes controlls (Currently only the scale slider)
+ */
 function initControls() {
     var slider = document.getElementById("myRange");
     slider.oninput = function () {
