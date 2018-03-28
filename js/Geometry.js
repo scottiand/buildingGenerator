@@ -369,6 +369,41 @@ Edge.prototype.getSpace = function(plot) {
 };
 
 /**
+ * Draws the edge, leaving spaces for doors
+ * @param context
+ * @param thickness
+ */
+Edge.prototype.draw = function (context, thickness) {
+    context.beginPath();
+    context.lineWidth = thickness;
+    context.strokeStyle = 'rgb(0, 0, 0)';
+    var pointX1 = Math.min(this.line.x1, this.line.x2) * scale;
+    var pointX2 = Math.max(this.line.x1, this.line.x2) * scale;
+    var pointY1 = Math.min(this.line.y1, this.line.y2) * scale;
+    var pointY2 = Math.max(this.line.y1, this.line.y2) * scale;
+    if (this.vertical) {
+        pointY1 -= thickness / 2;
+        pointY2 += thickness / 2;
+    } else {
+        pointX1 -= thickness / 2;
+        pointX2 += thickness / 2;
+     }
+    var doors = this.room.getDoors(getOppositeDirection(this.directionOfRoom));
+    console.log(doors);
+    context.moveTo(pointX1, pointY1);
+    for (var i = 0; i < doors.length; i++) {
+        //if (doors[i].startPoint().x >= pointX1 && doors[i].startPoint().y >= pointY1 && doors[i].endPoint().x <= pointX2 && doors[i].endPoint().y <= pointY2) {
+        if (typeof doors[i].edge !== 'undefined') {
+            context.lineTo(doors[i].startPoint().x * scale, doors[i].startPoint().y * scale);
+            context.moveTo(doors[i].endPoint().x * scale, doors[i].endPoint().y * scale);
+        }
+        //}
+    }
+    context.lineTo(pointX2, pointY2);
+    context.stroke();
+};
+
+/**
  * Returns the first edge in the list that contains the given point
  * @param edgeList
  * @param point

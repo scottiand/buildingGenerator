@@ -79,7 +79,7 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
  */
 function drawRoom(context) {
     context.beginPath();
-    context.lineWidth = scale / 5;
+    context.lineWidth = scale / 3;
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
     //For each direction: North, east, south, then west
@@ -115,7 +115,7 @@ function drawRoom(context) {
     if (context.measureText(this.name).width < this.width * scale && this.height * scale > 20) {
         context.fillText(this.name, (this.locX + this.width / 2) * scale, (this.locY + this.height / 2) * scale);
     }
-};
+}
 
 /**
  * Returns the index of the corner that starts the side of the given number

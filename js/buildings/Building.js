@@ -916,6 +916,10 @@ Building.prototype.drawRooms = function (context) {
     for (var i = 0; i < this.allRooms.length; i++) {
         this.allRooms.get(i).draw(context);
     }
+    var edges = this.getOutsideEdges();
+    for (var i = 0; i < edges.length; i++) {
+        edges[i].draw(context, scale / 1.5);
+    }
     // for (var i = 0; i < this.doors.length; i++) {
     //     this.doors[i].draw(context);
     // }

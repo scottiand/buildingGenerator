@@ -227,6 +227,10 @@ function expand(door) {
     door.expanded = true;
 }
 
+/**
+ * Sets the door's length to the total overlap between the two rooms.
+ * @param door
+ */
 function takeDownWall(door) {
     door.size = door.overlap.length;
     door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
