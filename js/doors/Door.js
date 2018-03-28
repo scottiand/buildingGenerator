@@ -57,7 +57,7 @@ Door.prototype.addDoorToRooms = function(direction) {
     switch (direction) {
         case 'north':
         case 'south':
-            if (this.room1.locY === this.room2.bottom()) {
+            if (equals(this.room1.locY, this.room2.bottom())) {
                 this.room1.addDoor(this, 'north');
                 this.room2.addDoor(this, 'south');
             } else {
@@ -67,7 +67,7 @@ Door.prototype.addDoorToRooms = function(direction) {
             break;
         case 'east':
         case 'west':
-            if (this.room1.locX === this.room2.right()) {
+            if (equals(this.room1.locX, this.room2.right())) {
                 this.room1.addDoor(this, 'west');
                 this.room2.addDoor(this, 'east');
             } else {
@@ -90,7 +90,7 @@ Door.prototype.setExactLocation = function (placement, direction) {
         case 'north':
         case 'south':
             this.x = placement;
-            if (this.room1.locY === this.room2.bottom()) {
+            if (equals(this.room1.locY, this.room2.bottom())) {
                 this.y = this.room1.locY;
             } else {
                 this.y = this.room2.locY;
@@ -99,7 +99,7 @@ Door.prototype.setExactLocation = function (placement, direction) {
         case 'east':
         case 'west':
             this.y = placement;
-            if (this.room1.locX === this.room2.right()) {
+            if (equals(this.room1.locX, this.room2.right())) {
                 this.x = this.room1.locX;
             } else {
                 this.x = this.room2.locX;

@@ -124,7 +124,7 @@ Building.prototype.rectangleIsClosed = function (rect, number) {
             var overlap = getOverlap(room, dummy,direction);
             //console.log(overlap);
             //console.log(overlap.length);
-            if (room.getSide(getOppositeDirection(direction)) === rect.getSide(direction) && overlap.length > 0) {
+            if (equals(room.getSide(getOppositeDirection(direction)), rect.getSide(direction)) && overlap.length > 0) {
                 touchingSide = true;
                 break;
             }
@@ -299,7 +299,7 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
         var oppositeDirection = getOppositeDirection(direction);
         for (var j = 0; j < this.allRooms.length; j++) {
             var room = this.allRooms.get(j);
-            if (room.getSide(oppositeDirection) === rect.getSide(direction)) {
+            if (equals(room.getSide(oppositeDirection), rect.getSide(direction))) {
                 var overlap = getOverlap(room, dummyRoom(rect.left, rect.top, rect.width, rect.height), direction);
                 // console.log(room);
                 // console.log(room.bottom());
@@ -309,14 +309,14 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
                 switch (direction) {
                     case 'north':
                     case 'south':
-                        if (overlap.length === room.width) {
+                        if (equals(overlap.length, room.width)) {
                             room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
                             return true;
                         }
                         break;
                     case 'east':
                     case 'west':
-                        if (overlap.length === room.height) {
+                        if (equals(overlap.length, room.height)) {
                             console.log('true');
                             room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
                             return true;
@@ -1073,7 +1073,7 @@ Building.prototype.addOutsideDoors = function () {
         //console.log('here');
         for (var i = 0; i < yardList.length; i++) {
             var i2 = (i + 1) % yardList.length;
-            if (yardList[i].x2 === yardList[i2].x1 && yardList[i].y2 === yardList[i2].y1) {
+            if (equals(yardList[i].x2, yardList[i2].x1) && equals(yardList[i].y2, yardList[i2].y1)) {
                 yardList[i] = new Line2D(yardList[i].x1, yardList[i].y1, yardList[i2].x2, yardList[i2].y2);
                 yardList.splice(i2, 1);
                 break;
@@ -1180,7 +1180,7 @@ Building.prototype.getRoomAtPoint = function (x, y) {
 Building.prototype.isConnected = function(listOfLine2D) {
     for (var i = 0; i < listOfLine2D.length; i++) {
         var i2 = (i + 1) % listOfLine2D.length;
-        if (listOfLine2D[i].x2 === listOfLine2D[i2].x1 && listOfLine2D[i].y2 === listOfLine2D[i2].y1) return false;
+        if (equals(listOfLine2D[i].x2, listOfLine2D[i2].x1) && equals(listOfLine2D[i].y2, listOfLine2D[i2].y1)) return false;
     }
     return true;
 };
@@ -1195,7 +1195,7 @@ Building.prototype.getFreeOuterLines = function (roomList, direction) {
     var lineList = [new Line1D(this.plot.getSide(getNextDirection(direction, false)),this.plot.getSide(getNextDirection(direction)))];
     for (var i = 0; i < roomList.length; i++) {
         var room = roomList[i];
-        if (room.getSide(direction) === this.plot.getSide(direction)) {
+        if (equals(room.getSide(direction), this.plot.getSide(direction))) {
             for (var j = 0; j < lineList.length; j++) {
                 var split = lineList[j].split(new Line1D(room.getSide(getNextDirection(direction, false)), room.getSide(getNextDirection(direction))));
                 if (split.line1 != null) lineList[j] = split.line1;

@@ -147,6 +147,16 @@ function compareScore(a, b) {
     return 0;
 }
 
+var precision = 0.0000001;
 
+/**
+ * Returns true if the given floating point values are very close to equal
+ * @param numA
+ * @param numB
+ * @returns {boolean}
+ */
+function equals(numA, numB) {
+    return Math.abs(numA - numB) <= precision;
+}
 
 

@@ -5,7 +5,7 @@
 
 var useLast;
 var y2;
-var precision = 1;
+var truncation = 1000;
 
 /**
  * Returns a random value between 0 (inclusive) and 1 (exclusive), such that generates numbers have a normal distribution
@@ -31,7 +31,7 @@ function randGauss(mean, standDev) {
         y2 = x2 * w;
         useLast = true;
     }
-    return ((mean + y1 * standDev) * precision) / precision;
+    return Math.round((mean + y1 * standDev) * truncation) / truncation;
 }
 
 /**
@@ -57,7 +57,7 @@ function randInt(max) {
  * @returns {number} A number between 0 (inclusive) and max (exclusive)
  */
 function randDoub(max) {
-    return (Math.random() * max * precision) / precision;
+    return Math.round(Math.random() * max * truncation) / truncation;
 }
 
 /**

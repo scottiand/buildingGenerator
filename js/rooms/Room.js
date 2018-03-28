@@ -150,9 +150,6 @@ Room.prototype.printToConsole = function () {
  * @param {Room} room the room to connect
  */
 Room.prototype.connect = function (room) {
-    //room.adjacent = typeof room.adjacent === 'undefined' ? [] : room.adjacent;
-    //room.adjacent.push(this);
-    //console.log("here");
     room.parent = this;
     this.adjacent.push(room);
 };
@@ -421,8 +418,8 @@ Room.prototype.touchingSides = function (plot) {
     var sides = [];
     if (this.locX === 0) sides.push('west');
     if (this.locY === 0) sides.push('north');
-    if (this.right() === plot.width) sides.push('east');
-    if (this.bottom() === plot.height) sides.push('south');
+    if (equals(this.right(), plot.width)) sides.push('east');
+    if (equals(this.bottom(), plot.height)) sides.push('south');
     return sides;
 };
 
@@ -475,7 +472,7 @@ Room.prototype.getContactingRooms = function(building, direction) {
         var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction));
         // find all rooms that contact this one
         for (var j = 0; j < possibleRooms.length; j++) {
-            if (possibleRooms[j].getSide(getOppositeDirection(direction)) === this.getSide(direction)) list.push(possibleRooms[j]);
+            if (equals(possibleRooms[j].getSide(getOppositeDirection(direction)), this.getSide(direction))) list.push(possibleRooms[j]);
         }
     }
     return list;

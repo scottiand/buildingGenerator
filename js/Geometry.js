@@ -196,8 +196,8 @@ function Line2D(x1, y1, x2, y2) {
  * @returns {*}
  */
 Line2D.prototype.toLine1D = function() {
-    if (this.x1 === this.x2) return new Line1D(Math.min(this.y1, this.y2), Math.max(this.y1, this.y2));
-    if (this.y1 === this.y2) return new Line1D(Math.min(this.x1, this.x2), Math.max(this.x1, this.x2));
+    if (equals(this.x1, this.x2)) return new Line1D(Math.min(this.y1, this.y2), Math.max(this.y1, this.y2));
+    if (equals(this.y1, this.y2)) return new Line1D(Math.min(this.x1, this.x2), Math.max(this.x1, this.x2));
     return null;
 };
 
@@ -266,27 +266,27 @@ function compareLength(a, b) {
 function Edge(line, room) {
     this.line = line;
     this.room = room;
-    if (this.line.x1 === this.line.x2) {
+    if (equals(this.line.x1, this.line.x2)) {
         this.vertical = true;
         this.location = this.line.x1;
-    } else if (this.line.y1 === this.line.y2) {
+    } else if (equals(this.line.y1, this.line.y2)) {
         this.vertical = false;
         this.location = this.line.y1;
     } else {
         throw("Edge must be a strait line");
     }
     if (this.vertical) {
-        if (this.room.locX === this.location) {
+        if (equals(this.room.locX, this.location)) {
             this.directionOfRoom = 'east';
-        } else if (this.room.right() === this.location) {
+        } else if (equals(this.room.right(), this.location)) {
             this.directionOfRoom = 'west';
         } else {
             throw("Edge must connect to room");
         }
     } else {
-        if (this.room.locY === this.location) {
+        if (equals(this.room.locY, this.location)) {
             this.directionOfRoom = 'south';
-        } else if (this.room.bottom() === this.location) {
+        } else if (equals(this.room.bottom(), this.location)) {
             this.directionOfRoom = 'north';
         } else {
             throw("Edge must connect to room");
@@ -301,7 +301,7 @@ function Edge(line, room) {
  * @returns {boolean}
  */
 Edge.prototype.hasPoint = function (x, y) {
-    return (this.line.x1 === x && this.line.y1 === y) || (this.line.x2 === x && this.line.y2 === y);
+    return (equals(this.line.x1, x) && equals(this.line.y1, y)) || (equals(this.line.x2, x) && equals(this.line.y2, y));
 };
 
 /**
@@ -311,8 +311,8 @@ Edge.prototype.hasPoint = function (x, y) {
  */
 Edge.prototype.getOtherPoint = function (point) {
     if (this.hasPoint(point.x, point.y)) {
-        if (this.line.x1 === point.x && this.line.y1 === point.y) return {x: this.line.x2, y: this.line.y2};
-        if (this.line.x2 === point.x && this.line.y2 === point.y) return {x: this.line.x1, y: this.line.y1};
+        if (equals(this.line.x1, point.x) && equals(this.line.y1, point.y)) return {x: this.line.x2, y: this.line.y2};
+        if (equals(this.line.x2, point.x) && equals(this.line.y2, point.y)) return {x: this.line.x1, y: this.line.y1};
     } else {
         throw("Edge does not contain point (" + point.x + ", " + point.y + ")");
     }
@@ -326,9 +326,9 @@ Edge.prototype.getOtherPoint = function (point) {
  */
 Edge.prototype.contacts = function(structure) {
     if (this.vertical) {
-        return (this.location === structure.getSide('east') || this.location === structure.getSide('west'));
+        return (equals(this.location, structure.getSide('east')) || equals(this.location, structure.getSide('west')));
     } else {
-        return (this.location === structure.getSide('north') || this.location === structure.getSide('south'));
+        return (equals(this.location, structure.getSide('north')) || equals(this.location, structure.getSide('south')));
     }
 };
 
