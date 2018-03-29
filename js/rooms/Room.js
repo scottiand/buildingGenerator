@@ -38,6 +38,7 @@ function Room(proto) {
         this.westDoors = [];
 
         this.draw = drawRoom;
+        this.floor = 1;
     } else {
         throw "no ProtoRoom provided";
     }

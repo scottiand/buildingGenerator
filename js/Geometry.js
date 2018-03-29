@@ -392,12 +392,10 @@ Edge.prototype.draw = function (context, thickness) {
     console.log(doors);
     context.moveTo(pointX1, pointY1);
     for (var i = 0; i < doors.length; i++) {
-        //if (doors[i].startPoint().x >= pointX1 && doors[i].startPoint().y >= pointY1 && doors[i].endPoint().x <= pointX2 && doors[i].endPoint().y <= pointY2) {
         if (typeof doors[i].edge !== 'undefined') {
             context.lineTo(doors[i].startPoint().x * scale, doors[i].startPoint().y * scale);
             context.moveTo(doors[i].endPoint().x * scale, doors[i].endPoint().y * scale);
         }
-        //}
     }
     context.lineTo(pointX2, pointY2);
     context.stroke();

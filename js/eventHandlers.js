@@ -31,6 +31,11 @@ function canvasClicked(event) {
     console.log("X: " + (event.clientX - rect.left - 3) / scale + " Y: " + (event.clientY - rect.top - 3)/ scale);
 }
 
+/**
+ * Fires when the mouse is over the canvas.
+ * Prints out the name of the room that that the mouse is over, or outside if there is no room
+ * @param event
+ */
 function canvasMouseOver(event) {
     var output = document.getElementById('output');
     var rect = canvas.getBoundingClientRect();
@@ -44,7 +49,7 @@ function canvasMouseOver(event) {
 }
 
 /**
- * Initializes controlls (Currently only the scale slider)
+ * Initializes controls
  */
 function initControls() {
     var slider = document.getElementById("myRange");
@@ -55,5 +60,36 @@ function initControls() {
         //canvas.clear();
         currentBuilding.drawRooms(context);
     };
+}
 
+/**
+ * Shows the given floor in the canvas
+ * @param event
+ * @param number
+ */
+function openFloor(event, number) {
+    context.clearRect(0,0,canvas.width,canvas.height);
+    console.log('-------------------');
+    console.log(number);
+    currentBuilding.selectedFloor = number;
+    currentBuilding.drawRooms(context);
+}
+
+function setTabs() {
+    var div = document.getElementById('tabs');
+    while (div.firstChild) {
+        div.removeChild(div.firstChild);
+    }
+    for (var i = 1; i <= currentBuilding.numFloors; i++) {
+        //var num = i;
+        var button = document.createElement('button');
+        button.id = i.toString();
+        button.innerText = 'Floor ' + i;
+        div.appendChild(button);
+        button.addEventListener('click', function (event) {
+            var id = this.id;
+            var num = parseInt(id);
+            openFloor(event, num);
+        });
+    }
 }

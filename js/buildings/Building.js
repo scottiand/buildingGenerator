@@ -25,6 +25,9 @@ function Building() {
     this.doors = [];
     this.draw = true;
     this.doorSpace = 0.5;
+
+    this.numFloors = 2;
+    this.selectedFloor = 1;
 }
 
 /**
@@ -892,7 +895,9 @@ function queueRooms(room, list) {
  * @param context the context in which to draw the rooms
  */
 Building.prototype.drawRooms = function (context) {
+    setTabs();
     // Draw the grid
+    context.lineWidth = 1;
     context.strokeStyle = 'rgb(230, 243, 255)';
     for (var i = 1; i < this.plot.width; i++) {
         context.beginPath();
@@ -914,9 +919,9 @@ Building.prototype.drawRooms = function (context) {
     console.log(this.entry);
     // Draw the building
     for (var i = 0; i < this.allRooms.length; i++) {
-        this.allRooms.get(i).draw(context);
+        if (this.allRooms.get(i).floor === this.selectedFloor) this.allRooms.get(i).draw(context);
     }
-    var edges = this.getOutsideEdges();
+    var edges = this.getOutsideEdges(this.selectedFloor);
     for (var i = 0; i < edges.length; i++) {
         edges[i].draw(context, scale / 1.5);
     }
@@ -1149,12 +1154,16 @@ Building.prototype.addOutsideDoorsSingleYard = function () {
  * Returns of list of room edges that line the outside of the building
  * @returns {Array}
  */
-Building.prototype.getOutsideEdges = function () {
+Building.prototype.getOutsideEdges = function (floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     var list = [];
     for (var i = 0; i < this.allRooms.length; i++) {
-        var roomEdges = this.allRooms.get(i).getOutsideEdges(this);
-        for (var j = 0; j < roomEdges.length; j++) {
-            list.push(roomEdges[j])
+        var room = this.allRooms.get(i)
+        if (room.floor === floor) {
+            var roomEdges = room.getOutsideEdges(this);
+            for (var j = 0; j < roomEdges.length; j++) {
+                list.push(roomEdges[j])
+            }
         }
         //list.concat(roomEdges);
     }
