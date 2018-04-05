@@ -290,10 +290,10 @@ function dummyRoom(x, y, width, height) {
  * @param y
  * @param width
  * @param height
- * @returns {dummyRoom}
+ * @returns {Room}
  */
 function wallRoom(x, y, width, height) {
-    var newRoom = new dummyRoom(x, y, width, height);
+    var newRoom = dummyRoom(x, y, width, height);
     newRoom.draw = function (context) {
         context.strokeStyle = 'rgb(0, 0, 0)';
         //context.moveTo(this.locX * scale, this.locY * scale);
@@ -304,4 +304,43 @@ function wallRoom(x, y, width, height) {
     newRoom.name = '';
     newRoom.purpose = 'wall';
     return newRoom;
+}
+
+function stairwellRoom(x, y, width, height) {
+    var newRoom = new Room(new ProtoRoom(stairwell));
+    newRoom.setLocation(x,y);
+    newRoom.setSize(width, height);
+    // Make stairs and edit draw function
+    return newRoom;
+}
+
+function hallwayToStairwell(hallway) {
+    var newRoom = stairwellRoom(hallway.locX, hallway.locY, hallway.width, hallway.height);
+
+    newRoom.northDoors = hallway.northDoors;
+    newRoom.southDoors = hallway.southDoors;
+    newRoom.eastDoors = hallway.eastDoors;
+    newRoom.westDoors = hallway.westDoors;
+    newRoom.floor = hallway.floor;
+    newRoom.adjacent = hallway.adjacent;
+    newRoom.parent = hallway.parent;
+    newRoom.isPlaced = hallway.isPlaced;
+    console.log(newRoom);
+    return newRoom;
+}
+
+/**
+ * A function for comparing rooms based on the number of doors
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareNumberOfDoors(a, b) {
+    if (a.doorCount() < b.doorCount()) {
+        return -1;
+    }
+    if (a.doorCount() > b.doorCount()) {
+        return 1;
+    }
+    return 0;
 }

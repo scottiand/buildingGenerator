@@ -538,6 +538,14 @@ Room.prototype.doorCount = function(direction) {
     return count;
 };
 
+/**
+ * Returns a string representation of the room
+ * @returns {*}
+ */
+Room.prototype.toString = function () {
+    return this.name;
+};
+
 
 
 

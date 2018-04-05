@@ -113,7 +113,12 @@ RoomList.prototype.countAllOf = function (purpose) {
     return toReturn;
 };
 
-// Returns [number] Rooms with the given purpose
+/**
+ * Returns [number] Rooms with the given purpose
+ * @param purpose
+ * @param number
+ * @returns {*}
+ */
 RoomList.prototype.getSomeOf = function (purpose, number) {
     var toReturn = [];
     number = typeof number === 'undefined' ? 1 : number;
@@ -133,7 +138,11 @@ RoomList.prototype.getSomeOf = function (purpose, number) {
     return toReturn;
 };
 
-// Returns the first Room with the given purpose
+/**
+ * Returns the first Room with the given purpose
+ * @param purpose
+ * @returns {*}
+ */
 RoomList.prototype.getFirstOf = function(purpose) {
     for (var i = 0; i < this.length; i++) {
         if (this.content[i].purpose === purpose) {
@@ -142,7 +151,12 @@ RoomList.prototype.getFirstOf = function(purpose) {
     }
 };
 
-// Removes and returns [number] Rooms with the given purpose
+/**
+ * Removes and returns [number] Rooms with the given purpose
+ * @param purpose
+ * @param number
+ * @returns {Array}
+ */
 RoomList.prototype.removeSomeOf = function (purpose, number) {
     var toReturn = [];
     number = typeof number === 'undefined' ? 1 : number;
@@ -179,7 +193,7 @@ RoomList.prototype.removeFirstOf = function (purpose) {
 };
 
 /**
- * Sorts the list by privacy
+ * Sorts the list using the given comparison function
  */
 RoomList.prototype.sort = function (func) {
     this.content.sort(func);
@@ -190,4 +204,30 @@ RoomList.prototype.sort = function (func) {
  */
 RoomList.prototype.reverse = function () {
     this.content.reverse();
+};
+
+/**
+ * Returns a copy of this roomList
+ */
+RoomList.prototype.copy = function() {
+    var list = new RoomList();
+    list.content = this.content.slice();
+    list.resetLength();
+    return list;
+};
+
+/**
+ * Returns the index of the given room
+ * @param room
+ */
+RoomList.prototype.getIndexOf = function (room) {
+    return this.content.indexOf(room);
+};
+
+/**
+ * Returns a String representation of the room
+ * @returns {string}
+ */
+RoomList.prototype.toString = function() {
+  return this.content.toString();
 };

@@ -17,16 +17,21 @@ function Building() {
     this.roomSnap = 8;
     this.area = 0;
     this.roomTypes = [greatRoom,bathroom,bedroom,kitchen,diningRoom]; // Eventually get this from BuildingType
-    this.rules = [bedBathAndBeyondRule, diningAndKitchenRule]; // Eventually get this from BuildingType
+    this.connectivityRules = [bedBathAndBeyondRule, diningAndKitchenRule]; // Eventually get this from BuildingType
+    this.connectivityRulesUpstairs = [upstairsBedroomRule];
     this.protoRooms = [];
-    this.roomList = new RoomList();
+
+    this.floors = [new RoomList()];
+
+    this.roomList = this.floors[0];
+
     this.allRooms = new RoomList();
-    this.entry;
+    //this.entry;
     this.doors = [];
     this.draw = true;
     this.doorSpace = 0.5;
 
-    this.numFloors = 2;
+    this.numFloors = 1;
     this.selectedFloor = 1;
 }
 
@@ -40,9 +45,9 @@ Building.prototype.build = function () {
     this.generateRoomList();
     this.generateConnectivityGraph();
     if (this.placeRooms()) {
-        this.fillGaps();
         this.addOutsideDoors();
         this.expandDoors();
+        //console.log(this.roomList.toString());
         if (this.draw) this.drawRooms(context);
         return true;
     }
@@ -55,7 +60,6 @@ Building.prototype.build = function () {
  */
 Building.prototype.fillGaps = function () {
     for (var i = 0; i < 100; i++) {
-        console.log(i);
         if (!this.findGap()) break;
     }
 };
@@ -354,7 +358,7 @@ Building.prototype.generateRoomList = function () {
  * Creates the abstract graph that represents the flow of rooms in the building
  */
 Building.prototype.generateConnectivityGraph = function () {
-    this.createSubtrees();
+    this.performRules(this.connectivityRules);
     this.connectSubtrees();
 };
 
@@ -362,6 +366,7 @@ Building.prototype.generateConnectivityGraph = function () {
  * Sets the rooms coordinates within the plot
  */
 Building.prototype.placeRooms = function () {
+
     var roomQueue = [];
     // Place the first room
     var firstRoom = this.roomList.peek();
@@ -374,6 +379,7 @@ Building.prototype.placeRooms = function () {
         firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
         validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
     }
+
     firstRoom.isPlaced = true;
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
@@ -386,7 +392,10 @@ Building.prototype.placeRooms = function () {
     roomQueue.sort(compareTotalArea);
     roomQueue.reverse();
     // Place each room
+    //var upstairs = new RoomList();
+
     while (roomQueue.length !== 0) {
+
         var current = roomQueue.shift();
         var parent = current.parent;
         var sides = this.getSideSpace(parent);
@@ -398,7 +407,7 @@ Building.prototype.placeRooms = function () {
             if (this.placeRoom(current, sides[i].direction)) break;
             if (i === 3) {
                 if (current.height * 0.9 < current.proto.minSize && current.width * 0.9 < current.proto.minSize) {
-                    if (this.draw) console.log("Failed to place room");
+                    //this.performRules(this.connectivityRulesUpstairs);
                     return false;
                 }
                 if (current.height * 0.9 >= current.proto.minSize) {
@@ -410,6 +419,7 @@ Building.prototype.placeRooms = function () {
                 i = -1;
             }
         }
+        if (typeof current === 'undefined') break;
         usedRooms.push(current);
         current.isPlaced = true;
         var children = current.adjacent.slice();
@@ -428,8 +438,26 @@ Building.prototype.placeRooms = function () {
             roomQueue.push(children[i]);
         }
     }
-    //this.snapAllRooms(1);
+    this.fillGaps();
     return true;
+};
+
+/**
+ * Replaces oldRoom with newRoom in the allRooms list
+ * @param oldRoom
+ * @param newRoom
+ */
+Building.prototype.replace = function (oldRoom, newRoom) {
+    this.removeRoom(oldRoom);
+    this.allRooms.push(newRoom);
+};
+
+/**
+ * Removes the given room from the buildings allRooms list
+ * @param room
+ */
+Building.prototype.removeRoom = function (room) {
+    this.allRooms.remove(this.allRooms.getIndexOf(room));
 };
 
 /**
@@ -972,15 +1000,6 @@ Building.prototype.trimSize = function () {
 };
 
 /**
- *  Builds subtrees based on the building's rules
- */
-Building.prototype.createSubtrees = function () {
-    for (var i = 0; i < this.rules.length; i++) {
-        this.rules[i](this);
-    }
-};
-
-/**
  *  Connects the subtrees based on privacy
  */
 Building.prototype.connectSubtrees = function () {
@@ -1229,6 +1248,12 @@ Building.prototype.expandDoors = function() {
     }
 };
 
+Building.prototype.performRules = function (ruleList) {
+    for (var i = 0; i < ruleList.length; i++) {
+        ruleList[i](this);
+    }
+};
+
 function bedBathAndBeyondRule(building) {
     var roomList = building.roomList;
     while (roomList.contains("bedroom")) {
@@ -1272,4 +1297,9 @@ function diningAndKitchenRule(building) {
         var din = roomList.getFirstOf("dining");
         din.connect(kitch);
     }
+}
+
+function upstairsBedroomRule(building) {
+    this.numFloors++;
+
 }

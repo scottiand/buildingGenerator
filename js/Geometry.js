@@ -389,7 +389,6 @@ Edge.prototype.draw = function (context, thickness) {
         pointX2 += thickness / 2;
      }
     var doors = this.room.getDoors(getOppositeDirection(this.directionOfRoom));
-    console.log(doors);
     context.moveTo(pointX1, pointY1);
     for (var i = 0; i < doors.length; i++) {
         if (typeof doors[i].edge !== 'undefined') {

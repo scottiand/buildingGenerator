@@ -14,6 +14,7 @@ var kitchen;
 var diningRoom;
 var hallway;
 var closet;
+var stairwell;
 var dummy;
 
 // Must call to initialize global RoomType variables
@@ -28,6 +29,7 @@ function initRoomTypes() {
     diningRoom = new RoomType("Dining Room","dining",30,0,200,13,10,20,3,1);
     hallway = new RoomType("Hallway","hallway",50,200,100,6,4,8,1,1);
     closet = new RoomType("Closet","storage", 80, 100, 50, 4, 3, 8, 1, 1);
+    stairwell = new RoomType("Stairwell", 'stairwell', 50, 200, 100, 6, 4, 8, 1, 1);
     dummy = new RoomType("Dummy", "dummy", 0, 0,0,1,0,1000,1,1);
 }
 
