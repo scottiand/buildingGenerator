@@ -546,6 +546,13 @@ Room.prototype.toString = function () {
     return this.name;
 };
 
+Room.prototype.elevate = function (floor) {
+    this.floor = floor;
+    for (var i = 0; i < this.adjacent.length; i++) {
+        this.adjacent[i].elevate(floor);
+    }
+};
+
 
 
 

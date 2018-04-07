@@ -18,7 +18,7 @@ function Building() {
     this.area = 0;
     this.roomTypes = [greatRoom,bathroom,bedroom,kitchen,diningRoom]; // Eventually get this from BuildingType
     this.connectivityRules = [bedBathAndBeyondRule, diningAndKitchenRule]; // Eventually get this from BuildingType
-    this.connectivityRulesUpstairs = [upstairsBedroomRule];
+    this.connectivityRulesUpstairs = [upstairsBedroomRule]; // Eventually get this from BuildingType
     this.protoRooms = [];
 
     this.floors = [new RoomList()];
@@ -31,6 +31,7 @@ function Building() {
     this.draw = true;
     this.doorSpace = 0.5;
 
+    this.maxFloors = 2;
     this.numFloors = 1;
     this.selectedFloor = 1;
 }
@@ -366,7 +367,6 @@ Building.prototype.generateConnectivityGraph = function () {
  * Sets the rooms coordinates within the plot
  */
 Building.prototype.placeRooms = function () {
-
     var roomQueue = [];
     // Place the first room
     var firstRoom = this.roomList.peek();
@@ -407,8 +407,13 @@ Building.prototype.placeRooms = function () {
             if (this.placeRoom(current, sides[i].direction)) break;
             if (i === 3) {
                 if (current.height * 0.9 < current.proto.minSize && current.width * 0.9 < current.proto.minSize) {
-                    //this.performRules(this.connectivityRulesUpstairs);
-                    return false;
+                    if (!this.addFloor()) return false;
+                    this.performRules(this.connectivityRulesUpstairs);
+                    // console.log('------------------------------------');
+                    // console.log(this.floors[0]);
+                    // console.log(this.floors[1]);
+                    // console.log('------------------------------------');
+                    //return false;
                 }
                 if (current.height * 0.9 >= current.proto.minSize) {
                     current.height *= 0.9;
@@ -421,7 +426,7 @@ Building.prototype.placeRooms = function () {
         }
         if (typeof current === 'undefined') break;
         usedRooms.push(current);
-        current.isPlaced = true;
+        //current.isPlaced = true;
         var children = current.adjacent.slice();
         for (var i = 0; i < usedRooms.length; i++) {
             if (children.includes(usedRooms[i])) {
@@ -514,6 +519,7 @@ Building.prototype.placeRoom = function (room, direction) {
     room.locY = placeY;
     this.doors.push(new Door(room, room.parent, direction));
     this.snap(room);
+    room.isPlaced = true;
     return true;
 };
 
@@ -1036,8 +1042,9 @@ Building.prototype.connectSubtrees = function () {
  * @param room The room to add
  */
 Building.prototype.push = function (room) {
-    this.area += room.area;
-    this.roomList.push(room);
+    var floor = room.floor;
+    if (floor === 1) this.area += room.area;
+    this.floors[floor - 1].push(room);
     this.allRooms.push(room);
 };
 
@@ -1248,58 +1255,26 @@ Building.prototype.expandDoors = function() {
     }
 };
 
+/**
+ * Performs each rule in the given list of rules
+ * @param ruleList
+ */
 Building.prototype.performRules = function (ruleList) {
     for (var i = 0; i < ruleList.length; i++) {
         ruleList[i](this);
     }
 };
 
-function bedBathAndBeyondRule(building) {
-    var roomList = building.roomList;
-    while (roomList.contains("bedroom")) {
-        var num = roomList.countAllOf("bedroom");
-        var shortList = [];
-        var rand = Math.random();
-        // Get some number of bedrooms and remove them from the list
-        if (num <= 2) {
-            shortList = roomList.removeAllOf("bedroom");
-        } else if (rand < 0.1) {
-            shortList = roomList.removeSomeOf("bedroom",5);
-        } else if (Math.random() < 0.3) {
-            shortList = roomList.removeSomeOf("bedroom",4);
-        } else if (Math.random() < 0.6) {
-            shortList = roomList.removeSomeOf("bedroom",3);
-        } else {
-            shortList = roomList.removeSomeOf("bedroom",2);
-        }
-        // Get a bathroom and remove it to the list
-        var bath = roomList.contains("bathroom") ? roomList.removeFirstOf("bathroom") : null;
-        if (bath != null) {
-            shortList.push(bath);
-        }
-        var hall = new Room(new ProtoRoom(hallway));
-        hall.connectAll(shortList);
-        //building.area += hall.area;
-        building.push(hall);
-    }
-}
-
-function diningAndKitchenRule(building) {
-    var roomList = building.roomList;
-    var i = roomList.countAllOf("kitchen");
-    var j = roomList.countAllOf("dining");
-    if (j < i) {
-        i = j;
-    }
-    // Do until we run out of dining rooms or kitchens
-    for (var k = 0; k < i; k++){
-        var kitch = roomList.removeFirstOf("kitchen");
-        var din = roomList.getFirstOf("dining");
-        din.connect(kitch);
-    }
-}
-
-function upstairsBedroomRule(building) {
+/**
+ * Adds another empty floor to the building
+ * Returns false if the building is already at it's maximum number of floors
+ * @returns {boolean}
+ */
+Building.prototype.addFloor = function () {
+    if (this.numFloors === this.maxFloors) return false;
     this.numFloors++;
+    this.floors.push([]);
+    return true;
+};
 
-}
+
