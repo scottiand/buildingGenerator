@@ -218,7 +218,7 @@ Building.prototype.fillRectWithRoom = function(rect) {
         var newDoor = new Door(choice, room,  choice.getDirectionFrom(room));
         this.doors.push(newDoor);
         choice.connect(room);
-        console.log(room);
+        //console.log(room);
     }
 };
 
@@ -325,7 +325,6 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
                     case 'east':
                     case 'west':
                         if (equals(overlap.length, room.height)) {
-                            console.log('true');
                             room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
                             return true;
                         }
@@ -366,21 +365,15 @@ Building.prototype.generateConnectivityGraph = function () {
 /**
  * Sets the rooms coordinates within the plot
  */
-Building.prototype.placeRooms = function () {
+Building.prototype.placeRooms = function (floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
+    var roomList = this.floors[floor - 1];
     var roomQueue = [];
     // Place the first room
-    var firstRoom = this.roomList.peek();
-    var validPlacement = false;
-    // Make sure that the room is placed within the plot
-    while (!validPlacement) {
-        var XCenter = this.plot.width / 2;
-        var XOffset = randGauss(0, 5) - (firstRoom.width / 2);
-        var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
-        firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
-        validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
-    }
+    var firstRoom = roomList.peek();
 
-    firstRoom.isPlaced = true;
+    this.placeFirstRoom(firstRoom);
+
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
@@ -406,14 +399,25 @@ Building.prototype.placeRooms = function () {
             current.rotate();
             if (this.placeRoom(current, sides[i].direction)) break;
             if (i === 3) {
+                // If the room can't be place, try adding another floor
                 if (current.height * 0.9 < current.proto.minSize && current.width * 0.9 < current.proto.minSize) {
                     if (!this.addFloor()) return false;
                     this.performRules(this.connectivityRulesUpstairs);
-                    // console.log('------------------------------------');
-                    // console.log(this.floors[0]);
-                    // console.log(this.floors[1]);
-                    // console.log('------------------------------------');
-                    //return false;
+                    var list = this.allRooms.getAllOf('stairwell');
+                    for (var j = 0; j < list.length; j++) {
+                        if ((!list[j].isPlaced) && list[j].floor === floor) roomQueue.push(list[j]);
+                    }
+                    var toRemove = [];
+                    for (var j = 0; j < roomQueue.length; j++) {
+                        if (roomQueue[j].floor !== floor) {
+                            toRemove.push(roomQueue[j]);
+                        }
+                    }
+                    for (var j = 0; j < toRemove.length; j++) {
+                        roomQueue.splice(roomQueue.indexOf(toRemove[j]), 1);
+                    }
+                    current = roomQueue.shift();
+                    if (typeof current === 'undefined') break;
                 }
                 if (current.height * 0.9 >= current.proto.minSize) {
                     current.height *= 0.9;
@@ -444,6 +448,13 @@ Building.prototype.placeRooms = function () {
         }
     }
     this.fillGaps();
+    // console.log(this.numFloors);
+    // console.log(floor);
+    if (this.numFloors > floor) {
+        var success = this.placeRooms(floor + 1);
+        //console.log(success);
+        return success;
+    }
     return true;
 };
 
@@ -760,8 +771,13 @@ Building.prototype.getObstacles = function(room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
+    var relevantRooms = this.getRoomsOnFloor(room.floor);
+
+    //console.log(room);
+    //console.log(relevantRooms);
+
+    for (var i = 0; i < relevantRooms.length; i++) {
+        var current = relevantRooms[i];
         if (current.intersection(range) > 0) {
             obstacles.push(new Rectangle(current.locX, current.locY, current.width, current.height));
         }
@@ -917,8 +933,6 @@ function queueRooms(room, list) {
     for (var i = 0; i < room.adjacent.length; i++) {
         var toPlace = room.adjacent[i];
         if (!toPlace.isPlaced) {
-            toPlace.isPlaced = true;
-            toPlace.parent = room;
             list.push(toPlace);
         }
     }
@@ -1008,16 +1022,19 @@ Building.prototype.trimSize = function () {
 /**
  *  Connects the subtrees based on privacy
  */
-Building.prototype.connectSubtrees = function () {
-    this.roomList.sort(ComparePrivacy);
-    this.entry = this.roomList.peek();
-    for (var i = 1; i < this.roomList.length; i++) {
+Building.prototype.connectSubtrees = function (floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
+    //console.log(floor);
+    var roomList = this.floors[floor - 1];
+    roomList.sort(ComparePrivacy);
+    if (floor === 1) this.entry = roomList.peek();
+    for (var i = 1; i < roomList.length; i++) {
         var toConnect;
-        var room = this.roomList.get(i);
+        var room = roomList.get(i);
         var lowScore = Infinity;
-        for (var j = 0; j < this.roomList.length; j++) {
-            if (j != i) {
-                var currentRoom = this.roomList.get(j);
+        for (var j = 0; j < roomList.length; j++) {
+            if (j !== i) {
+                var currentRoom = roomList.get(j);
                 var score = currentRoom.privacy;
                 if (room.adjacent.includes(currentRoom)) {
                     score = Infinity;
@@ -1273,8 +1290,66 @@ Building.prototype.performRules = function (ruleList) {
 Building.prototype.addFloor = function () {
     if (this.numFloors === this.maxFloors) return false;
     this.numFloors++;
-    this.floors.push([]);
+    this.floors.push(new RoomList());
     return true;
 };
 
+/**
+ * Selects a spot for the first room.
+ * If this is the first floor, it generates random values.
+ * On other floors, this picks the location of a stairwell from the lower floor.
+ * @param firstRoom
+ * @param floor
+ */
+Building.prototype.placeFirstRoom = function (firstRoom) {
+    var floor = firstRoom.floor;
+    if (floor === 1) {
+        var validPlacement = false;
+        while (!validPlacement) {
+            var XCenter = this.plot.width / 2;
+            var XOffset = randGauss(0, 5) - (firstRoom.width / 2);
+            var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
+            firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
+            validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
+        }
+    } else {
+        var longList = this.getFloor(floor - 1);
+        //console.log(longList);
+        var shortList = [];
+        console.log(longList);
+        for (var i = 0; i < longList.length; i++) {
+            if (longList.get(i).purpose === 'stairwell') shortList.push(longList.get(i));
+        }
+        console.log(shortList);
+        if (shortList.length > 0) {
+            console.log(firstRoom);
+            var stairwell = shortList[0];
+            firstRoom.setLocation(stairwell.locX, stairwell.locY);
+            firstRoom.setSize(stairwell.width, stairwell.height);
+        }
 
+    }
+    firstRoom.isPlaced = true;
+};
+
+/**
+ * Returns the roomList for the given floor
+ * @param floor
+ * @returns {RoomList|*}
+ */
+Building.prototype.getFloor = function (floor) {
+    return this.floors[floor - 1];
+};
+
+/**
+ * Returns a list of all rooms on the given floor
+ * @param floor
+ * @returns {Array}
+ */
+Building.prototype.getRoomsOnFloor = function (floor) {
+  var toReturn = [];
+  for (var i = 0; i< this.allRooms.length; i++) {
+      if (this.allRooms.get(i).floor === floor) toReturn.push(this.allRooms.get(i));
+  }
+  return toReturn;
+};

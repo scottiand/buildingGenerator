@@ -45,7 +45,8 @@ function diningAndKitchenRule(building) {
 }
 
 function upstairsBedroomRule(building) {
-    var roomList = building.floors[building.numFloors - 2];
+    //console.log('upstairsBedroomRule');
+    var roomList = building.getFloor(building.numFloors - 1);
     var candidates = [];
     for (var i = 0; i < roomList.length; i++) {
         var room = roomList.get(i);
@@ -62,5 +63,13 @@ function upstairsBedroomRule(building) {
     var choice = candidates[0].room;
     choice.elevate(2);
     roomList.remove(roomList.getIndexOf(choice));
-    building.floors[building.numFloors - 1].push(choice);
+    var stairwellOne = stairwellRoom();
+    stairwellOne.floor = building.numFloors - 1;
+    var stairwellTwo = stairwellRoom();
+    building.push(stairwellOne);
+    stairwellTwo.floor = building.numFloors;
+    stairwellTwo.connect(choice);
+    stairwellTwo.setPlacedForAll(false);
+    building.push(stairwellTwo);
+    building.connectSubtrees(building.numFloors - 1);
 }

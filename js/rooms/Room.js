@@ -543,13 +543,32 @@ Room.prototype.doorCount = function(direction) {
  * @returns {*}
  */
 Room.prototype.toString = function () {
-    return this.name;
+    return this.name + " (" + this.floor + ")";
 };
 
+/**
+ * Sets the floor and its descendants to the given value
+ * @param floor
+ */
 Room.prototype.elevate = function (floor) {
     this.floor = floor;
     for (var i = 0; i < this.adjacent.length; i++) {
         this.adjacent[i].elevate(floor);
+    }
+};
+
+/**
+ * Sets isPlaced for this room and its descendants
+ * @param bool
+ */
+Room.prototype.setPlacedForAll = function (bool) {
+    this.isPlaced = bool;
+    if (!bool) {
+        this.locX = -99999;
+        this.locY = -99999;
+    }
+    for (var i = 0; i < this.adjacent.length; i++) {
+        this.adjacent[i].setPlacedForAll(bool);
     }
 };
 

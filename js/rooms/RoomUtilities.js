@@ -306,10 +306,22 @@ function wallRoom(x, y, width, height) {
     return newRoom;
 }
 
+/**
+ * Creates a new stairwell
+ * If values are given for all parameters, the room will be forced to have those parameters.
+ * Otherwise, values are generated as normal
+ * @param x
+ * @param y
+ * @param width
+ * @param height
+ * @returns {Room}
+ */
 function stairwellRoom(x, y, width, height) {
     var newRoom = new Room(new ProtoRoom(stairwell));
-    newRoom.setLocation(x,y);
-    newRoom.setSize(width, height);
+    if (typeof(x) !== 'undefined' && typeof(x) !== 'undefined' && typeof(x) !== 'undefined' && typeof(x) !== 'undefined') {
+        newRoom.setLocation(x, y);
+        newRoom.setSize(width, height);
+    }
     // Make stairs and edit draw function
     return newRoom;
 }
