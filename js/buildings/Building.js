@@ -184,7 +184,6 @@ Building.prototype.fillRectWithRoom = function(rect) {
     var current = 0;
     var room = new Room(this.protoRooms[0]);
     while (room.proto.minSize >= rect.width && room.proto.minSize >= rect.height) {
-        console.log('fillRectWithRoom');
         current++;
         if (this.protoRooms.length > current) {
             room = new Room(this.protoRooms[current]);
@@ -532,7 +531,7 @@ Building.prototype.placeRoom = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    if (isNaN(placeX) || isNaN(placeY) || this.intersection(new Rectangle(placeX, placeY, room.width, room.height))) {
+    if (isNaN(placeX) || isNaN(placeY) || this.intersection(new Rectangle(placeX, placeY, room.width, room.height), room.floor)) {
         return false;
     }
     room.locX = placeX;
@@ -791,7 +790,7 @@ Building.prototype.getObstacles = function(room, direction) {
 
     for (var i = 0; i < relevantRooms.length; i++) {
         var current = relevantRooms[i];
-        if (current.intersection(range) > 0) {
+        if (current.intersection(range, room.floor) > 0) {
             obstacles.push(new Rectangle(current.locX, current.locY, current.width, current.height));
         }
     }
@@ -932,11 +931,12 @@ Building.prototype.getSideSpace = function(parent) {
     var eastRect = new Rectangle(parent.right(), 0, this.plot.width - parent.right(), this.plot.height);
     var westRect = new Rectangle(0, 0, parent.locX, this.plot.height);
     var sides = [northRect,southRect,eastRect,westRect];
-    for (var i = 0; i < this.roomList.length;i++) {
-        var current = this.roomList.get(i);
+    var roomList = this.getFloor(parent.floor);
+    for (var i = 0; i < roomList.length;i++) {
+        var current = roomList.get(i);
         for (var j = 0; j < sides.length; j++) {
             var side = sides[j];
-            side.area -= current.intersection(side);
+            side.area -= current.intersection(side, parent.floor);
         }
     }
     return [{direction: "north", area: northRect.area},{direction: "south", area: southRect.area},{direction: "east", area: eastRect.area},{direction: "west", area: westRect.area}];
