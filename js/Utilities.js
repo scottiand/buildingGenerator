@@ -159,4 +159,28 @@ function equals(numA, numB) {
     return Math.abs(numA - numB) <= precision;
 }
 
+function greaterThanEqual(numA, numB) {
+    var diff = numA - numB;
+    if (Math.abs(diff) <= precision) return true;
+    return (diff > 0);
+}
+
+function lessThanEqual(numA, numB) {
+    var diff = numA - numB;
+    if (Math.abs(diff) <= precision) return true;
+    return (diff < 0);
+}
+
+function greaterThan(numA, numB) {
+    var diff = numA - numB;
+    if (Math.abs(diff) <= precision) return false;
+    return (diff > 0);
+}
+
+function lessThan(numA, numB) {
+    var diff = numA - numB;
+    if (Math.abs(diff) <= precision) return false;
+    return (diff < 0);
+}
+
 

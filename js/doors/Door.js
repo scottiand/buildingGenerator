@@ -13,7 +13,6 @@ var MIN_PRIVACY_TO_REMOVE_WALL = 50;
  * @constructor
  */
 function Door(room1, room2, direction) {
-
     this.room1 = room1;
     this.room2 = room2;
     this.x = 0;// The location of the center of the door
@@ -23,10 +22,13 @@ function Door(room1, room2, direction) {
     this.privacy = Math.max(this.room1.privacy, this.room2.privacy);
     this.overlap;
     this.removalChance = CHANCE_TO_REMOVE_WALL;
+
     this.setLocation();
+
     this.doorTypes = [smallDoor, singleDoor, doubleDoor];
     this.doorType = smallDoor;
     this.expanded = false;
+
 }
 
 /**
@@ -36,7 +38,12 @@ Door.prototype.setLocation = function() {
     var overlap = this.calcOverlap();
     var spot = (overlap.start + overlap.end) / 2;
     if (overlap.start > overlap.end) {console.log("Ohhhhh nooooooo")}
-    if (overlap.length >= 3) {
+    if (equals(overlap.length, 3)) {
+        placement = spot;
+        this.setExactLocation(placement, this.direction);
+        this.addDoorToRooms(this.direction);
+        this.size = 2;
+    } else if (overlap.length >= 3) {
         this.overlap = overlap;
         placement = Infinity;
         while (placement < (1.5 + overlap.start) || placement > (overlap.end - 1.5)) {

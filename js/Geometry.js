@@ -188,7 +188,11 @@ function Line2D(x1, y1, x2, y2) {
     this.x2 = x2;
     this.y1 = y1;
     this.y2 = y2;
+    if (Math.abs(x1 - x2) <= precision) x1 = x2;
+    if (Math.abs(y1 - y2) <= precision) y1 = y2;
+
     this.length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    //if (this.length < precision) this.length = 0;
 }
 
 /**
@@ -264,11 +268,20 @@ function compareLength(a, b) {
  * @constructor
  */
 function Edge(line, room) {
+
     this.line = line;
     this.room = room;
+    if (equals(this.line.x1, this.line.x2) && equals(this.line.y1, this.line.y2)) {
+
+        this.line = new Line2D(0,0,0,0);
+        this.vertical = true;
+        this.location = 0;
+        this.directionOfRoom = 'north';
+    } else {
     if (equals(this.line.x1, this.line.x2)) {
         this.vertical = true;
         this.location = this.line.x1;
+
     } else if (equals(this.line.y1, this.line.y2)) {
         this.vertical = false;
         this.location = this.line.y1;
@@ -291,6 +304,7 @@ function Edge(line, room) {
         } else {
             throw("Edge must connect to room");
         }
+    }
     }
 }
 

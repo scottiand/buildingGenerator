@@ -52,6 +52,7 @@ Building.prototype.build = function () {
         if (this.draw) this.drawRooms(context);
         return true;
     }
+
     return false;
 };
 
@@ -61,6 +62,7 @@ Building.prototype.build = function () {
  */
 Building.prototype.fillGaps = function () {
     for (var i = 0; i < 100; i++) {
+        //console.log('fillGaps');
         if (!this.findGap()) break;
     }
 };
@@ -170,6 +172,7 @@ Building.prototype.fillGap = function(rect) {
             this.fillRectWithRoom(rect);
         }
     }
+
 };
 
 /**
@@ -181,6 +184,7 @@ Building.prototype.fillRectWithRoom = function(rect) {
     var current = 0;
     var room = new Room(this.protoRooms[0]);
     while (room.proto.minSize >= rect.width && room.proto.minSize >= rect.height) {
+        console.log('fillRectWithRoom');
         current++;
         if (this.protoRooms.length > current) {
             room = new Room(this.protoRooms[current]);
@@ -229,6 +233,7 @@ Building.prototype.fillRectWithRoom = function(rect) {
 Building.prototype.fillGapWithClosets = function (rect) {
 
     while (rect.area > 0) {
+
         // Create a closet room to put into the gap
         var newRoom = new Room(new ProtoRoom(closet));
         newRoom.setLocation(rect.left, rect.top);
@@ -270,11 +275,15 @@ Building.prototype.fillGapWithClosets = function (rect) {
                 candidates.push({room: room, score: score});
             }
         }
+
         if (candidates.length > 0) {
+
             candidates.sort(compareScore);
             candidates.reverse();
             var choice = candidates[0].room;
+
             var newDoor = new Door(choice, newRoom,  choice.getDirectionFrom(newRoom));
+
             if (choice.purpose === 'kitchen' || choice.purpose === 'dining') newRoom.name = 'Pantry';
             if (purposeCount(choice.adjacent, 'storage') > 0) { // If a room would gain additional closet, expand that room instead
                 //console.log('here');
@@ -289,10 +298,12 @@ Building.prototype.fillGapWithClosets = function (rect) {
                 newDoor.overlap = newDoor.calcOverlap();
                 takeDownWall(newDoor);
             }
+
             this.doors.push(newDoor);
             choice.connect(newRoom);
 
         }
+
     }
 };
 
@@ -388,7 +399,6 @@ Building.prototype.placeRooms = function (floor) {
     //var upstairs = new RoomList();
 
     while (roomQueue.length !== 0) {
-
         var current = roomQueue.shift();
         var parent = current.parent;
         var sides = this.getSideSpace(parent);
@@ -448,9 +458,8 @@ Building.prototype.placeRooms = function (floor) {
         }
     }
     this.fillGaps();
-    // console.log(this.numFloors);
-    // console.log(floor);
     if (this.numFloors > floor) {
+
         var success = this.placeRooms(floor + 1);
         //console.log(success);
         return success;
@@ -566,7 +575,8 @@ Building.prototype.snapPlot = function (room) {
  * @param direction
  */
 Building.prototype.snapPlotSingleDirection = function(room, direction) {
-    var empty = !this.intersection(room.getSpace(this.plot, direction));
+    var floor = room.floor;
+    var empty = !this.intersection(room.getSpace(this.plot, direction), floor);
     var closeEnough;
     var spot;
     switch (direction) {
@@ -608,7 +618,8 @@ Building.prototype.snapTo = function (room) {
  * @param direction
  */
 Building.prototype.snapToSingleDirection = function (room, direction) {
-    var roomList = this.getIntersectingRooms(room.getSpace(this.plot, direction));
+    var floor = room.floor;
+    var roomList = this.getIntersectingRooms(room.getSpace(this.plot, direction), floor);
     var list = [];
     if (roomList.length <= 0) return;
     var validSnap;
@@ -661,6 +672,7 @@ Building.prototype.snapAlign = function (room) {
  * @param direction
  */
 Building.prototype.snapAlignSingleDirection = function(room, direction) {
+    var floor = room.floor;
     if (room.hasDoor(direction)) return; //Do not snap if it would disconnect rooms connected by a door
     var nearSide = room.getSide(direction) - this.roomSnap;
     var farSide = room.getSide(direction) + this.roomSnap;
@@ -668,7 +680,7 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
     // Get all room that fall within the snap distance
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
-        if (current.getSide(direction) >= nearSide && current.getSide(direction) <= farSide && current !== room) list.push(new Line1D(room.getSide(direction), current.getSide(direction)));
+        if (current.floor === floor && current.getSide(direction) >= nearSide && current.getSide(direction) <= farSide && current !== room) list.push(new Line1D(room.getSide(direction), current.getSide(direction)));
     }
     if (list.length <= 0) return; // If there are no matches, we're done!
     list.sort(compareLength);
@@ -718,8 +730,9 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
  * @returns {boolean}
  */
 Building.prototype.empty = function(room, rectangle) {
+    var floor = room.floor;
     for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).intersection(rectangle) > 0 && room !== this.allRooms.get(i)) {
+        if (this.allRooms.get(i).floor === floor && this.allRooms.get(i).intersection(rectangle) > 0 && room !== this.allRooms.get(i)) {
             return false;
         }
     }
@@ -1070,15 +1083,14 @@ Building.prototype.push = function (room) {
  * @param rectangle
  * @returns {boolean}
  */
-Building.prototype.intersection = function(rectangle) {
-    var inters = false;
+Building.prototype.intersection = function(rectangle, floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).intersection(rectangle)) {
-            inters = true;
-            break;
+        if (this.allRooms.get(i).intersection(rectangle) && this.allRooms.get(i).floor === floor) {
+            return true;
         }
     }
-    return  inters;
+    return false;
 };
 
 /**
@@ -1086,11 +1098,12 @@ Building.prototype.intersection = function(rectangle) {
  * @param rectangle
  * @returns {Array}
  */
-Building.prototype.getIntersectingRooms = function (rectangle) {
+Building.prototype.getIntersectingRooms = function (rectangle, floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     var list = [];
     for (var i = 0; i < this.allRooms.length; i++) {
         var current = this.allRooms.get(i);
-        if (current.intersection(rectangle) > 0) {
+        if (current.intersection(rectangle, floor) > 0) {
             list.push(current);
         }
     }
@@ -1316,13 +1329,10 @@ Building.prototype.placeFirstRoom = function (firstRoom) {
         var longList = this.getFloor(floor - 1);
         //console.log(longList);
         var shortList = [];
-        console.log(longList);
         for (var i = 0; i < longList.length; i++) {
             if (longList.get(i).purpose === 'stairwell') shortList.push(longList.get(i));
         }
-        console.log(shortList);
         if (shortList.length > 0) {
-            console.log(firstRoom);
             var stairwell = shortList[0];
             firstRoom.setLocation(stairwell.locX, stairwell.locY);
             firstRoom.setSize(stairwell.width, stairwell.height);

@@ -202,7 +202,9 @@ Room.prototype.calcTotalArea = function(usedRooms) {
  * @param rectangle A rectangle of the the form: {right: *, left: *, top: *, bottom: *, area: *}
  * @returns {number} the area of the intersecting space
  */
-Room.prototype.intersection = function (rectangle) {
+Room.prototype.intersection = function (rectangle, floor) {
+    if (typeof(floor) === 'undefined') floor = this.floor;
+    if (floor !== this.floor) return 0;
     if (this.locX < -9999 || this.locY < -9999) return 0;
     var right = this.right();
     var bottom = this.bottom();
@@ -430,6 +432,7 @@ Room.prototype.touchingSides = function (plot) {
  * @returns {Array}
  */
 Room.prototype.getOutsideEdges = function (building) {
+
     var list = [];
     //console.log(this.name);
     for (var i = 0; i < 4; i++) {
@@ -451,7 +454,8 @@ Room.prototype.getOutsideEdges = function (building) {
         lines = lines.filter(function (value) { return value.length > 0 });
         for (var j = 0; j < lines.length; j++) {
             var edge = new Edge(lines[j].to2DRoomEdge(this, direction), this);
-            if (!edge.contacts(building.plot)) list.push(edge);
+            //&& !equals(edge.line.length, 0)
+            if (!edge.contacts(building.plot) && !equals(edge.line.length, 0)) list.push(edge);
         }
     }
     return list;
@@ -470,7 +474,7 @@ Room.prototype.getContactingRooms = function(building, direction) {
             list = list.concat(this.getContactingRooms(building, directions[i]));
         }
     } else {
-        var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction));
+        var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction), this.floor);
         // find all rooms that contact this one
         for (var j = 0; j < possibleRooms.length; j++) {
             if (equals(possibleRooms[j].getSide(getOppositeDirection(direction)), this.getSide(direction))) list.push(possibleRooms[j]);
@@ -507,16 +511,21 @@ Room.prototype.getSpace = function (plot, direction) {
  * @returns {string}
  */
 Room.prototype.getDirectionFrom = function (room) {
-    if (this.bottom() <= room.locY) {
+    if (!room.floor === this.floor) {
+        console.log('Got direction from room on different floor');
+    }
+    if (lessThanEqual(this.bottom(), room.locY)) {
         return 'north';
-    } else if (this.locX >= room.right()) {
+    } else if (greaterThanEqual(this.locX, room.right())) {
         return 'east';
-    } else if (this.locY >= room.bottom()) {
+    } else if (greaterThanEqual(this.locY, room.bottom())) {
         return 'south';
-    } else if (this.right() <= room.locX) {
+    } else if (lessThanEqual(this.right(), room.locX)) {
         return 'west';
     } else {
-        throw('Intersecting Rooms! (' + this.name + " and " + room.name + ")");
+        if (room.floor === this.floor) {
+            throw('Intersecting Rooms! (' + this.name + " and " + room.name + ")");
+        }
     }
 };
 
