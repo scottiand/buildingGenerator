@@ -1233,9 +1233,10 @@ Building.prototype.getOutsideEdges = function (floor) {
  * @param y
  * @returns {*}
  */
-Building.prototype.getRoomAtPoint = function (x, y) {
+Building.prototype.getRoomAtPoint = function (x, y, floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).containsPoint(x, y)) return this.allRooms.get(i);
+        if (this.allRooms.get(i).containsPoint(x, y) && this.allRooms.get(i).floor === floor) return this.allRooms.get(i);
     }
     return null;
 };

@@ -575,6 +575,10 @@ Room.prototype.setPlacedForAll = function (bool) {
     if (!bool) {
         this.locX = -99999;
         this.locY = -99999;
+        this.northDoors = [];
+        this.southDoors = [];
+        this.eastDoors = [];
+        this.westDoors = [];
     }
     for (var i = 0; i < this.adjacent.length; i++) {
         this.adjacent[i].setPlacedForAll(bool);

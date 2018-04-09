@@ -39,7 +39,7 @@ function canvasClicked(event) {
 function canvasMouseOver(event) {
     var output = document.getElementById('output');
     var rect = canvas.getBoundingClientRect();
-    var room = currentBuilding.getRoomAtPoint((event.clientX - rect.left - 3) / scale, (event.clientY - rect.top - 3)/ scale);
+    var room = currentBuilding.getRoomAtPoint((event.clientX - rect.left - 3) / scale, (event.clientY - rect.top - 3)/ scale, currentBuilding.selectedFloor);
     if (room != null) {
         output.innerText = room.name;
     } else {
