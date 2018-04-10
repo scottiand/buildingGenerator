@@ -75,6 +75,9 @@ function openFloor(event, number) {
     currentBuilding.drawRooms(context);
 }
 
+/**
+ * Sets the floor tabs depending on the number of floors in the current building
+ */
 function setTabs() {
     var div = document.getElementById('tabs');
     while (div.firstChild) {

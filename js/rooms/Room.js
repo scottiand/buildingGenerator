@@ -83,6 +83,9 @@ function drawRoom(context) {
     context.lineWidth = scale / 3;
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
+    console.log(this.name);
+    console.log(this.locX + ", " + this.locY);
+    console.log(this.area);
     //For each direction: North, east, south, then west
     //console.log(this.name);
     for (var i = 0; i < 4; i++) {
@@ -575,14 +578,44 @@ Room.prototype.setPlacedForAll = function (bool) {
     if (!bool) {
         this.locX = -99999;
         this.locY = -99999;
-        this.northDoors = [];
-        this.southDoors = [];
-        this.eastDoors = [];
-        this.westDoors = [];
+        this.removeDoors();
     }
     for (var i = 0; i < this.adjacent.length; i++) {
         this.adjacent[i].setPlacedForAll(bool);
     }
+};
+
+/**
+ * Destroys all doors in the given direction
+ * If no direction is given, destroys all doors
+ * @param direction
+ */
+Room.prototype.removeDoors = function(direction) {
+    if (typeof(direction) === 'undefined') {
+        for (var i = 0; i < 4; i++) {
+            var direction = directions[i];
+            this.removeDoors(direction);
+        }
+    } else {
+        for (var i = 0; i< this.getDoors(direction).length; i++) {
+            var door = this.getDoors(direction)[i];
+            door.delete();
+        }
+    }
+};
+
+/**
+ * Removes the given door from this room
+ * @param door
+ */
+Room.prototype.removeDoor = function (door) {
+  for (var i = 0; i < 4; i++) {
+      var direction = directions[i];
+      var doors = this.getDoors(direction);
+      if (doors.includes(door)) {
+        doors.splice(doors.indexOf(door), 1);
+      }
+  }
 };
 
 

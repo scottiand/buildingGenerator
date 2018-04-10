@@ -58,6 +58,7 @@ Door.prototype.setLocation = function() {
         currentBuilding.drawRooms(context);
         throw("Could not place door between " + this.room1.name + " and " + this.room2.name + ".");
     }
+    console.log(this.size);
 };
 
 Door.prototype.addDoorToRooms = function(direction) {
@@ -207,7 +208,17 @@ function doorFits(current, door) {
  * @returns {Line1D}
  */
 Door.prototype.calcOverlap = function() {
+    console.log(currentBuilding.allRooms);
     return getOverlap(this.room1, this.room2, this.direction);
+};
+
+Door.prototype.toString = function () {
+    return this.size;
+};
+
+Door.prototype.delete = function() {
+    this.room1.removeDoor(this);
+    this.room2.removeDoor(this);
 };
 
 /**
@@ -229,8 +240,10 @@ function expand(door) {
     }
     if (validDoors.length > 0) {
         door.doorType = validDoors[randInt(validDoors.length)];
+        //console.log(door.doorType);
         door.size = door.doorType.size;
     }
+
     door.expanded = true;
 }
 

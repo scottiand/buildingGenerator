@@ -46,6 +46,13 @@ Building.prototype.build = function () {
     this.generateRoomList();
     this.generateConnectivityGraph();
     if (this.placeRooms()) {
+        var toRemove = [];
+        for (var i = 0; i < this.allRooms.length; i++) {
+            if (this.allRooms.get(i).locX < 0) toRemove.push(this.allRooms.get(i));
+        }
+        for (var i = 0; i < toRemove.length; i++) {
+            this.allRooms.remove(this.allRooms.getIndexOf(toRemove[i]));
+        }
         this.addOutsideDoors();
         this.expandDoors();
         //console.log(this.roomList.toString());
@@ -463,6 +470,7 @@ Building.prototype.placeRooms = function (floor) {
         //console.log(success);
         return success;
     }
+
     return true;
 };
 
@@ -536,7 +544,10 @@ Building.prototype.placeRoom = function (room, direction) {
     }
     room.locX = placeX;
     room.locY = placeY;
-    this.doors.push(new Door(room, room.parent, direction));
+    var door = new Door(room, room.parent, direction);
+    this.doors.push(door);
+    //console.log(this.doors.toString());
+    if (door.size === 0) console.log('yes');
     this.snap(room);
     room.isPlaced = true;
     return true;
@@ -1281,8 +1292,10 @@ Building.prototype.getFreeOuterLines = function (roomList, direction) {
  * Tells all doors to expand(), allowing for variety in doors
  */
 Building.prototype.expandDoors = function() {
+    console.log(this.doors.toString());
     for (var i = 0; i < this.doors.length; i++) {
         this.doors[i].expand();
+        console.log(this.doors.toString());
     }
 };
 
