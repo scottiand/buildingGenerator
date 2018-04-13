@@ -1,6 +1,6 @@
 
 function bedBathAndBeyondRule(building) {
-    var roomList = building.roomList;
+    var roomList = building.getFloor(1);
     while (roomList.contains("bedroom")) {
         var num = roomList.countAllOf("bedroom");
         var shortList = [];
@@ -30,7 +30,7 @@ function bedBathAndBeyondRule(building) {
 }
 
 function diningAndKitchenRule(building) {
-    var roomList = building.roomList;
+    var roomList = building.getFloor(1);
     var i = roomList.countAllOf("kitchen");
     var j = roomList.countAllOf("dining");
     if (j < i) {
@@ -52,9 +52,9 @@ function upstairsBedroomRule(building) {
     for (var i = 0; i < roomList.length; i++) {
         var room = roomList.get(i);
         var score = 0;
-        if (room.purpose = 'bedroom') score += 15;
-        if (room.purpose = 'hallway') score += 10;
-        if (room.purpose = 'kitchen') score -= 100;
+        if (room.purpose === 'bedroom') score += 15;
+        if (room.purpose === 'hallway') score += 10;
+        if (room.purpose === 'kitchen') score -= 100;
         score += purposeCount(room.adjacent, 'bedroom') * 10;
         score -= purposeCount(room.adjacent, 'kitchen') * 40;
         candidates.push({room: room, score: score});
@@ -63,11 +63,12 @@ function upstairsBedroomRule(building) {
     candidates.reverse();
     var choice = candidates[0].room;
     //console.log(choice);
-    choice.elevate(2);
+
     roomList.remove(roomList.getIndexOf(choice));
     var stairwellOne = stairwellRoom();
     stairwellOne.floor = building.numFloors - 1;
     var stairwellTwo = stairwellRoom();
+    choice.elevate(2);
     choice.setPlacedForAll(false);
     building.push(stairwellOne);
     stairwellTwo.floor = building.numFloors;

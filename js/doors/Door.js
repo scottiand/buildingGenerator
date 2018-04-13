@@ -224,10 +224,10 @@ Door.prototype.toString = function () {
 Door.prototype.delete = function() {
     this.room1.removeDoor(this);
     var adj1 = this.room1.adjacent;
-    if (adj1.includes(this.room2)) adj1.splice(adj1.indexOf(this.room2), 1);
+    if (adj1.includes(this.room2) && this.room1.isPlaced) adj1.splice(adj1.indexOf(this.room2), 1);
     this.room2.removeDoor(this);
     var adj2 = this.room2.adjacent;
-    if (adj2.includes(this.room1)) adj2.splice(adj2.indexOf(this.room1), 1);
+    if (adj2.includes(this.room1) && this.room2.isPlaced) adj2.splice(adj2.indexOf(this.room1), 1);
 };
 
 /**

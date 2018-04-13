@@ -389,7 +389,7 @@ Building.prototype.generateConnectivityGraph = function () {
  */
 Building.prototype.placeRooms = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
-    console.log('placeRooms' + floor);
+    //console.log('placeRooms' + floor);
     var roomList = this.floors[floor - 1];
     var roomQueue = [];
     // Place the first room
@@ -1047,11 +1047,11 @@ Building.prototype.addRoomsToList = function () {
  */
 Building.prototype.trimSize = function () {
     var i = 0;
-    this.roomList.sort(ComparePrivacy);
+    this.allRooms.sort(ComparePrivacy);
     while (this.area > this.maxPlotPortion) {
         this.area = 0;
-        for (var roomNum = 0; roomNum < this.roomList.length; roomNum++) {
-            var room = this.roomList.get(roomNum);
+        for (var roomNum = 0; roomNum < this.allRooms.length; roomNum++) {
+            var room = this.allRooms.get(roomNum);
             if (room.area > room.proto.avgArea() * (1.3 - (0.2 * i))) {
                 room.makeRectangle(room.width *= 0.9,room.height *= 0.9);
             }
@@ -1179,15 +1179,12 @@ Building.prototype.addOutsideDoors = function () {
         }
     }
     if (yardList.length === 1) {
-        console.log('true');
+        //console.log('true');
         this.addOutsideDoorsSingleYard();
     } else {
-        console.log('false');
+        //console.log('false');
         this.addOutsideDoorsMultipleYards(yardList);
     }
-    console.log('end');
-    //console.log(this.doors);
-    //console.log(yardList);
 };
 
 /**
@@ -1208,16 +1205,17 @@ Building.prototype.addOutsideDoorsMultipleYards = function (yardList) {
 Building.prototype.addDoorToYard = function(yard) {
     var currentLocation = {x: yard.x2, y: yard.y2};
     var adjacentEdges = [];
-    var edges = this.getOutsideEdges();
+    var edges = this.getOutsideEdges(1);
     var currentEdge = removeEdge(edges, currentLocation);
     // console.log("Edges");
     // console.log(edges.toString());
     if (currentEdge !== null) {
         while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
             if (currentEdge === null) break;
-            adjacentEdges.push(currentEdge);
+            if (!(currentEdge.room.purpose === 'wall')) adjacentEdges.push(currentEdge);
             currentLocation = currentEdge.getOtherPoint(currentLocation);
             currentEdge = removeEdge(edges, currentLocation);
+
         }
         adjacentEdges.sort(sortEdgesByRoomPrivacy);
         var publicEdges = [adjacentEdges[0]];
@@ -1237,6 +1235,7 @@ Building.prototype.addDoorToYard = function(yard) {
 Building.prototype.addOutsideDoorsSingleYard = function () {
     var edges = this.getOutsideEdges(1);
     edges.sort(sortEdgesByRoomPrivacy);
+    if (edges[0].room.purpose === 'wall') edges.splice(0, 1);
     addOutsideDoor(edges[0]);
     edges.splice(0,1);
     if (Math.random() > 0.5) addOutsideDoor(edges[0]);
