@@ -34,7 +34,7 @@ window.onload = function init() {
     //    initRandom(Math.random());
     // }
     // console.log("Failures: " + failures);
-    testRun(1000);
+    testRun(1);
 
     // Testing stuff
     //var roomType = new RoomType();

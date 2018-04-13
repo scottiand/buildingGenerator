@@ -38,15 +38,18 @@ Door.prototype.setLocation = function() {
     var overlap = this.calcOverlap();
     var spot = (overlap.start + overlap.end) / 2;
     if (overlap.start > overlap.end) {console.log("Ohhhhh nooooooo")}
-    if (equals(overlap.length, 3)) {
+    if (greaterThanEqual(overlap.length, 3) && lessThanEqual(overlap.length, 4)) {
         placement = spot;
         this.setExactLocation(placement, this.direction);
         this.addDoorToRooms(this.direction);
         this.size = 2;
-    } else if (overlap.length >= 3) {
+    } else if (greaterThanEqual(overlap.length, 4)) {
+        console.log('greater');
         this.overlap = overlap;
+        console.log(overlap);
         placement = Infinity;
         while (placement < (1.5 + overlap.start) || placement > (overlap.end - 1.5)) {
+            console.log('here');
             var placement = randGauss(spot, overlap.length / 6);
         }
         this.setExactLocation(placement, this.direction);
@@ -58,7 +61,6 @@ Door.prototype.setLocation = function() {
         currentBuilding.drawRooms(context);
         throw("Could not place door between " + this.room1.name + " and " + this.room2.name + ".");
     }
-    console.log(this.size);
 };
 
 Door.prototype.addDoorToRooms = function(direction) {
@@ -208,7 +210,7 @@ function doorFits(current, door) {
  * @returns {Line1D}
  */
 Door.prototype.calcOverlap = function() {
-    console.log(currentBuilding.allRooms);
+    //console.log(currentBuilding.allRooms);
     return getOverlap(this.room1, this.room2, this.direction);
 };
 
@@ -216,9 +218,16 @@ Door.prototype.toString = function () {
     return this.size;
 };
 
+/**
+ * Removes this door from the rooms it's connected to and severs the connection between them
+ */
 Door.prototype.delete = function() {
     this.room1.removeDoor(this);
+    var adj1 = this.room1.adjacent;
+    if (adj1.includes(this.room2)) adj1.splice(adj1.indexOf(this.room2), 1);
     this.room2.removeDoor(this);
+    var adj2 = this.room2.adjacent;
+    if (adj2.includes(this.room1)) adj2.splice(adj2.indexOf(this.room1), 1);
 };
 
 /**
@@ -307,20 +316,19 @@ function OutsideDoor(room, edge, direction) {
  * Sets the door's location to a random spot within the allotted space
  */
 OutsideDoor.prototype.setLocation = function() {
-    //var space = new Line1D(this.room1.getSide(getNextDirection(this.direction, false)), this.room1.getSide(getNextDirection(this.direction)));
-   var space = this.calcOverlap();
-   //console.log("Outside Door");
-   //console.log(space);
-    if (space.length >= 3) {
+    var space = this.calcOverlap();
+    var spot = (space.start + space.end) / 2;
+    if (greaterThanEqual(space.length, 3) && lessThanEqual(space.length, 4)) {
+        placement = spot;
+    } else if (greaterThanEqual(space.length, 4)) {
         this.overlap = space;
-        var spot = (space.start + space.end) / 2;
         placement = Infinity;
         while (placement < (1.5 + space.start) || placement > (space.end - 1.5)) {
             var placement = randGauss(spot, space.length / 6);
         }
-        this.setExactLocation(placement, this.direction);
-        this.size = 2;
     }
+    this.setExactLocation(placement, this.direction);
+    this.size = 2;
 };
 
 /**
@@ -376,10 +384,19 @@ OutsideDoor.prototype.calcOverlap = function () {
   return this.edge.getLine1D();
 };
 
+/**
+ * Removes this door from the room it is connected to
+ */
+OutsideDoor.prototype.delete = function () {
+    this.room1.removeDoor(this);
+};
+
 function addOutsideDoor(edge) {
     var room = edge.room;
     //console.log(room);
     var direction = getOppositeDirection(edge.directionOfRoom);
+    //console.log('1');
     currentBuilding.doors.push(new OutsideDoor(room, edge, direction));
+    //console.log('2');
 
 }

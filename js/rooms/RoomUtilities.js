@@ -292,7 +292,8 @@ function dummyRoom(x, y, width, height) {
  * @param height
  * @returns {Room}
  */
-function wallRoom(x, y, width, height) {
+function wallRoom(x, y, width, height, floor) {
+    if (typeof(floor) === "undefined") floor = 1;
     var newRoom = dummyRoom(x, y, width, height);
     newRoom.draw = function (context) {
         context.strokeStyle = 'rgb(0, 0, 0)';
@@ -303,6 +304,7 @@ function wallRoom(x, y, width, height) {
     };
     newRoom.name = '';
     newRoom.purpose = 'wall';
+    newRoom.floor = floor;
     return newRoom;
 }
 

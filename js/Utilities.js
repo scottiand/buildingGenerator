@@ -167,6 +167,7 @@ function greaterThanEqual(numA, numB) {
 
 function lessThanEqual(numA, numB) {
     var diff = numA - numB;
+    console.log(diff);
     if (Math.abs(diff) <= precision) return true;
     return (diff < 0);
 }

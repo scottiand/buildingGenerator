@@ -57,7 +57,11 @@ function randInt(max) {
  * @returns {number} A number between 0 (inclusive) and max (exclusive)
  */
 function randDoub(max) {
-    return Math.round(Math.random() * max * truncation) / truncation;
+    var num = Math.round(Math.random() * max * truncation) / truncation;
+    if (num > max) {
+        return randDoub(max);
+    }
+    return num;
 }
 
 /**

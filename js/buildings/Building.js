@@ -40,12 +40,15 @@ function Building() {
  * Creates and draws the building
  */
 Building.prototype.build = function () {
-    //this.addPlot(plotSize);
+    //console.log('build()');
     canvas.width = this.plot.width * scale;
     canvas.height = this.plot.height * scale;
     this.generateRoomList();
+    //console.log('List Generated');
     this.generateConnectivityGraph();
+    //console.log('Graph Created');
     if (this.placeRooms()) {
+        //console.log('Rooms Placed');
         var toRemove = [];
         for (var i = 0; i < this.allRooms.length; i++) {
             if (this.allRooms.get(i).locX < 0) toRemove.push(this.allRooms.get(i));
@@ -54,7 +57,9 @@ Building.prototype.build = function () {
             this.allRooms.remove(this.allRooms.getIndexOf(toRemove[i]));
         }
         this.addOutsideDoors();
+        //console.log('Doors added');
         this.expandDoors();
+        //console.log('Doors Expanded');
         //console.log(this.roomList.toString());
         if (this.draw) this.drawRooms(context);
         return true;
@@ -67,20 +72,23 @@ Building.prototype.build = function () {
  * Fills the gaps in the building.
  * Gives up after 100 tries.
  */
-Building.prototype.fillGaps = function () {
+Building.prototype.fillGaps = function (floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     for (var i = 0; i < 100; i++) {
         //console.log('fillGaps');
-        if (!this.findGap()) break;
+        if (!this.findGap(floor)) break;
     }
+    console.log('end fillGaps');
 };
 
 /**
  * Finds and fills gaps in the plot
  * @returns {boolean}
  */
-Building.prototype.findGap = function () {
+Building.prototype.findGap = function (floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     var foundGap = false;
-    var edges = this.getOutsideEdges();
+    var edges = this.getOutsideEdges(floor);
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
         var oppositeDirection = getOppositeDirection(direction);
@@ -91,7 +99,7 @@ Building.prototype.findGap = function () {
         for (var j = 0; j < thisSideEdges.length; j++) {
             var edge = thisSideEdges[j];
             var space = edge.getSpace(this.plot);
-            var intersectingRooms = this.getIntersectingRooms(space);
+            var intersectingRooms = this.getIntersectingRooms(space, floor);
             sortByGivenSide(intersectingRooms, oppositeDirection);
             if (direction === 'north' || direction === 'west') intersectingRooms.reverse();
             if (intersectingRooms.length > 0) {
@@ -109,9 +117,9 @@ Building.prototype.findGap = function () {
                         rect = new Rectangle(gap.start, Math.min(edge.line.y1, edge.line.y2), gap.length, edge.line.length);
                         break;
                 }
-                if (this.rectangleIsClosed(rect, 1)) {
-                    if (this.rectangleIsClosed(rect, 0)) foundGap = true;
-                    this.fillGap(rect);
+                if (this.rectangleIsClosed(rect, 1, floor)) {
+                    if (this.rectangleIsClosed(rect, 0, floor)) foundGap = true;
+                    this.fillGap(rect, floor);
                 }
             }
         }
@@ -125,7 +133,7 @@ Building.prototype.findGap = function () {
  * @param rect
  * @returns {boolean}
  */
-Building.prototype.rectangleIsClosed = function (rect, number) {
+Building.prototype.rectangleIsClosed = function (rect, number, floor) {
     var openSides = 0;
     for (var i = 0; i < 4; i++) {
         //console.log('here');
@@ -133,15 +141,9 @@ Building.prototype.rectangleIsClosed = function (rect, number) {
         var touchingSide = false;
         for (var j = 0; j < this.allRooms.length; j++) {
             var room = this.allRooms.get(j);
-            // console.log("-----------------------------")
-            // console.log(direction);
-            // console.log(room.getSide(getOppositeDirection(direction)));
-            // console.log(rect.getSide(direction));
             var dummy = dummyRoom(rect.left, rect.top, rect.width, rect.height);
             var overlap = getOverlap(room, dummy,direction);
-            //console.log(overlap);
-            //console.log(overlap.length);
-            if (equals(room.getSide(getOppositeDirection(direction)), rect.getSide(direction)) && overlap.length > 0) {
+            if (room.floor === floor && equals(room.getSide(getOppositeDirection(direction)), rect.getSide(direction)) && overlap.length > 0) {
                 touchingSide = true;
                 break;
             }
@@ -158,25 +160,26 @@ Building.prototype.rectangleIsClosed = function (rect, number) {
  * Fills the given gap by expanding or adding rooms
  * @param rect
  */
-Building.prototype.fillGap = function(rect) {
+Building.prototype.fillGap = function(rect, floor) {
+    if (typeof(floor) === 'undefined') floor = 1;
     if (rect.height < 1 || rect.width < 1) {
         if (!this.tryToStretchRoomToFillGap(rect)) {
             // Create a filler room in the empty space
-            this.push(wallRoom(rect.left, rect.top, rect.width, rect.height));
+            this.push(wallRoom(rect.left, rect.top, rect.width, rect.height, floor));
         }
     } else if (rect.height < 4 || rect.width < 4) {
         if (rect.width >= 3 || rect.height >=3) { // Only add a closet if a door ca fit
             // Make some closets
-            this.fillGapWithClosets(rect);
+            this.fillGapWithClosets(rect, floor);
         } else {
             if (!this.tryToStretchRoomToFillGap(rect)) {
                 // Create a filler room in the empty space
-                this.push(wallRoom(rect.left, rect.top, rect.width, rect.height));
+                this.push(wallRoom(rect.left, rect.top, rect.width, rect.height, floor));
             }
         }
     } else {
-        if (this.rectangleIsClosed(rect, 0)) {
-            this.fillRectWithRoom(rect);
+        if (this.rectangleIsClosed(rect, 0, floor)) {
+            this.fillRectWithRoom(rect, floor);
         }
     }
 
@@ -186,7 +189,7 @@ Building.prototype.fillGap = function(rect) {
  * Files the given rect with the next possible room in the proto rooms list.
  * @param rect
  */
-Building.prototype.fillRectWithRoom = function(rect) {
+Building.prototype.fillRectWithRoom = function(rect, floor) {
     this.protoRooms.sort(comparePriority);
     var current = 0;
     var room = new Room(this.protoRooms[0]);
@@ -198,6 +201,7 @@ Building.prototype.fillRectWithRoom = function(rect) {
             return;//throw('Couldnt find room to put in gap' );
         }
     }
+    room.floor = floor;
     room.setLocation(rect.left, rect.top);
     var newWidth = room.width;
     var newHeight = room.height;
@@ -236,13 +240,14 @@ Building.prototype.fillRectWithRoom = function(rect) {
  * Takes a given Rectangle and fill it with closet spaces
  * @param rect
  */
-Building.prototype.fillGapWithClosets = function (rect) {
-
+Building.prototype.fillGapWithClosets = function (rect, floor) {
+    if (typeof(floor) === "undefined") floor = 1;
     while (rect.area > 0) {
 
         // Create a closet room to put into the gap
         var newRoom = new Room(new ProtoRoom(closet));
         newRoom.setLocation(rect.left, rect.top);
+        newRoom.floor = floor;
         var filledGap = false;
 
         // If the closet can fill the space, stretch it to fit and move on
@@ -384,6 +389,7 @@ Building.prototype.generateConnectivityGraph = function () {
  */
 Building.prototype.placeRooms = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
+    console.log('placeRooms' + floor);
     var roomList = this.floors[floor - 1];
     var roomQueue = [];
     // Place the first room
@@ -402,8 +408,6 @@ Building.prototype.placeRooms = function (floor) {
     roomQueue.sort(compareTotalArea);
     roomQueue.reverse();
     // Place each room
-    //var upstairs = new RoomList();
-
     while (roomQueue.length !== 0) {
         var current = roomQueue.shift();
         var parent = current.parent;
@@ -433,6 +437,7 @@ Building.prototype.placeRooms = function (floor) {
                         roomQueue.splice(roomQueue.indexOf(toRemove[j]), 1);
                     }
                     current = roomQueue.shift();
+                    console.log('end adding floor');
                     if (typeof current === 'undefined') break;
                 }
                 if (current.height * 0.9 >= current.proto.minSize) {
@@ -463,7 +468,7 @@ Building.prototype.placeRooms = function (floor) {
             roomQueue.push(children[i]);
         }
     }
-    this.fillGaps();
+    this.fillGaps(floor);
     if (this.numFloors > floor) {
 
         var success = this.placeRooms(floor + 1);
@@ -511,7 +516,14 @@ Building.prototype.snapAllRooms = function(num){
  * @returns {boolean} Returns true if the building was successfully placed
  */
 Building.prototype.placeRoom = function (room, direction) {
+    //console.log('Begin placeRoom');
     var openings = this.getOpenings(room, direction);
+    //console.log('Openings calculated');
+
+    // if (room.purpose === 'bedroom' && room.floor === 2) {
+    //     console.log(room);
+    // }
+
     // If there are no openings, the room cannot be placed on this side
     if (openings.length === 0) return false;
     var opening = openings[randInt(openings.length)];
@@ -539,12 +551,15 @@ Building.prototype.placeRoom = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
+    //console.log('placement calculated');
     if (isNaN(placeX) || isNaN(placeY) || this.intersection(new Rectangle(placeX, placeY, room.width, room.height), room.floor)) {
         return false;
     }
     room.locX = placeX;
     room.locY = placeY;
+    //console.log('no door');
     var door = new Door(room, room.parent, direction);
+    //console.log('door added');
     this.doors.push(door);
     //console.log(this.doors.toString());
     if (door.size === 0) console.log('yes');
@@ -819,7 +834,8 @@ Building.prototype.collapseObstacles= function (list, direction) {
     for (var i = 0; i < list.length - 1; i++) {
         var current = list[i];
         for (var j = i + 1; j < list.length; j++) {
-            if (list[j] != 0) {
+            current = list[i];
+            if (list[j] !== 0) {
                 var next = list[j];
                 switch (direction) {
                     case 'north':
@@ -860,6 +876,8 @@ Building.prototype.collapseObstacles= function (list, direction) {
  * @returns {Array} All sufficient openings
  */
 Building.prototype.getOpenings = function (room, direction) {
+
+
     var parent = room.parent;
     // Return 0 openings if the room would extend outside the plot
     switch (direction) {
@@ -867,10 +885,10 @@ Building.prototype.getOpenings = function (room, direction) {
             if (parent.locY < room.height) return [];
             break;
         case 'south':
-            if (this.plot.height - parent.height - parent.locY < room.height) return [];
+            if (this.plot.height - parent.bottom() < room.height) return [];
             break;
         case 'east':
-            if (this.plot.width - parent.width - parent.locX < room.width) return [];
+            if (this.plot.width - parent.right() < room.width) return [];
             break;
         case 'west':
             if (parent.locX < room.width) return [];
@@ -1053,28 +1071,32 @@ Building.prototype.connectSubtrees = function (floor) {
     roomList.sort(ComparePrivacy);
     if (floor === 1) this.entry = roomList.peek();
     for (var i = 1; i < roomList.length; i++) {
-        var toConnect;
         var room = roomList.get(i);
-        var lowScore = Infinity;
-        for (var j = 0; j < roomList.length; j++) {
-            if (j !== i) {
-                var currentRoom = roomList.get(j);
-                var score = currentRoom.privacy;
-                if (room.adjacent.includes(currentRoom)) {
-                    score = Infinity;
-                } else {
-                    score += currentRoom.adjacent.length * 10;
-                    if (currentRoom.purpose === "hallway") {
-                        score -= 50;
+        if (!room.isPlaced) { // Does this actually matter?
+            var toConnect;
+            var lowScore = Infinity;
+            for (var j = 0; j < roomList.length; j++) {
+                if (j !== i) {
+                    var currentRoom = roomList.get(j);
+                    var score = currentRoom.privacy;
+                    if (room.adjacent.includes(currentRoom)) {
+                        score = Infinity;
+                    } else {
+                        score += currentRoom.adjacent.length * 10;
+                        if (currentRoom.purpose === "hallway") {
+                            score -= 50;
+                        }
+                    }
+                    if (score < lowScore) {
+                        lowScore = score;
+                        toConnect = currentRoom;
                     }
                 }
-                if (score < lowScore) {
-                    lowScore = score;
-                    toConnect = currentRoom;
-                }
             }
+            toConnect.connect(room);
         }
-        toConnect.connect(room);
+        //this.getFloor(floor).remove(this.getFloor(floor).getIndexOf(room));
+
     }
 };
 
@@ -1157,10 +1179,13 @@ Building.prototype.addOutsideDoors = function () {
         }
     }
     if (yardList.length === 1) {
+        console.log('true');
         this.addOutsideDoorsSingleYard();
     } else {
+        console.log('false');
         this.addOutsideDoorsMultipleYards(yardList);
     }
+    console.log('end');
     //console.log(this.doors);
     //console.log(yardList);
 };
@@ -1210,7 +1235,7 @@ Building.prototype.addDoorToYard = function(yard) {
  * Adds one or two doors to a building with a single yard.
  */
 Building.prototype.addOutsideDoorsSingleYard = function () {
-    var edges = this.getOutsideEdges();
+    var edges = this.getOutsideEdges(1);
     edges.sort(sortEdgesByRoomPrivacy);
     addOutsideDoor(edges[0]);
     edges.splice(0,1);
@@ -1292,10 +1317,10 @@ Building.prototype.getFreeOuterLines = function (roomList, direction) {
  * Tells all doors to expand(), allowing for variety in doors
  */
 Building.prototype.expandDoors = function() {
-    console.log(this.doors.toString());
+    //console.log(this.doors.toString());
     for (var i = 0; i < this.doors.length; i++) {
         this.doors[i].expand();
-        console.log(this.doors.toString());
+        //console.log(this.doors.toString());
     }
 };
 

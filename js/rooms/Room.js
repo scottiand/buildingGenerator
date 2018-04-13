@@ -83,9 +83,6 @@ function drawRoom(context) {
     context.lineWidth = scale / 3;
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
-    console.log(this.name);
-    console.log(this.locX + ", " + this.locY);
-    console.log(this.area);
     //For each direction: North, east, south, then west
     //console.log(this.name);
     for (var i = 0; i < 4; i++) {
@@ -617,7 +614,4 @@ Room.prototype.removeDoor = function (door) {
       }
   }
 };
-
-
-
 
