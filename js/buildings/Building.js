@@ -441,7 +441,6 @@ Building.prototype.placeRooms = function (floor) {
                         roomQueue.splice(roomQueue.indexOf(toRemove[j]), 1);
                     }
                     current = roomQueue.shift();
-                    console.log('end adding floor');
                     if (typeof current === 'undefined') break;
                 } else {
                     var newHeight = current.height;
@@ -484,7 +483,7 @@ Building.prototype.placeRooms = function (floor) {
     }
     if (this.numFloors > floor) {
         var list = this.getFloorOutline(floor);
-        this.floorOutlines[floor] = list;
+        this.floorOutlines[floor - 1] = list;
         // for (var i = 0; i < this.floorOutlines[floor].length; i++) {
         //     this.floorOutlines[floor].get(i).draw(context);
         // }
@@ -590,14 +589,8 @@ Building.prototype.placeRoom = function (room, direction) {
  * @param room The room to snap
  */
 Building.prototype.snap = function (room) {
-    this.snapPlot(room);
-    if (room.area === 0) {
-        throw("snapPlot");
-    }
+    if (room.floor === 1) this.snapPlot(room);
     this.snapTo(room);
-    if (room.area === 0) {
-        throw("snapTo");
-    }
     this.snapAlign(room);
 };
 
@@ -661,7 +654,7 @@ Building.prototype.snapTo = function (room) {
  */
 Building.prototype.snapToSingleDirection = function (room, direction) {
     var floor = room.floor;
-    var roomList = this.getIntersectingRooms(room.getSpace(this.plot, direction), floor);
+    var roomList = this.getIntersectingRooms(room.getSpace(this.plot, direction), floor, this.getFloorOutline(floor - 1));
     var list = [];
     if (roomList.length <= 0) return;
     var validSnap;
@@ -720,8 +713,9 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
     var farSide = room.getSide(direction) + this.roomSnap;
     var list = [];
     // Get all room that fall within the snap distance
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
+    var possibleSnapRooms = this.allRooms.concat(this.getFloorOutline(floor - 1));
+    for (var i = 0; i < possibleSnapRooms.length; i++) {
+        var current = possibleSnapRooms.get(i);
         if (current.floor === floor && current.getSide(direction) >= nearSide && current.getSide(direction) <= farSide && current !== room) list.push(new Line1D(room.getSide(direction), current.getSide(direction)));
     }
     if (list.length <= 0) return; // If there are no matches, we're done!
@@ -827,9 +821,7 @@ Building.prototype.getObstacles = function(room, direction) {
             throw("invalid direction: " + direction);
     }
     var relevantRooms = this.getRoomsOnFloor(room.floor);
-
-    //console.log(room);
-    //console.log(relevantRooms);
+    relevantRooms = this.addFloorOutlineToList(relevantRooms, room.floor);
 
     for (var i = 0; i < relevantRooms.length; i++) {
         var current = relevantRooms[i];
@@ -840,6 +832,20 @@ Building.prototype.getObstacles = function(room, direction) {
     obstacles.sort(sortFunction);
     obstacles = this.collapseObstacles(obstacles, direction);
     return obstacles;
+};
+
+/**
+ * Returns a list with the floor outilne dummy room added t the end of the given list
+ * @param list A list of rooms
+ * @param floor The current floor
+ * @returns {*} A list of rooms with the dummy rooms added on the end
+ */
+Building.prototype.addFloorOutlineToList = function(list, floor) {
+    if (floor > 1) {
+        return list.concat(this.getFloorOutline(floor - 1).content);
+    } else {
+        return list;
+    }
 };
 
 /**
@@ -1433,45 +1439,57 @@ Building.prototype.getRoomsOnFloor = function (floor) {
   return toReturn;
 };
 
+/**
+ * Returns of roomList full of dummy room that fill the outdoor spaces of the house
+ * Note that these rooms have a floor value of one greater than floor, because they will be used when creating the next floor
+ * @param floor The floor number in which to detect the outdoor spaces
+ * @returns {RoomList} A list of dummy rooms
+ */
 Building.prototype.getFloorOutline = function(floor) {
-    var queue = this.getOutsideEdges(floor);
-    var list = new RoomList();
-    this.drawRooms(context, floor);
-    while (queue.length > 0) {
-        var currentEdge = queue[0];
-        queue.splice(0, 1);
-        var direction = getOppositeDirection(currentEdge.directionOfRoom);
-        var rect = currentEdge.getSpace(this.plot, direction);
-        var intersectingRooms = this.getIntersectingRooms(rect, floor, list);
-        var newRoom;
-        if (intersectingRooms.length > 0) {
-            var nearRoom = nearestRoom(intersectingRooms, direction);
-            switch (direction) {
-                case "north":
-                    rect = new Rectangle(rect.left, nearRoom.bottom(), rect.width, currentEdge.location - nearRoom.bottom());
-                    break;
-                case "south":
-                    rect = new Rectangle(rect.left, rect.top, rect.width, nearRoom.locY - currentEdge.location);
-                    break;
-                case "east":
-                    rect = new Rectangle(rect.left, rect.top, nearRoom.locX - currentEdge.location, rect.height);
-                    break;
-                case "west":
-                    rect = new Rectangle(nearRoom.right(), rect.top, currentEdge.location - nearRoom.right(), rect.height);
-                    break;
-                default:
-                    throw("invalid direction: " + direction);
+    if (floor < 1) return new RoomList();
+    if (typeof this.floorOutlines[floor - 1] === 'undefined') {
+
+        var queue = this.getOutsideEdges(floor);
+        var list = new RoomList();
+        //this.drawRooms(context, floor);
+        while (queue.length > 0) {
+            var currentEdge = queue[0];
+            queue.splice(0, 1);
+            var direction = getOppositeDirection(currentEdge.directionOfRoom);
+            var rect = currentEdge.getSpace(this.plot, direction);
+            var intersectingRooms = this.getIntersectingRooms(rect, floor, list);
+            var newRoom;
+            if (intersectingRooms.length > 0) {
+                var nearRoom = nearestRoom(intersectingRooms, direction);
+                switch (direction) {
+                    case "north":
+                        rect = new Rectangle(rect.left, nearRoom.bottom(), rect.width, currentEdge.location - nearRoom.bottom());
+                        break;
+                    case "south":
+                        rect = new Rectangle(rect.left, rect.top, rect.width, nearRoom.locY - currentEdge.location);
+                        break;
+                    case "east":
+                        rect = new Rectangle(rect.left, rect.top, nearRoom.locX - currentEdge.location, rect.height);
+                        break;
+                    case "west":
+                        rect = new Rectangle(nearRoom.right(), rect.top, currentEdge.location - nearRoom.right(), rect.height);
+                        break;
+                    default:
+                        throw("invalid direction: " + direction);
+                }
+            }
+            newRoom = dummyRoom(rect.left, rect.top, rect.width, rect.height, floor + 1);
+            if (newRoom.area !== 0) {
+                list.push(newRoom);
+                //console.log(newRoom.getOutsideEdges(this, list));
+                var newEdges = newRoom.getOutsideEdges(this, list);
+                queue = queue.concat(newEdges);
+                //newRoom.draw(context);
             }
         }
-        newRoom = dummyRoom(rect.left, rect.top, rect.width, rect.height, floor);
-        if (newRoom.area !== 0) {
-            list.push(newRoom);
-            //console.log(newRoom.getOutsideEdges(this, list));
-            var newEdges = newRoom.getOutsideEdges(this, list);
-            queue = queue.concat(newEdges);
-            newRoom.draw(context);
-        }
+        console.log(list);
+        return list;
     }
-    console.log(list);
-    return list;
+    return this.floorOutlines[floor - 1];
 };
+
