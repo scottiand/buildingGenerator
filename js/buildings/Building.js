@@ -664,26 +664,26 @@ Building.prototype.snapToSingleDirection = function (room, direction) {
             list.sort();
             list.reverse();
             var rect = new Rectangle(room.locX, list[0], room.width, room.locY - list[0]);
-            validSnap = list[0] < room.locY && room.locY - list[0] <= this.roomSnap && this.empty(room, rect);
+            validSnap = list[0] < room.locY && room.locY - list[0] <= this.roomSnap && this.empty(room, rect, this.getFloorOutline(floor - 1));
             break;
         case 'south':
             roomList.forEach(function (value) { list.push(value.locY) });
             list.sort();
             var rect = new Rectangle(room.locX, room.bottom(), room.width, list[0] - room.bottom());
-            validSnap = list[0] > room.bottom() && list[0] - room.bottom() <= this.roomSnap && this.empty(room, rect);
+            validSnap = list[0] > room.bottom() && list[0] - room.bottom() <= this.roomSnap && this.empty(room, rect, this.getFloorOutline(floor - 1));
             break;
         case 'east':
             roomList.forEach(function (value) { list.push(value.locX) });
             list.sort();
             var rect = new Rectangle(room.right(), room.locY, list[0] - room.right(), room.width);
-            validSnap = list[0] > room.right() && list[0] - room.right() <= this.roomSnap && this.empty(room, rect);
+            validSnap = list[0] > room.right() && list[0] - room.right() <= this.roomSnap && this.empty(room, rect, this.getFloorOutline(floor - 1));
             break;
         case 'west':
             roomList.forEach(function (value) { list.push(value.right()) });
             list.sort();
             list.reverse();
             var rect = new Rectangle(list[0], room.locY, room.locX - list[0], room.height);
-            validSnap = list[0] < room.locX && room.locX - list[0] <= this.roomSnap && this.empty(room, rect);
+            validSnap = list[0] < room.locX && room.locX - list[0] <= this.roomSnap && this.empty(room, rect, this.getFloorOutline(floor - 1));
             break;
         default:
             throw("invalid direction: " + direction);
@@ -755,7 +755,7 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
         default:
             throw("invalid direction: " + this.direction);
     }
-    if (!this.empty(room, rect)) return; // If the space is occupied, do not snap
+    if (!this.empty(room, rect, this.getFloorOutline(floor - 1))) return; // If the space is occupied, do not snap
     room.stretch(spot, direction);//this.snapRoom(room, direction, spot);
 };
 
@@ -765,10 +765,12 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
  * @param rectangle
  * @returns {boolean}
  */
-Building.prototype.empty = function(room, rectangle) {
+Building.prototype.empty = function(room, rectangle, extraRooms) {
+    if (typeof extraRooms === 'undefined') extraRooms = new RoomList();
     var floor = room.floor;
-    for (var i = 0; i < this.allRooms.length; i++) {
-        if (this.allRooms.get(i).floor === floor && this.allRooms.get(i).intersection(rectangle) > 0 && room !== this.allRooms.get(i)) {
+    var roomList = this.roomList.concat(extraRooms);
+    for (var i = 0; i < roomList.length; i++) {
+        if (roomList.get(i).floor === floor && roomList.get(i).intersection(rectangle) > 0 && room !== roomList.get(i)) {
             return false;
         }
     }
