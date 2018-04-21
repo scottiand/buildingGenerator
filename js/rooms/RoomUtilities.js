@@ -277,10 +277,12 @@ function purposeCount(list, purpose) {
  * @param height
  * @returns {Room}
  */
-function dummyRoom(x, y, width, height) {
+function dummyRoom(x, y, width, height, floor) {
+    if (typeof floor === 'undefined') floor = 1;
     var room = new Room(new ProtoRoom(dummy));
     room.setLocation(x,y);
     room.setSize(width, height);
+    room.floor = floor;
     return room;
 }
 

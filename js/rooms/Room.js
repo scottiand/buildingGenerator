@@ -26,7 +26,7 @@ function Room(proto) {
         this.width = 0;
         this.height = 0;
         this.pointsByDirection = [0, 0, 0, 0]; //[North, East, South, West]
-        this.corners = this.makeRectangle();
+        this.makeRectangle();
         this.locX = -99999;
         this.locY = -99999;
         this.adjacent = [];
@@ -71,7 +71,7 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
     corners.push({x:width,y:0});
     corners.push({x:width,y:height});
     corners.push({x:0,y:height});
-    return corners;
+    this.corners = corners;
 };
 
 /**
@@ -79,6 +79,9 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
  * @param {Context} context The context in which the room is drawn
  */
 function drawRoom(context) {
+    // console.log(this.name);
+    // console.log(this.right());
+    // console.log(this.bottom());
     context.beginPath();
     context.lineWidth = scale / 3;
     context.strokeStyle = 'rgb(0, 0, 0)';
@@ -213,7 +216,9 @@ Room.prototype.intersection = function (rectangle, floor) {
 
     var xOverlap = Math.max(0, Math.min(rectangle.right, right) - Math.max(rectangle.left, left));
     var yOverlap = Math.max(0, Math.min(rectangle.bottom, bottom) - Math.max(rectangle.top, top));
-
+    if (lessThanEqual(xOverlap, 0) || lessThanEqual(yOverlap, 0)) {
+        return 0;
+    }
     return xOverlap * yOverlap;
 };
 
@@ -232,7 +237,7 @@ Room.prototype.containsPoint = function (x, y) {
  * Rotates the room by 90 degrees
  */
 Room.prototype.rotate = function () {
-    this.corners = this.makeRectangle(this.height, this.width);
+    this.makeRectangle(this.height, this.width);
 };
 
 /**
@@ -253,7 +258,7 @@ Room.prototype.printTree = function(string) {
  * @param height New Height
  */
 Room.prototype.setSize = function(width, height) {
-    this.corners = this.makeRectangle(width, height);
+    this.makeRectangle(width, height);
 };
 
 /**
@@ -431,14 +436,14 @@ Room.prototype.touchingSides = function (plot) {
  * @param building
  * @returns {Array}
  */
-Room.prototype.getOutsideEdges = function (building) {
-
+Room.prototype.getOutsideEdges = function (building, extraRooms) {
+    if (typeof extraRooms === 'undefined') extraRooms = new RoomList();
     var list = [];
     //console.log(this.name);
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
         var lines = [new Line1D(this.getSide(getNextDirection(direction)), this.getSide(getNextDirection(direction, false)))];
-        var contactingRooms = this.getContactingRooms(building, direction);
+        var contactingRooms = this.getContactingRooms(building, direction, extraRooms);
         for (var j = 0; j < contactingRooms.length; j++) {
             var room = contactingRooms[j];
             for (var k = 0; k < lines.length; k++) {
@@ -467,7 +472,8 @@ Room.prototype.getOutsideEdges = function (building) {
  * @param direction
  * @returns {Array}
  */
-Room.prototype.getContactingRooms = function(building, direction) {
+Room.prototype.getContactingRooms = function(building, direction, extraRooms) {
+    if (typeof extraRooms === 'undefined') extraRooms = new RoomList();
     var list = [];
     if (typeof(direction) === 'undefined') {
         for (var i = 0; i < 4; i++) {
@@ -475,6 +481,9 @@ Room.prototype.getContactingRooms = function(building, direction) {
         }
     } else {
         var possibleRooms = building.getIntersectingRooms(this.getSpace(building.plot, direction), this.floor);
+        for (var i = 0; i < extraRooms.length; i++) {
+            if (extraRooms.get(i).intersection(this.getSpace(building.plot, direction), this.floor)) possibleRooms.push(extraRooms.get(i));
+        }
         // find all rooms that contact this one
         for (var j = 0; j < possibleRooms.length; j++) {
             if (equals(possibleRooms[j].getSide(getOppositeDirection(direction)), this.getSide(direction))) list.push(possibleRooms[j]);
@@ -485,7 +494,7 @@ Room.prototype.getContactingRooms = function(building, direction) {
 
 /**
  * Returns a rectangle representing the space in the given direction
- * @param plot THe building's plot
+ * @param plot The building's plot
  * @param direction 'north', 'south', 'east', or 'west'
  * @returns {Rectangle} A rectangle representing the space in the direction of the given room.
  */
@@ -559,10 +568,12 @@ Room.prototype.toString = function () {
  * Sets the floor and its descendants to the given value
  * @param floor
  */
-Room.prototype.elevate = function (floor) {
+Room.prototype.elevate = function (floor, building) {
+    //console.log(building);
+    if (building.getFloor(this.floor).includes(this)) building.getFloor(this.floor).remove(building.getFloor(this.floor).getIndexOf(this));
     this.floor = floor;
     for (var i = 0; i < this.adjacent.length; i++) {
-        this.adjacent[i].elevate(floor);
+        this.adjacent[i].elevate(floor, building);
     }
 };
 

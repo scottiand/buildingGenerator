@@ -22,6 +22,7 @@ function Building() {
     this.protoRooms = [];
 
     this.floors = [new RoomList()];
+    this.floorOutlines = [];
 
     this.roomList = this.floors[0];
 
@@ -422,6 +423,9 @@ Building.prototype.placeRooms = function (floor) {
                 // If the room can't be place, try adding another floor
                 if (current.height * 0.9 < current.proto.minSize && current.width * 0.9 < current.proto.minSize) {
                     if (!this.addFloor()) return false;
+                    if (failures === 9) {
+                        console.log('here');
+                    }
                     this.performRules(this.connectivityRulesUpstairs);
                     var list = this.allRooms.getAllOf('stairwell');
                     for (var j = 0; j < list.length; j++) {
@@ -439,12 +443,16 @@ Building.prototype.placeRooms = function (floor) {
                     current = roomQueue.shift();
                     console.log('end adding floor');
                     if (typeof current === 'undefined') break;
-                }
-                if (current.height * 0.9 >= current.proto.minSize) {
-                    current.height *= 0.9;
-                }
-                if (current.width * 0.9 >= current.proto.minSize) {
-                    current.width *= 0.9;
+                } else {
+                    var newHeight = current.height;
+                    var newWidth = current.width;
+                    if (newHeight * 0.9 >= current.proto.minSize) {
+                        newHeight *= 0.9;
+                    }
+                    if (newWidth * 0.9 >= current.proto.minSize) {
+                        newWidth *= 0.9;
+                    }
+                    current.setSize(newWidth, newHeight);
                 }
                 i = -1;
             }
@@ -469,8 +477,17 @@ Building.prototype.placeRooms = function (floor) {
         }
     }
     this.fillGaps(floor);
+    for (var i = 0; i < this.allRooms.length; i++) {
+        if (this.allRooms.get(i).locX < 0 && this.allRooms.get(i).floor === floor) {
+            this.allRooms.remove(this.allRooms.getIndexOf(this.allRooms.get(i)),1);
+        }
+    }
     if (this.numFloors > floor) {
-
+        var list = this.getFloorOutline(floor);
+        this.floorOutlines[floor] = list;
+        // for (var i = 0; i < this.floorOutlines[floor].length; i++) {
+        //     this.floorOutlines[floor].get(i).draw(context);
+        // }
         var success = this.placeRooms(floor + 1);
         //console.log(success);
         return success;
@@ -990,6 +1007,11 @@ Building.prototype.drawRooms = function (context) {
     context.lineWidth = 1;
     context.strokeStyle = 'rgb(230, 243, 255)';
     for (var i = 1; i < this.plot.width; i++) {
+        if (i % 5 === 0) {
+            context.strokeStyle = 'rgb(210, 223, 235)'
+        } else {
+            context.strokeStyle = 'rgb(230, 243, 255)';
+        }
         context.beginPath();
         context.moveTo(i * scale, 0);
         context.lineTo(i * scale, this.plot.height * scale);
@@ -997,6 +1019,11 @@ Building.prototype.drawRooms = function (context) {
         context.stroke();
     }
     for (var i = 1; i < this.plot.height; i++) {
+        if (i % 5 === 0) {
+            context.strokeStyle = 'rgb(210, 223, 235)'
+        } else {
+            context.strokeStyle = 'rgb(230, 243, 255)';
+        }
         context.beginPath();
         context.moveTo(0, i * scale);
         context.lineTo(this.plot.width * scale, i * scale);
@@ -1067,7 +1094,8 @@ Building.prototype.trimSize = function () {
 Building.prototype.connectSubtrees = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
     //console.log(floor);
-    var roomList = this.floors[floor - 1];
+    var roomList = this.getFloor(floor);
+
     roomList.sort(ComparePrivacy);
     if (floor === 1) this.entry = roomList.peek();
     for (var i = 1; i < roomList.length; i++) {
@@ -1131,11 +1159,13 @@ Building.prototype.intersection = function(rectangle, floor) {
  * @param rectangle
  * @returns {Array}
  */
-Building.prototype.getIntersectingRooms = function (rectangle, floor) {
+Building.prototype.getIntersectingRooms = function (rectangle, floor, extraRooms) {
     if (typeof(floor) === 'undefined') floor = 1;
+    if (typeof extraRooms === 'undefined') extraRooms = new RoomList();
     var list = [];
-    for (var i = 0; i < this.allRooms.length; i++) {
-        var current = this.allRooms.get(i);
+    var toTest = this.allRooms.concat(extraRooms);
+    for (var i = 0; i < toTest.length; i++) {
+        var current = toTest.get(i);
         if (current.intersection(rectangle, floor) > 0) {
             list.push(current);
         }
@@ -1249,7 +1279,7 @@ Building.prototype.getOutsideEdges = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
     var list = [];
     for (var i = 0; i < this.allRooms.length; i++) {
-        var room = this.allRooms.get(i)
+        var room = this.allRooms.get(i);
         if (room.floor === floor) {
             var roomEdges = room.getOutsideEdges(this);
             for (var j = 0; j < roomEdges.length; j++) {
@@ -1342,6 +1372,7 @@ Building.prototype.addFloor = function () {
     if (this.numFloors === this.maxFloors) return false;
     this.numFloors++;
     this.floors.push(new RoomList());
+
     return true;
 };
 
@@ -1400,4 +1431,47 @@ Building.prototype.getRoomsOnFloor = function (floor) {
       if (this.allRooms.get(i).floor === floor) toReturn.push(this.allRooms.get(i));
   }
   return toReturn;
+};
+
+Building.prototype.getFloorOutline = function(floor) {
+    var queue = this.getOutsideEdges(floor);
+    var list = new RoomList();
+    this.drawRooms(context, floor);
+    while (queue.length > 0) {
+        var currentEdge = queue[0];
+        queue.splice(0, 1);
+        var direction = getOppositeDirection(currentEdge.directionOfRoom);
+        var rect = currentEdge.getSpace(this.plot, direction);
+        var intersectingRooms = this.getIntersectingRooms(rect, floor, list);
+        var newRoom;
+        if (intersectingRooms.length > 0) {
+            var nearRoom = nearestRoom(intersectingRooms, direction);
+            switch (direction) {
+                case "north":
+                    rect = new Rectangle(rect.left, nearRoom.bottom(), rect.width, currentEdge.location - nearRoom.bottom());
+                    break;
+                case "south":
+                    rect = new Rectangle(rect.left, rect.top, rect.width, nearRoom.locY - currentEdge.location);
+                    break;
+                case "east":
+                    rect = new Rectangle(rect.left, rect.top, nearRoom.locX - currentEdge.location, rect.height);
+                    break;
+                case "west":
+                    rect = new Rectangle(nearRoom.right(), rect.top, currentEdge.location - nearRoom.right(), rect.height);
+                    break;
+                default:
+                    throw("invalid direction: " + direction);
+            }
+        }
+        newRoom = dummyRoom(rect.left, rect.top, rect.width, rect.height, floor);
+        if (newRoom.area !== 0) {
+            list.push(newRoom);
+            //console.log(newRoom.getOutsideEdges(this, list));
+            var newEdges = newRoom.getOutsideEdges(this, list);
+            queue = queue.concat(newEdges);
+            newRoom.draw(context);
+        }
+    }
+    console.log(list);
+    return list;
 };

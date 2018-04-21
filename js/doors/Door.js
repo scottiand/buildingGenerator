@@ -44,12 +44,9 @@ Door.prototype.setLocation = function() {
         this.addDoorToRooms(this.direction);
         this.size = 2;
     } else if (greaterThanEqual(overlap.length, 4)) {
-        console.log('greater');
         this.overlap = overlap;
-        console.log(overlap);
         placement = Infinity;
         while (placement < (1.5 + overlap.start) || placement > (overlap.end - 1.5)) {
-            console.log('here');
             var placement = randGauss(spot, overlap.length / 6);
         }
         this.setExactLocation(placement, this.direction);

@@ -403,9 +403,19 @@ Edge.prototype.draw = function (context, thickness) {
         pointX2 += thickness / 2;
      }
     var doors = this.room.getDoors(getOppositeDirection(this.directionOfRoom));
+    var invalidDoors = [];
+    for (var i = 0; i < doors.length; i++) {
+        var door = doors[i];
+        if (this.vertical) {
+            if (lessThan(door.y * scale, pointY1) || greaterThan(door.y * scale, pointY2)) invalidDoors.push(door);
+        } else {
+            if (lessThan(door.x * scale, pointX1) || greaterThan(door.x * scale, pointX2)) invalidDoors.push(door);
+
+        }
+    }
     context.moveTo(pointX1, pointY1);
     for (var i = 0; i < doors.length; i++) {
-        if (typeof doors[i].edge !== 'undefined') {
+        if (typeof doors[i].edge !== 'undefined' && !invalidDoors.includes(doors[i])) {
             context.lineTo(doors[i].startPoint().x * scale, doors[i].startPoint().y * scale);
             context.moveTo(doors[i].endPoint().x * scale, doors[i].endPoint().y * scale);
         }

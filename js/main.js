@@ -19,7 +19,7 @@ window.onload = function init() {
     // Initialize global variables, DO NOT DELETE
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
-    seedEntry = document.getElementById("seedEntry")
+    seedEntry = document.getElementById("seedEntry");
     initRoomTypes();
     initRandom(seedEntry.value);
     initDoorTypes();

@@ -231,3 +231,23 @@ RoomList.prototype.getIndexOf = function (room) {
 RoomList.prototype.toString = function() {
   return this.content.toString();
 };
+
+RoomList.prototype.includes = function (room) {
+    return this.content.includes(room);
+};
+
+RoomList.prototype.filter = function (func) {
+    return this.content.filter(func);
+};
+
+/**
+ * Creates a new roomlist combinint this list with the given list
+ * @param roomList roomlist is added to the end of this.content
+ * @returns {*} A new RoomList
+ */
+RoomList.prototype.concat = function (roomList) {
+    var newList = new RoomList();
+    newList.content = this.content.concat(roomList.content);
+    newList.resetLength();
+  return newList;
+};

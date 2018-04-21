@@ -147,6 +147,50 @@ function compareScore(a, b) {
     return 0;
 }
 
+/**
+ * Returns the nearest room in a given direction
+ * for 'north', returns the room with the lowest LocX
+ * for 'south', returns the room with the greatest Bottom()
+ * for 'east', returns the room with the greatest Right()
+ * for 'west', returns the room with the lowest LocY
+ * @param array An array of rooms
+ * @param direction The direction to sort the roms in ('north', 'south', 'east', or 'west')
+ * @returns {*} The nearest room, as described above
+ */
+function nearestRoom(array, direction) {
+    var compareFunction;
+    switch (direction) {
+        case "north":
+            compareFunction = compareBottom;
+            break;
+        case "south":
+            compareFunction = compareLocY;
+            break;
+        case "east":
+            compareFunction = compareLocX;
+            break;
+        case "west":
+            compareFunction = compareRight;
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+    array.sort(compareFunction);
+    switch (direction) {
+        case "north":
+        case "west":
+            array.reverse();
+            break;
+        case "south":
+        case "east":
+
+            break;
+        default:
+            throw("invalid direction: " + direction);
+    }
+    return array[0];
+}
+
 var precision = 0.0000001;
 
 /**
@@ -167,7 +211,6 @@ function greaterThanEqual(numA, numB) {
 
 function lessThanEqual(numA, numB) {
     var diff = numA - numB;
-    console.log(diff);
     if (Math.abs(diff) <= precision) return true;
     return (diff < 0);
 }
