@@ -7,6 +7,9 @@
  * Generates a new building based on the seed entry
  */
 function generateButtonOnClick(draw) {
+
+    //testRun(10000);
+
     draw = typeof draw === 'undefined' ? true : draw;
     initRandom(seedEntry.value);
     failures = 0;

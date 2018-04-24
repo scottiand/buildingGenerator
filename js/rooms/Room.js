@@ -117,6 +117,7 @@ function drawRoom(context) {
     context.stroke();
     context.textAlign = 'center';
     if (context.measureText(this.name).width < this.width * scale && this.height * scale > 20) {
+        context.fillStyle = 'rgb(0,0,0)';
         context.fillText(this.name, (this.locX + this.width / 2) * scale, (this.locY + this.height / 2) * scale);
     }
 }
@@ -327,17 +328,25 @@ Room.prototype.bottom = function () {
  * @returns {Array}
  */
 Room.prototype.getDoors = function(direction) {
-    switch (direction) {
-        case 'north':
-            return this.northDoors;
-        case 'south':
-            return this.southDoors;
-        case 'east':
-            return this.eastDoors;
-        case 'west':
-            return this.westDoors;
-        default:
-            throw("invalid direction: " + this.direction);
+    if (typeof direction === 'undefined') {
+        var list = [];
+        for (var i = 0; i < 4; i++) {
+            list = list.concat(this.getDoors(directions[i]));
+        }
+        return list;
+    } else {
+        switch (direction) {
+            case 'north':
+                return this.northDoors;
+            case 'south':
+                return this.southDoors;
+            case 'east':
+                return this.eastDoors;
+            case 'west':
+                return this.westDoors;
+            default:
+                throw("invalid direction: " + this.direction);
+        }
     }
 };
 
@@ -561,7 +570,7 @@ Room.prototype.doorCount = function(direction) {
  * @returns {*}
  */
 Room.prototype.toString = function () {
-    return this.name + " (" + this.floor + ")";
+    return this.name + " (" + this.floor + ") x:" + this.locX + " y:" +this.locY + " w:" + this.width + " h:" + this.height;
 };
 
 /**
@@ -626,3 +635,17 @@ Room.prototype.removeDoor = function (door) {
   }
 };
 
+/**
+ * Returns true if the given room has a door to this room
+ * @param room The room to test
+ * @returns {boolean} true if this room is connected to the given room
+ */
+Room.prototype.hasDoorTo = function (room) {
+    var doors = this.getDoors();
+    for (var i = 0; i < doors.length; i++) {
+        if (doors[i].otherRoom(this) === room) {
+            return true;
+        }
+    }
+    return false;
+};

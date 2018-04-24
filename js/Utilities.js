@@ -16,6 +16,7 @@ function nonZero(number) {
 function testRun(tries) {
     var failure = 0;
     for (var i = 0; i < tries; i++) {
+        console.log(i);
         seedEntry.value = i;
         failure += generateButtonOnClick(false);
     }
@@ -142,6 +143,22 @@ function compareScore(a, b) {
         return -1;
     }
     if (a.score > b.score) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * Compares a and b by score
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function numericSort(a, b) {
+    if (lessThan(a, b)) {
+        return -1;
+    }
+    if (greaterThan(a, b)) {
         return 1;
     }
     return 0;

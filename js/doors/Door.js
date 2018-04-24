@@ -177,6 +177,18 @@ Door.prototype.expand = function () {
 };
 
 /**
+ * Returns the door that is not the given door
+ * If there is no match to the given door, returns null
+ * @param room The room to match
+ * @returns {*} The other room
+ */
+Door.prototype.otherRoom = function(room) {
+    if (room === this.room1) return this.room2;
+    if (room === this.room2) return this.room1;
+    return null;
+};
+
+/**
  * Returns true if there is enough space to place the given type of door
  * @param current
  * @param door
@@ -386,6 +398,16 @@ OutsideDoor.prototype.calcOverlap = function () {
  */
 OutsideDoor.prototype.delete = function () {
     this.room1.removeDoor(this);
+};
+
+/**
+ * Returns null if the given room has this door, or room1 if it does not
+ * @param room The room to match
+ * @returns {*} null, or room1
+ */
+OutsideDoor.prototype.otherRoom = function(room) {
+    if (room === this.room1) return null;
+    return this.room1;
 };
 
 function addOutsideDoor(edge) {
