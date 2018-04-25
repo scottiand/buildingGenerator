@@ -244,4 +244,22 @@ function lessThan(numA, numB) {
     return (diff < 0);
 }
 
+noisy = false;
+
+function spit(obj) {
+    if (noisy) {
+
+        if (typeof obj.content === 'undefined') {
+            console.log(obj);
+        } else {
+            for (var i = 0; i < obj.length; i++) {
+                console.log(obj.get(i).toString());
+            }
+        }
+
+
+    }
+
+}
+
 

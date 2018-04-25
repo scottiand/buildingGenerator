@@ -4,23 +4,25 @@
 //
 
 var plotSize = 50;
-noisy = false;
+
 /**
  * Represents the floor plan of a building as a series of rooms connected and placed in space.
  * @constructor
  */
-function Building() {
-    this.plot = new Plot(50);
+function Building(buildingType) {
+    this.buildingType = buildingType;
+
+    this.plot = new Plot(buildingType.avgPlotSize);
     this.minPlotPortion = this.plot.area * 0.5; // Calculate this based on density at a later date
     this.maxPlotPortion = this.plot.area * 0.7; // Calculate this based on density at a later date
-    this.plotSnap = 4;
-    this.roomSnap = 8;
-    this.cyclingPrivacy = 50;
-    this.cyclingChance = 40;
+    this.plotSnap = buildingType.plotSnap;
+    this.roomSnap = buildingType.roomSnap;
+    this.cyclingPrivacy = buildingType.cyclingPrivacy;
+    this.cyclingChance = buildingType.cyclingChance;
     this.area = 0;
-    this.roomTypes = [greatRoom,bathroom,bedroom,kitchen,diningRoom]; // Eventually get this from BuildingType
-    this.connectivityRules = [bedBathAndBeyondRule, diningAndKitchenRule]; // Eventually get this from BuildingType
-    this.connectivityRulesUpstairs = [upstairsBedroomRule]; // Eventually get this from BuildingType
+    this.roomTypes = buildingType.roomTypes; // Eventually get this from BuildingType
+    this.connectivityRules = buildingType.connectivityRules; // Eventually get this from BuildingType
+    this.connectivityRulesUpstairs = buildingType.connectivityRulesUpstairs; // Eventually get this from BuildingType
     this.protoRooms = [];
 
     this.floors = [new RoomList()];
@@ -32,9 +34,9 @@ function Building() {
     //this.entry;
     this.doors = [];
     this.draw = true;
-    this.doorSpace = 0.5;
+    this.doorSpace = buildingType.doorSpace;
 
-    this.maxFloors = 2;
+    this.maxFloors = buildingType.maxFloors;
     this.numFloors = 1;
     this.selectedFloor = 1;
 
@@ -442,19 +444,5 @@ Building.prototype.getFloorOutline = function(floor) {
     return this.floorOutlines[floor - 1];
 };
 
-function spit(obj) {
-    if (noisy) {
 
-        if (typeof obj.content === 'undefined') {
-            console.log(obj);
-        } else {
-            for (var i = 0; i < obj.length; i++) {
-                console.log(obj.get(i).toString());
-            }
-        }
-
-
-    }
-
-}
 

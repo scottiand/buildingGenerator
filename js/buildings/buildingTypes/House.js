@@ -1,4 +1,12 @@
 
+function initHouse() {
+    var house = new BuildingType('House', 50, 4, 8, 50, 40, 0.5, 2);
+    house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom);
+    house.addConnectivityRules(bedBathAndBeyondRule, diningAndKitchenRule);
+    house.addConnectivityRulesUpstairs(upstairsBedroomRule);
+    return house;
+}
+
 function bedBathAndBeyondRule(building) {
     var roomList = building.getFloor(1);
     while (roomList.contains("bedroom")) {

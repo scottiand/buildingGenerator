@@ -21,12 +21,12 @@ window.onload = function init() {
     context = canvas.getContext("2d");
     seedEntry = document.getElementById("seedEntry");
     initRoomTypes();
+    initBuildingTypes();
     initRandom(seedEntry.value);
     initDoorTypes();
     initControls();
-
     // Create the first Building, from the default values
-    currentBuilding = new Building();
+    currentBuilding = new Building(house);
 
     // while (!currentBuilding.build()) {
     //    currentBuilding = new Building();

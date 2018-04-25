@@ -14,10 +14,10 @@ function generateButtonOnClick(draw) {
     initRandom(seedEntry.value);
     failures = 0;
     //var success = false;
-    currentBuilding = new Building();
+    currentBuilding = new Building(house);
     currentBuilding.draw = draw;
     while (!currentBuilding.build()) {
-        currentBuilding = new Building();
+        currentBuilding = new Building(house);
         currentBuilding.draw = draw;
         failures++;
         initRandom(Math.random());
