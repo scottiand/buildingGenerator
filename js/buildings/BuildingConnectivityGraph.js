@@ -1,3 +1,6 @@
+
+// GENERATING ROOM LIST
+
 /**
  * Creates a list of rooms to be placed into the building
  */
@@ -7,14 +10,6 @@ Building.prototype.generateRoomList = function () {
     if (this.area > this.maxPlotPortion) {
         this.trimSize();
     }
-};
-
-/**
- * Creates the abstract graph that represents the flow of rooms in the building
- */
-Building.prototype.generateConnectivityGraph = function () {
-    this.performRules(this.connectivityRules);
-    this.connectSubtrees();
 };
 
 /**
@@ -56,6 +51,16 @@ Building.prototype.trimSize = function () {
         }
         i++;
     }
+};
+
+// CREATE CONNECTIVITY GRAPH
+
+/**
+ * Creates the abstract graph that represents the flow of rooms in the building
+ */
+Building.prototype.generateConnectivityGraph = function () {
+    this.performRules(this.connectivityRules);
+    this.connectSubtrees();
 };
 
 /**

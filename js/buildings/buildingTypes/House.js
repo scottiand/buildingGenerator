@@ -4,9 +4,12 @@ function initHouse() {
     house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom);
     house.addConnectivityRules(bedBathAndBeyondRule, diningAndKitchenRule);
     house.addConnectivityRulesUpstairs(upstairsBedroomRule);
+    house.addOutsideDoors = outsideDoorsRuleHouse;
     return house;
 }
 
+
+// CONNECTIVITY RULES
 function bedBathAndBeyondRule(building) {
     var roomList = building.getFloor(1);
     while (roomList.contains("bedroom")) {
@@ -52,6 +55,7 @@ function diningAndKitchenRule(building) {
     }
 }
 
+// UPSTAIRS RULES
 function upstairsBedroomRule(building) {
     //console.log('upstairsBedroomRule');
     var roomList = building.getFloor(building.numFloors - 1);
@@ -83,4 +87,52 @@ function upstairsBedroomRule(building) {
 
     building.push(stairwellTwo);
     building.connectSubtrees(building.numFloors - 1);
+}
+
+// OUTSIDE DOORS RULE
+function outsideDoorsRuleHouse(building, yardList) {
+    if (yardList.length === 1) {
+        outsideDoorsRuleHouseSingleYard(building);
+    } else {
+        outsideDoorsRuleHouseMultipleYards(building, yardList);
+    }
+}
+
+function outsideDoorsRuleHouseSingleYard(building) {
+    var edges = building.getOutsideEdges(1);
+    edges.sort(sortEdgesByRoomPrivacy);
+    if (edges[0].room.purpose === 'wall') edges.splice(0, 1);
+    addOutsideDoor(edges[0]);
+    edges.splice(0,1);
+    if (Math.random() > 0.5) addOutsideDoor(edges[0]);
+}
+
+function outsideDoorsRuleHouseMultipleYards(building, yardList) {
+    for (var i = 0; i < yardList.length; i++) {
+        var yard = yardList[i];
+        var currentLocation = {x: yard.x2, y: yard.y2};
+        var adjacentEdges = [];
+        var edges = building.getOutsideEdges(1);
+        var currentEdge = removeEdge(edges, currentLocation);
+        // console.log("Edges");
+        // console.log(edges.toString());
+        if (currentEdge !== null) {
+            while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
+                if (currentEdge === null) break;
+                if (!(currentEdge.room.purpose === 'wall')) adjacentEdges.push(currentEdge);
+                currentLocation = currentEdge.getOtherPoint(currentLocation);
+                currentEdge = removeEdge(edges, currentLocation);
+
+            }
+            adjacentEdges.sort(sortEdgesByRoomPrivacy);
+            var publicEdges = [adjacentEdges[0]];
+            var count = 1;
+            while (count < adjacentEdges.length && adjacentEdges[0].room.privacy === adjacentEdges[count].room.privacy) {
+                publicEdges.push(adjacentEdges[count]);
+                count++;
+            }
+            var edgeToPlaceDoor = publicEdges[randInt(publicEdges.length)];
+            addOutsideDoor(edgeToPlaceDoor);
+        }
+    }
 }

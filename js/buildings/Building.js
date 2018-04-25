@@ -20,9 +20,15 @@ function Building(buildingType) {
     this.cyclingPrivacy = buildingType.cyclingPrivacy;
     this.cyclingChance = buildingType.cyclingChance;
     this.area = 0;
-    this.roomTypes = buildingType.roomTypes; // Eventually get this from BuildingType
-    this.connectivityRules = buildingType.connectivityRules; // Eventually get this from BuildingType
-    this.connectivityRulesUpstairs = buildingType.connectivityRulesUpstairs; // Eventually get this from BuildingType
+
+    // RULES
+    this.roomTypes = buildingType.roomTypes;
+    this.connectivityRules = buildingType.connectivityRules;
+    this.connectivityRulesUpstairs = buildingType.connectivityRulesUpstairs;
+
+    this.addOutsideDoorsToYards = buildingType.addOutsideDoors;
+
+
     this.protoRooms = [];
 
     this.floors = [new RoomList()];

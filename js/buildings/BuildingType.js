@@ -32,6 +32,9 @@ function BuildingType(name, avgPlotSize, plotSnap, roomSnap, cyclingPrivacy, cyc
     this.roomTypes = [];
     this.connectivityRules = [];
     this.connectivityRulesUpstairs = [];
+    this.addOutsideDoors = function (building, yardList) {
+        // Replace with a function that does something in the init function for this buildingType
+    }
 }
 
 /**

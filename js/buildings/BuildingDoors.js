@@ -37,14 +37,16 @@ Building.prototype.addCycles = function (floor) {
  * If there is only one yard space, we may add a front door and a back door
  */
 Building.prototype.addOutsideDoors = function () {
+    // Get all rooms that are touching an edge
     var roomsTouchingEdge = [];
     for (var i = 0; i < this.allRooms.length; i++) {
         var room = this.allRooms.get(i);
         if (room.touchingSides(this.plot).length > 0) {
             roomsTouchingEdge.push(room);
         }
-    } // Get all rooms that are touching an edge
+    }
 
+    // Get all the uninterrupted lines along the plot on each side
     var northLines = [];
     this.getFreeOuterLines(roomsTouchingEdge, 'north').forEach(function (value) { northLines.push(value.to2DPlotEdge(currentBuilding.plot,'north')) });
     var eastLines = [];
@@ -55,6 +57,8 @@ Building.prototype.addOutsideDoors = function () {
     this.getFreeOuterLines(roomsTouchingEdge, 'west').forEach(function (value) { westLines.push(value.to2DPlotEdge(currentBuilding.plot,'west')) });
 
     var yardList = northLines.concat(eastLines, southLines, westLines);
+
+    // Connect yards at corners
     while (!this.isConnected(yardList) && yardList.length > 1) {
         //console.log('here');
         for (var i = 0; i < yardList.length; i++) {
@@ -66,67 +70,7 @@ Building.prototype.addOutsideDoors = function () {
             }
         }
     }
-    if (yardList.length === 1) {
-        //console.log('true');
-        this.addOutsideDoorsSingleYard();
-    } else {
-        //console.log('false');
-        this.addOutsideDoorsMultipleYards(yardList);
-    }
-};
-
-/**
- * Adds a door to each yard in the yardList
- * The yards in the yardList are represented as a Line2D that marks the points where the yard contacts the house
- * @param yardList
- */
-Building.prototype.addOutsideDoorsMultipleYards = function (yardList) {
-    for (var i = 0; i < yardList.length; i++) {
-        this.addDoorToYard(yardList[i]);
-    }
-};
-
-/**
- * Adds a door to the least private room that contacts the given yard
- * @param yard
- */
-Building.prototype.addDoorToYard = function(yard) {
-    var currentLocation = {x: yard.x2, y: yard.y2};
-    var adjacentEdges = [];
-    var edges = this.getOutsideEdges(1);
-    var currentEdge = removeEdge(edges, currentLocation);
-    // console.log("Edges");
-    // console.log(edges.toString());
-    if (currentEdge !== null) {
-        while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
-            if (currentEdge === null) break;
-            if (!(currentEdge.room.purpose === 'wall')) adjacentEdges.push(currentEdge);
-            currentLocation = currentEdge.getOtherPoint(currentLocation);
-            currentEdge = removeEdge(edges, currentLocation);
-
-        }
-        adjacentEdges.sort(sortEdgesByRoomPrivacy);
-        var publicEdges = [adjacentEdges[0]];
-        var count = 1;
-        while (count < adjacentEdges.length && adjacentEdges[0].room.privacy === adjacentEdges[count].room.privacy) {
-            publicEdges.push(adjacentEdges[count]);
-            count++;
-        }
-        var edgeToPlaceDoor = publicEdges[randInt(publicEdges.length)];
-        addOutsideDoor(edgeToPlaceDoor);
-    }
-};
-
-/**
- * Adds one or two doors to a building with a single yard.
- */
-Building.prototype.addOutsideDoorsSingleYard = function () {
-    var edges = this.getOutsideEdges(1);
-    edges.sort(sortEdgesByRoomPrivacy);
-    if (edges[0].room.purpose === 'wall') edges.splice(0, 1);
-    addOutsideDoor(edges[0]);
-    edges.splice(0,1);
-    if (Math.random() > 0.5) addOutsideDoor(edges[0]);
+    this.addOutsideDoorsToYards(this, yardList);
 };
 
 /**
