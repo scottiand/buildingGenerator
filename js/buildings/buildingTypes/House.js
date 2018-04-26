@@ -5,6 +5,8 @@ function initHouse() {
     house.addConnectivityRules(bedBathAndBeyondRule, diningAndKitchenRule);
     house.addConnectivityRulesUpstairs(upstairsBedroomRule);
     house.addOutsideDoors = outsideDoorsRuleHouse;
+    house.fillSmallGaps = fillGapWithClosets;
+    house.placeFirstRoom = placeFirstRoomHouse;
     return house;
 }
 
@@ -135,4 +137,111 @@ function outsideDoorsRuleHouseMultipleYards(building, yardList) {
             addOutsideDoor(edgeToPlaceDoor);
         }
     }
+}
+
+// FILL GAPS WITH CLOSETS
+function fillGapWithClosets(building, rect, floor) {
+    if (typeof(floor) === "undefined") floor = 1;
+    while (rect.area > 0) {
+        // Create a closet room to put into the gap
+        var newRoom = new Room(new ProtoRoom(closet));
+        newRoom.setLocation(rect.left, rect.top);
+        newRoom.floor = floor;
+        var filledGap = false;
+
+        // If the closet can fill the space, stretch it to fit and move on
+        if (rect.width <= newRoom.proto.maxSize) {
+            newRoom.stretch(rect.right, 'east', true);
+            filledGap = true;
+        } else {
+            rect = new Rectangle(newRoom.right(), rect.top, rect.width - newRoom.width, rect.height);
+        }
+        if (rect.height <= newRoom.proto.maxSize) {
+            newRoom.stretch(rect.bottom, 'south', true);
+            if (filledGap) {
+                rect = new Rectangle(0,0,0,0);
+            }
+        } else {
+            rect = new Rectangle(rect.left, newRoom.bottom(), rect.width, rect.height - newRoom.height);
+        }
+        building.push(newRoom);
+        newRoom.isPlaced = true;
+        // Select an adjacent room and add a door
+        var connectedRooms = newRoom.getContactingRooms(this);
+        var candidates = [];
+        for (var i = 0; i < connectedRooms.length; i++) {
+            var room = connectedRooms[i];
+            var direction = room.getDirectionFrom(newRoom);
+            var overlap = getOverlap(newRoom, room, direction);
+            if (overlap.length >= 3) {
+                var score = 0;
+                if (room.purpose === 'bedroom') score += 10;
+                if (room.purpose === 'kitchen') score += 20;
+                if (room.purpose === 'hallway') score += 20;
+                if (room.purpose === 'storage') score -= 1000;
+                if (room.purpose === 'bathroom') score -= 20;
+                if (hasPurpose(room.adjacent, 'storage')) score -= 50;
+                score -= room.doorCount() * 10;
+                candidates.push({room: room, score: score});
+            }
+        }
+
+        if (candidates.length > 0) {
+
+            candidates.sort(compareScore);
+            candidates.reverse();
+            var choice = candidates[0].room;
+
+            var newDoor = new Door(choice, newRoom,  choice.getDirectionFrom(newRoom));
+
+            if (choice.purpose === 'kitchen' || choice.purpose === 'dining') newRoom.name = 'Pantry';
+            if (purposeCount(choice.adjacent, 'storage') > 0) { // If a room would gain additional closet, expand that room instead
+                //console.log('here');
+                newDoor.expanded = true;
+                newRoom.name = "";
+                newRoom.purpose = choice.purpose;
+                if (!(rect.area === 0)) {
+                    if (rect.width !== newRoom.width) newRoom.stretch(newRoom.getSide('east') + rect.width, 'east',true);
+                    if (rect.height !== newRoom.height) newRoom.stretch(newRoom.getSide('south') + rect.height, 'south',true);
+                    rect = new Rectangle(0,0,0,0);
+                }
+                newDoor.overlap = newDoor.calcOverlap();
+                takeDownWall(newDoor);
+            }
+
+            building.doors.push(newDoor);
+            choice.connect(newRoom);
+
+        }
+
+    }
+}
+
+// PLACE FIRST ROOM
+function placeFirstRoomHouse(building, firstRoom) {
+    var floor = firstRoom.floor;
+    if (floor === 1) {
+        var validPlacement = false;
+        while (!validPlacement) {
+            var XCenter = building.plot.width / 2;
+            var XOffset = randGauss(0, 5) - (firstRoom.width / 2);
+            var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
+            firstRoom.setLocation(XCenter + XOffset, building.plot.height - YOffset);
+            validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
+        }
+    } else {
+        var longList = building.getFloor(floor - 1);
+        //console.log(longList);
+        var shortList = [];
+        for (var i = 0; i < longList.length; i++) {
+            if (longList.get(i).purpose === 'stairwell') shortList.push(longList.get(i));
+        }
+        if (shortList.length > 0) {
+            var stairwell = shortList[0];
+            firstRoom.setLocation(stairwell.locX, stairwell.locY);
+            firstRoom.setSize(stairwell.width, stairwell.height);
+        }
+
+    }
+    firstRoom.isPlaced = true;
 }

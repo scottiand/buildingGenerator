@@ -25,8 +25,9 @@ function Building(buildingType) {
     this.roomTypes = buildingType.roomTypes;
     this.connectivityRules = buildingType.connectivityRules;
     this.connectivityRulesUpstairs = buildingType.connectivityRulesUpstairs;
-
+    this.placeFirstRoom = buildingType.placeFirstRoom;
     this.addOutsideDoorsToYards = buildingType.addOutsideDoors;
+    this.fillSmallGaps = buildingType.fillSmallGaps;
 
 
     this.protoRooms = [];

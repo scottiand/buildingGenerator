@@ -1,40 +1,5 @@
 
 /**
- * Selects a spot for the first room.
- * If this is the first floor, it generates random values.
- * On other floors, this picks the location of a stairwell from the lower floor.
- * @param firstRoom
- * @param floor
- */
-Building.prototype.placeFirstRoom = function (firstRoom) {
-    var floor = firstRoom.floor;
-    if (floor === 1) {
-        var validPlacement = false;
-        while (!validPlacement) {
-            var XCenter = this.plot.width / 2;
-            var XOffset = randGauss(0, 5) - (firstRoom.width / 2);
-            var YOffset = Math.abs(randGauss(0, 10)) + firstRoom.height;
-            firstRoom.setLocation(XCenter + XOffset, this.plot.height - YOffset);
-            validPlacement = (firstRoom.locX >= 0) && (firstRoom.locX <= this.plot.width - firstRoom.width) && (firstRoom.locY >= 0) && (firstRoom.locY <= this.plot.height - firstRoom.height);
-        }
-    } else {
-        var longList = this.getFloor(floor - 1);
-        //console.log(longList);
-        var shortList = [];
-        for (var i = 0; i < longList.length; i++) {
-            if (longList.get(i).purpose === 'stairwell') shortList.push(longList.get(i));
-        }
-        if (shortList.length > 0) {
-            var stairwell = shortList[0];
-            firstRoom.setLocation(stairwell.locX, stairwell.locY);
-            firstRoom.setSize(stairwell.width, stairwell.height);
-        }
-
-    }
-    firstRoom.isPlaced = true;
-};
-
-/**
  * Sets the rooms coordinates within the plot
  */
 Building.prototype.placeRooms = function (floor) {
@@ -46,7 +11,7 @@ Building.prototype.placeRooms = function (floor) {
     // Place the first room
     var firstRoom = roomList.peek();
 
-    this.placeFirstRoom(firstRoom);
+    this.placeFirstRoom(this, firstRoom);
 
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
