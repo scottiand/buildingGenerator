@@ -570,7 +570,13 @@ Room.prototype.doorCount = function(direction) {
  * @returns {*}
  */
 Room.prototype.toString = function () {
-    return this.name + " (" + this.floor + ") x:" + this.locX + " y:" +this.locY + " w:" + this.width + " h:" + this.height;
+    var parentName;
+    if (this.parent === null) {
+        parentName = 'null';
+    } else {
+        parentName = this.parent.name;
+    }
+    return this.name + " (" + this.floor + ") x:" + this.locX + " y:" +this.locY + " w:" + this.width + " h:" + this.height + " parent: " + parentName + "\n";
 };
 
 /**

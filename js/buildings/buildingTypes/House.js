@@ -101,7 +101,8 @@ function upstairsBedroomRule(building) {
     stairwellTwo.connect(choice);
 
     building.push(stairwellTwo);
-    building.connectSubtrees(building.numFloors - 1);
+    building.connectRoom(stairwellOne, building.getAllRooms(building.numFloors - 1));
+    //building.connectSubtrees(building.numFloors - 1);
 }
 
 // OUTSIDE DOORS RULE

@@ -344,20 +344,20 @@ function stairwellRoom(x, y, width, height) {
     return newRoom;
 }
 
-function hallwayToStairwell(hallway) {
-    var newRoom = stairwellRoom(hallway.locX, hallway.locY, hallway.width, hallway.height);
-
-    newRoom.northDoors = hallway.northDoors;
-    newRoom.southDoors = hallway.southDoors;
-    newRoom.eastDoors = hallway.eastDoors;
-    newRoom.westDoors = hallway.westDoors;
-    newRoom.floor = hallway.floor;
-    newRoom.adjacent = hallway.adjacent;
-    newRoom.parent = hallway.parent;
-    newRoom.isPlaced = hallway.isPlaced;
-    console.log(newRoom);
-    return newRoom;
-}
+// function hallwayToStairwell(hallway) {
+//     var newRoom = stairwellRoom(hallway.locX, hallway.locY, hallway.width, hallway.height);
+//
+//     newRoom.northDoors = hallway.northDoors;
+//     newRoom.southDoors = hallway.southDoors;
+//     newRoom.eastDoors = hallway.eastDoors;
+//     newRoom.westDoors = hallway.westDoors;
+//     newRoom.floor = hallway.floor;
+//     newRoom.adjacent = hallway.adjacent;
+//     newRoom.parent = hallway.parent;
+//     newRoom.isPlaced = hallway.isPlaced;
+//     console.log(newRoom);
+//     return newRoom;
+// }
 
 /**
  * A function for comparing rooms based on the number of doors
@@ -373,4 +373,21 @@ function compareNumberOfDoors(a, b) {
         return 1;
     }
     return 0;
+}
+
+/**
+ *
+ * @param room
+ * @param list
+ * @returns {*}
+ */
+function addChildrenToList(room, list) {
+
+    for (var i = 0; i < room.adjacent.length; i++) {
+        var adjRoom = room.adjacent[i];
+        list.push(adjRoom);
+        addChildrenToList(adjRoom, list);
+    }
+
+    return list;
 }

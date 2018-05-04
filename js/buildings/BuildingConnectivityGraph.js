@@ -93,93 +93,62 @@ Building.prototype.generateConnectivityGraph = function () {
 /**
  *  Connects the subtrees based on privacy
  */
-Building.prototype.connectSubtreesOld = function (floor) {
-    if (typeof(floor) === 'undefined') floor = 1;
-    //console.log(floor);
-    var roomList = this.getFloor(floor);
-
-    var toRemove = [];
-
-    roomList.sort(ComparePrivacy);
-    if (floor === 1) this.entry = roomList.peek();
-    //while (roomList.length > 1) {
-        for (var i = 1; i < roomList.length; i++) {
-            var room = roomList.get(i);
-            if (!room.isPlaced) { // Does this actually matter?
-                var toConnect;
-                var lowScore = Infinity;
-                for (var j = 0; j < roomList.length; j++) {
-                    if (j !== i) {
-                        var currentRoom = roomList.get(j);
-                        var score = currentRoom.privacy;
-                        if (room.adjacent.includes(currentRoom)) {
-                            score = Infinity;
-                        } else {
-                            score += currentRoom.adjacent.length * 10;
-                            if (currentRoom.purpose === "hallway") {
-                                score -= 50;
-                            }
-                        }
-                        if (score < lowScore) {
-                            lowScore = score;
-                            toConnect = currentRoom;
-                        }
-                    }
-                }
-                toConnect.connect(room);
-
-                toRemove.push(room);
-                //this.getFloor(floor).remove(this.getFloor(floor).getIndexOf(room));
-            }
-
-        }
-        // for (var i = 0; i < roomList.length; i++) {
-        //     this.getFloor(floor).remove(this.getFloor(floor).getIndexOf(room));
-        // }
-    //}
-};
-
 Building.prototype.connectSubtrees = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
     var roomList = this.getFloor(floor).copy();
+    //console.log(this.getAllRooms(floor).length);
     //console.log(roomList)
     roomList.sort(ComparePrivacy);
-    var finalList = [roomList.peek()];
+    var finalList = new RoomList();
+    finalList.push(roomList.peek());
+    //var finalList = [roomList.peek()];
     finalList = addChildrenToList(roomList.peek(), finalList);
+    //console.log(f);
+    console.log('finalList');
+    console.log(finalList.toString());
+    console.log('roomList before removal');
+    console.log(roomList.toString());
+
     if (floor === 1) this.entry = roomList.peek();
     for (var i = 0; i < finalList.length; i++) {
-        roomList.remove(roomList.getIndexOf(finalList[i]));
+        var toRemove = finalList.get(i);
+        if (roomList.includes(toRemove)) roomList.remove(roomList.getIndexOf(toRemove));
     }
+    console.log('roomList after removal');
+    console.log(roomList.toString());
+    //console.log(finalList.length);
     for (var i = 0; i < roomList.length; i++) {
-        var room = roomList.get(i);
-        var toConnect;
-        var lowScore = Infinity;
-        for (var j = 0; j < finalList.length; j++) {
-            var candidate = finalList[j];
-            var score = candidate.privacy;
-            score += candidate.adjacent.length * 10;
-            if (candidate.purpose === 'hallway') score -= 50;
-            if (score < lowScore) {
-                lowScore = score;
-                toConnect = candidate;
-            }
-        }
-        toConnect.connect(room);
-        finalList.push(toConnect);
-        addChildrenToList(toConnect, finalList);
-    }
 
+        var room = roomList.get(i);
+        this.connectRoom(room, finalList);
+        finalList.push(room);
+        addChildrenToList(room, finalList);
+    }
+    console.log("All Rooms");
+    console.log(this.allRooms.toString());
 
 
 };
 
-function addChildrenToList(room, list) {
 
-    for (var i = 0; i < room.adjacent.length; i++) {
-        var adjRoom = room.adjacent[i];
-        list.push(adjRoom);
-        addChildrenToList(adjRoom, list);
+
+Building.prototype.connectRoom = function(room, possibilities) {
+    //console.log(possibilities);
+    //console.log('connectRoom');
+    //console.log(room);
+    var toConnect;
+    var lowScore = Infinity;
+    for (var i = 0; i < possibilities.length; i++) {
+        var candidate = possibilities.get(i);
+        var score = candidate.privacy;
+        score += candidate.adjacent.length * 10;
+        if (candidate.purpose === 'hallway') score -= 50;
+        if (score < lowScore) {
+            lowScore = score;
+            toConnect = candidate;
+        }
     }
-
-    return list;
-}
+    toConnect.connect(room);
+    console.log(room.parent);
+    return toConnect;
+};

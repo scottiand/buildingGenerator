@@ -45,7 +45,7 @@ function Building(buildingType) {
     this.draw = true;
     this.doorSpace = buildingType.doorSpace;
 
-    this.maxFloors = 1;//buildingType.maxFloors;
+    this.maxFloors = buildingType.maxFloors;
     this.numFloors = 1;
     this.selectedFloor = 1;
 
@@ -452,6 +452,19 @@ Building.prototype.getFloorOutline = function(floor) {
     }
 
     return this.floorOutlines[floor - 1];
+};
+
+Building.prototype.getAllRooms = function(floor) {
+    if (typeof floor === 'undefined') {
+        return this.allRooms;
+    } else {
+        var list = new RoomList();
+        for (var i = 0; i < this.allRooms.length; i++) {
+            var room = this.allRooms.get(i);
+            if (room.floor === floor) list.push(room);
+        }
+        return list;
+    }
 };
 
 
