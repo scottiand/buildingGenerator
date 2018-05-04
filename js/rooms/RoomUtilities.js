@@ -270,6 +270,20 @@ function purposeCount(list, purpose) {
 }
 
 /**
+ * Returns all members of the list with the given purpose
+ * @param list
+ * @param purpose
+ * @returns {Array}
+ */
+function getAllOf(list, purpose) {
+    var toReturn =[];
+    for (var i = 0; i< list.length; i++) {
+        if (list[i].purpose === purpose) toReturn.push(list[i]);
+    }
+    return toReturn;
+}
+
+/**
  * Returns a dummy room not meant to be placed in a house, but instead used for other types of calculations
  * @param x
  * @param y

@@ -4,12 +4,20 @@
  */
 Building.prototype.placeRooms = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
-
     //console.log('placeRooms' + floor);
     var roomList = this.floors[floor - 1];
+    console.log('------------------');
+    console.log(roomList);
     var roomQueue = [];
     // Place the first room
-    var firstRoom = roomList.peek();
+    if (floor === 1) {
+        //console.log('if');
+        firstRoom = this.entry;
+        //console.log(firstRoom);
+    } else {
+        //console.log("else");
+        var firstRoom = roomList.peek();
+    }
 
     this.placeFirstRoom(this, firstRoom);
 
@@ -30,6 +38,7 @@ Building.prototype.placeRooms = function (floor) {
 
         var parent = current.parent;
         if (current.floor === floor && !current.isPlaced) {
+            console.log(current);
             var sides = this.getSideSpace(parent);
             sides.sort(compareArea);
             sides.reverse();
@@ -292,6 +301,7 @@ Building.prototype.getOpenings = function (room, direction) {
 
 
     var parent = room.parent;
+    console.log(room);
     // Return 0 openings if the room would extend outside the plot
     switch (direction) {
         case 'north':

@@ -262,4 +262,17 @@ function spit(obj) {
 
 }
 
+/**
+ * Rule used by a building to determine which RoomTypes to include
+ * @param purpose
+ * @param min
+ * @param max
+ * @constructor
+ */
+function RoomChoiceRule(purpose, min, max) {
+    this.purpose = purpose;
+    this.min = min;
+    this.max = max;
+}
+
 

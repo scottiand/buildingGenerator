@@ -23,6 +23,8 @@ function Building(buildingType) {
 
     // RULES
     this.roomTypes = buildingType.roomTypes;
+    this.roomChoiceRules = buildingType.roomChoiceRules;
+
     this.connectivityRules = buildingType.connectivityRules;
     this.connectivityRulesUpstairs = buildingType.connectivityRulesUpstairs;
     this.placeFirstRoom = buildingType.placeFirstRoom;
@@ -43,7 +45,7 @@ function Building(buildingType) {
     this.draw = true;
     this.doorSpace = buildingType.doorSpace;
 
-    this.maxFloors = buildingType.maxFloors;
+    this.maxFloors = 1;//buildingType.maxFloors;
     this.numFloors = 1;
     this.selectedFloor = 1;
 
@@ -140,6 +142,7 @@ Building.prototype.addFloorOutlineToList = function(list, floor) {
  * @returns {*[]} Areas of available space in each cardinal direction
  */
 Building.prototype.getSideSpace = function(parent) {
+    //console.log(parent);
     var northRect = new Rectangle(0,0, this.plot.width,parent.locY);
     var southRect = new Rectangle(0, parent.bottom(), this.plot.width,this.plot.height - parent.bottom());
     var eastRect = new Rectangle(parent.right(), 0, this.plot.width - parent.right(), this.plot.height);

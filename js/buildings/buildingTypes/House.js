@@ -1,7 +1,20 @@
 
 function initHouse() {
     var house = new BuildingType('House', 50, 4, 8, 50, 40, 0.5, 2);
-    house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom);
+    //house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom);
+    house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom, garage,
+        laundryRoom, familyRoom, livingRoom, mudRoom, foyer, study, office);
+    var roomChoiceRules = [];
+    roomChoiceRules.push(new RoomChoiceRule('lounge', 0, 1));
+    roomChoiceRules.push(new RoomChoiceRule('bathroom', 1, Infinity));
+    roomChoiceRules.push(new RoomChoiceRule('bedroom', 1, Infinity));
+    roomChoiceRules.push(new RoomChoiceRule('kitchen', 1, 1));
+    roomChoiceRules.push(new RoomChoiceRule('dining', 1, 1));
+    //roomChoiceRules.push(new RoomChoiceRule('garage', 0, 1));
+    roomChoiceRules.push(new RoomChoiceRule('laundry', 0, 1));
+    roomChoiceRules.push(new RoomChoiceRule('entrance', 0, 1));
+    roomChoiceRules.push(new RoomChoiceRule('office', 0, 1));
+    house.roomChoiceRules = roomChoiceRules;
     house.addConnectivityRules(bedBathAndBeyondRule, diningAndKitchenRule);
     house.addConnectivityRulesUpstairs(upstairsBedroomRule);
     house.addOutsideDoors = outsideDoorsRuleHouse;

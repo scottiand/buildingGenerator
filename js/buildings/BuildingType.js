@@ -30,6 +30,7 @@ function BuildingType(name, avgPlotSize, plotSnap, roomSnap, cyclingPrivacy, cyc
     this.doorSpace = doorSpace;
     this.maxFloors = maxFloors;
     this.roomTypes = [];
+    this.roomChoiceRules = []; // Use the RoomChoiceRule function
     this.connectivityRules = [];
     this.connectivityRulesUpstairs = [];
     this.addOutsideDoors = function (building, yardList) {
