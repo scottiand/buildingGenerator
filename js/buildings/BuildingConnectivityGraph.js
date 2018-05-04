@@ -16,12 +16,9 @@ Building.prototype.generateRoomList = function () {
  *  Creates ProtoRooms for use in addRoomsToList
  */
 Building.prototype.initializeRoomPrototypes = function () {
-    //console.log('----------------------------------');
     for (var i = 0; i < this.roomChoiceRules.length; i++) {
         var rule = this.roomChoiceRules[i];
-        //console.log(rule);
         var possibilities = getAllOf(this.roomTypes, rule.purpose);
-        //console.log(possibilities);
         var numPos = possibilities.length;
         if (numPos > 0) {
             var max = rule.max;
@@ -29,23 +26,15 @@ Building.prototype.initializeRoomPrototypes = function () {
                 max = numPos;
             }
             var range = (max - rule.min + 1);
-            //console.log(range);
             if (range > 0) {
                 var numChoices = randInt(range) + rule.min;
-                //console.log(numChoices);
                 for (var j = 0; j < numChoices; j++) {
                     var choice = possibilities.splice(randInt(possibilities.length), 1)[0];
-                    //console.log(choice);
                     this.protoRooms.push(new ProtoRoom(choice));
                 }
             }
         }
     }
-
-
-    // for (var i = 0; i < this.roomTypes.length; i++) {
-    //     this.protoRooms.push(new ProtoRoom(this.roomTypes[i]));
-    // }
 };
 
 /**
@@ -57,7 +46,6 @@ Building.prototype.addRoomsToList = function () {
         var room = new Room(this.protoRooms[0]);
         this.push(room);
         this.protoRooms[0].priority += this.protoRooms[0].delay;
-        //this.area += room.area;
     }
 };
 
@@ -130,12 +118,14 @@ Building.prototype.connectSubtrees = function (floor) {
 
 };
 
-
-
+/**
+ * Connects a single room to one of the listed possibilities
+ * Rooms are rated using privacy, number of connections, and if they are a hallway.
+ * @param room
+ * @param possibilities
+ * @returns {*}
+ */
 Building.prototype.connectRoom = function(room, possibilities) {
-    //console.log(possibilities);
-    //console.log('connectRoom');
-    //console.log(room);
     var toConnect;
     var lowScore = Infinity;
     for (var i = 0; i < possibilities.length; i++) {
@@ -149,6 +139,5 @@ Building.prototype.connectRoom = function(room, possibilities) {
         }
     }
     toConnect.connect(room);
-    console.log(room.parent);
     return toConnect;
 };

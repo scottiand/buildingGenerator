@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="414b7317-66a7-4b0c-af61-157a13fbd5f2" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/js/Utilities.js" afterPath="$PROJECT_DIR$/js/Utilities.js" />
       <change beforePath="$PROJECT_DIR$/js/buildings/Building.js" afterPath="$PROJECT_DIR$/js/buildings/Building.js" />
       <change beforePath="$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js" afterPath="$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js" />
-      <change beforePath="$PROJECT_DIR$/js/buildings/BuildingPlaceRooms.js" afterPath="$PROJECT_DIR$/js/buildings/BuildingPlaceRooms.js" />
+      <change beforePath="$PROJECT_DIR$/js/buildings/BuildingType.js" afterPath="$PROJECT_DIR$/js/buildings/BuildingType.js" />
       <change beforePath="$PROJECT_DIR$/js/buildings/buildingTypes/House.js" afterPath="$PROJECT_DIR$/js/buildings/buildingTypes/House.js" />
-      <change beforePath="$PROJECT_DIR$/js/rooms/Room.js" afterPath="$PROJECT_DIR$/js/rooms/Room.js" />
-      <change beforePath="$PROJECT_DIR$/js/rooms/RoomUtilities.js" afterPath="$PROJECT_DIR$/js/rooms/RoomUtilities.js" />
+      <change beforePath="$PROJECT_DIR$/js/doors/Door.js" afterPath="$PROJECT_DIR$/js/doors/Door.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -25,9 +24,81 @@
       <file leaf-file-name="Building.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/buildings/Building.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="129">
-              <caret line="403" column="23" lean-forward="false" selection-start-line="403" selection-start-column="16" selection-end-line="403" selection-end-column="23" />
-              <folding />
+            <state relative-caret-position="495">
+              <caret line="79" column="43" lean-forward="false" selection-start-line="79" selection-start-column="43" selection-end-line="79" selection-end-column="43" />
+              <folding>
+                <element signature="e#2690#2787#0" expanded="false" />
+                <element signature="e#2845#2911#0" expanded="false" />
+                <element signature="e#2914#2995#0" expanded="false" />
+                <element signature="e#3044#3105#0" expanded="false" />
+                <element signature="e#3108#3247#0" expanded="false" />
+                <element signature="e#3313#3698#0" expanded="false" />
+                <element signature="e#3701#3929#0" expanded="false" />
+                <element signature="e#3995#4128#0" expanded="false" />
+                <element signature="e#4131#4372#0" expanded="false" />
+                <element signature="e#4424#5344#0" expanded="false" />
+                <element signature="e#5347#5450#0" expanded="false" />
+                <element signature="e#5501#6978#0" expanded="false" />
+                <element signature="e#6981#7061#0" expanded="false" />
+                <element signature="e#7104#7249#0" expanded="false" />
+                <element signature="e#7252#7376#0" expanded="false" />
+                <element signature="e#7438#7703#0" expanded="false" />
+                <element signature="e#7706#7817#0" expanded="false" />
+                <element signature="e#7900#8301#0" expanded="false" />
+                <element signature="e#8304#8402#0" expanded="false" />
+                <element signature="e#8457#8859#0" expanded="false" />
+                <element signature="e#8862#8992#0" expanded="false" />
+                <element signature="e#9052#9304#0" expanded="false" />
+                <element signature="e#9307#9556#0" expanded="false" />
+                <element signature="e#9613#9865#0" expanded="false" />
+                <element signature="e#9868#10067#0" expanded="false" />
+                <element signature="e#10138#10907#0" expanded="false" />
+                <element signature="e#10910#10985#0" expanded="false" />
+                <element signature="e#11040#11124#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Utilities.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/Utilities.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="625">
+              <caret line="284" column="1" lean-forward="false" selection-start-line="284" selection-start-column="1" selection-end-line="284" selection-end-column="1" />
+              <folding>
+                <element signature="n#!!doc;n#nonZero#0" expanded="false" />
+                <element signature="n#!!block;n#nonZero#0" expanded="false" />
+                <element signature="n#!!doc;n#testRun#0" expanded="false" />
+                <element signature="n#!!block;n#testRun#0" expanded="false" />
+                <element signature="n#!!doc;n#getNextDirection#0" expanded="false" />
+                <element signature="n#!!block;n#getNextDirection#0" expanded="false" />
+                <element signature="n#!!doc;n#getOppositeDirection#0" expanded="false" />
+                <element signature="n#!!block;n#getOppositeDirection#0" expanded="false" />
+                <element signature="n#!!doc;n#vertical#0" expanded="false" />
+                <element signature="n#!!block;n#vertical#0" expanded="false" />
+                <element signature="n#!!doc;n#sortByLocationClockwise#0" expanded="false" />
+                <element signature="n#!!block;n#sortByLocationClockwise#0" expanded="false" />
+                <element signature="n#!!doc;n#compareX#0" expanded="false" />
+                <element signature="n#!!block;n#compareX#0" expanded="false" />
+                <element signature="n#!!doc;n#compareY#0" expanded="false" />
+                <element signature="n#!!block;n#compareY#0" expanded="false" />
+                <element signature="n#!!doc;n#compareScore#0" expanded="false" />
+                <element signature="n#!!block;n#compareScore#0" expanded="false" />
+                <element signature="n#!!doc;n#numericSort#0" expanded="false" />
+                <element signature="n#!!block;n#numericSort#0" expanded="false" />
+                <element signature="n#!!doc;n#nearestRoom#0" expanded="false" />
+                <element signature="n#!!block;n#nearestRoom#0" expanded="false" />
+                <element signature="n#!!doc;n#equals#0" expanded="false" />
+                <element signature="n#!!block;n#equals#0" expanded="false" />
+                <element signature="n#!!block;n#greaterThanEqual#0" expanded="false" />
+                <element signature="n#!!block;n#lessThanEqual#0" expanded="false" />
+                <element signature="n#!!block;n#greaterThan#0" expanded="false" />
+                <element signature="n#!!block;n#lessThan#0" expanded="false" />
+                <element signature="n#!!block;n#spit#0" expanded="false" />
+                <element signature="n#!!doc;n#RoomChoiceRule#0" expanded="false" />
+                <element signature="n#!!block;n#RoomChoiceRule#0" expanded="false" />
+                <element signature="n#!!block;n#queueRooms#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -35,34 +106,38 @@
       <file leaf-file-name="BuildingConnectivityGraph.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="520">
-              <caret line="132" column="0" lean-forward="false" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
+            <state relative-caret-position="105">
+              <caret line="17" column="58" lean-forward="false" selection-start-line="17" selection-start-column="58" selection-end-line="17" selection-end-column="58" />
               <folding>
                 <element signature="e#26#91#0" expanded="false" />
+                <element signature="e#142#283#0" expanded="false" />
                 <element signature="e#286#342#0" expanded="false" />
-                <element signature="e#1530#1639#0" expanded="false" />
-                <element signature="e#1688#1963#0" expanded="false" />
-                <element signature="e#1966#2028#0" expanded="false" />
-                <element signature="e#2071#2549#0" expanded="false" />
-                <element signature="e#2582#2669#0" expanded="false" />
-                <element signature="e#2729#2807#0" expanded="false" />
-                <element signature="e#2810#2860#0" expanded="false" />
-                <element signature="e#2915#4118#0" expanded="false" />
-                <element signature="e#4186#4769#0" expanded="false" />
+                <element signature="e#401#1148#0" expanded="false" />
+                <element signature="e#1151#1260#0" expanded="false" />
+                <element signature="e#1309#1550#0" expanded="false" />
+                <element signature="e#1553#1615#0" expanded="false" />
+                <element signature="e#1658#2136#0" expanded="false" />
+                <element signature="e#2169#2256#0" expanded="false" />
+                <element signature="e#2316#2394#0" expanded="false" />
+                <element signature="e#2397#2447#0" expanded="false" />
+                <element signature="e#2502#3705#0" expanded="false" />
+                <element signature="e#3708#3915#0" expanded="false" />
+                <element signature="e#3979#4439#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RoomUtilities.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="RoomUtilities.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/rooms/RoomUtilities.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="870">
+            <state relative-caret-position="750">
               <caret line="345" column="0" lean-forward="true" selection-start-line="345" selection-start-column="0" selection-end-line="345" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc;n#ComparePrivacy#0" expanded="false" />
                 <element signature="n#!!block;n#ComparePrivacy#0" expanded="false" />
                 <element signature="n#!!doc;n#compareTotalArea#0" expanded="false" />
+                <element signature="n#!!block;n#compareTotalArea#0" expanded="false" />
                 <element signature="n#!!doc;n#compareArea#0" expanded="false" />
                 <element signature="n#!!block;n#compareArea#0" expanded="false" />
                 <element signature="n#!!doc;n#comparePriority#0" expanded="false" />
@@ -105,8 +180,8 @@
       <file leaf-file-name="Room.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/rooms/Room.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="325">
-              <caret line="571" column="38" lean-forward="false" selection-start-line="571" selection-start-column="38" selection-end-line="571" selection-end-column="38" />
+            <state relative-caret-position="163">
+              <caret line="329" column="0" lean-forward="false" selection-start-line="329" selection-start-column="0" selection-end-line="329" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc;n#drawRoom#0" expanded="false" />
                 <element signature="n#!!block;n#drawRoom#0" expanded="false" />
@@ -117,6 +192,8 @@
                 <element signature="e#5707#5816#0" expanded="false" />
                 <element signature="e#5951#6073#0" expanded="false" />
                 <element signature="e#6163#6395#0" expanded="false" />
+                <element signature="e#10193#10290#0" expanded="false" />
+                <element signature="e#10337#10940#0" expanded="false" />
                 <element signature="e#17910#18082#0" expanded="false" />
                 <element signature="e#18130#18383#0" expanded="false" />
                 <element signature="e#18386#18456#0" expanded="false" />
@@ -159,60 +236,40 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RoomList.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/rooms/RoomList.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="555">
-              <caret line="40" column="16" lean-forward="false" selection-start-line="40" selection-start-column="16" selection-end-line="40" selection-end-column="16" />
-              <folding>
-                <element signature="e#796#893#0" expanded="false" />
-                <element signature="e#943#1100#0" expanded="false" />
-                <element signature="e#1103#1202#0" expanded="false" />
-                <element signature="e#1252#1454#0" expanded="false" />
-                <element signature="e#1457#1547#0" expanded="false" />
-                <element signature="e#1593#1693#0" expanded="false" />
-                <element signature="e#1696#1807#0" expanded="false" />
-                <element signature="e#1860#2102#0" expanded="false" />
-                <element signature="e#2105#2210#0" expanded="false" />
-                <element signature="e#2262#2443#0" expanded="false" />
-                <element signature="e#2446#2553#0" expanded="false" />
-                <element signature="e#2612#3053#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="BuildingType.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/buildings/BuildingType.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="32" column="65" lean-forward="false" selection-start-line="32" selection-start-column="65" selection-end-line="32" selection-end-column="65" />
+            <state relative-caret-position="554">
+              <caret line="65" column="0" lean-forward="false" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc;n#initBuildingTypes#0" expanded="false" />
                 <element signature="n#!!doc;n#BuildingType#0" expanded="false" />
-                <element signature="e#1235#1287#0" expanded="false" />
-                <element signature="e#1337#1422#0" expanded="false" />
-                <element signature="e#1425#1485#0" expanded="false" />
-                <element signature="e#1543#1636#0" expanded="false" />
-                <element signature="e#1639#1708#0" expanded="false" />
-                <element signature="e#1774#1875#0" expanded="false" />
+                <element signature="e#1261#1313#0" expanded="false" />
+                <element signature="e#1363#1448#0" expanded="false" />
+                <element signature="e#1451#1511#0" expanded="false" />
+                <element signature="e#1569#1662#0" expanded="false" />
+                <element signature="e#1665#1734#0" expanded="false" />
+                <element signature="e#1800#1901#0" expanded="false" />
+                <element signature="e#1904#1958#0" expanded="false" />
+                <element signature="e#2009#2095#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="House.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="House.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/buildings/buildingTypes/House.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="960">
-              <caret line="105" column="0" lean-forward="false" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
+            <state relative-caret-position="330">
+              <caret line="22" column="24" lean-forward="false" selection-start-line="22" selection-start-column="24" selection-end-line="22" selection-end-column="24" />
               <folding>
                 <element signature="n#!!block;n#bedBathAndBeyondRule#0" expanded="false" />
                 <element signature="n#!!block;n#diningAndKitchenRule#0" expanded="false" />
+                <element signature="n#!!block;n#upstairsBedroomRule#0" expanded="false" />
                 <element signature="n#!!block;n#outsideDoorsRuleHouse#0" expanded="false" />
                 <element signature="n#!!block;n#outsideDoorsRuleHouseSingleYard#0" expanded="false" />
                 <element signature="n#!!block;n#outsideDoorsRuleHouseMultipleYards#0" expanded="false" />
-                <element signature="e#4865#6081#0" expanded="false" />
+                <element signature="e#4904#6120#0" expanded="false" />
                 <element signature="n#!!block;n#fillGapWithClosets#0" expanded="false" />
                 <element signature="n#!!block;n#placeFirstRoomHouse#0" expanded="false" />
               </folding>
@@ -220,12 +277,42 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/index.html">
+      <file leaf-file-name="RoomType.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/rooms/RoomType.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="31" column="74" lean-forward="false" selection-start-line="31" selection-start-column="74" selection-end-line="31" selection-end-column="74" />
+            <state relative-caret-position="149">
+              <caret line="23" column="19" lean-forward="false" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Door.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/doors/Door.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="652">
+              <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="412" selection-end-column="0" />
+              <folding>
+                <element signature="n#!!doc;n#OutsideDoor#0" expanded="false" />
+                <element signature="e#9356#9434#0" expanded="false" />
+                <element signature="e#9482#10019#0" expanded="false" />
+                <element signature="e#10022#10137#0" expanded="false" />
+                <element signature="e#10210#10673#0" expanded="false" />
+                <element signature="e#10676#10728#0" expanded="false" />
+                <element signature="e#10775#10811#0" expanded="false" />
+                <element signature="e#10814#10864#0" expanded="false" />
+                <element signature="e#10910#10944#0" expanded="false" />
+                <element signature="e#10947#11013#0" expanded="false" />
+                <element signature="e#11056#11077#0" expanded="false" />
+                <element signature="e#11080#11191#0" expanded="false" />
+                <element signature="e#11240#11275#0" expanded="false" />
+                <element signature="e#11278#11339#0" expanded="false" />
+                <element signature="e#11383#11419#0" expanded="false" />
+                <element signature="e#11422#11566#0" expanded="false" />
+                <element signature="e#11616#11684#0" expanded="false" />
+                <element signature="n#!!doc;n#addOutsideDoor#0" expanded="false" />
+                <element signature="n#!!block;n#addOutsideDoor#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -282,7 +369,6 @@
         <option value="$PROJECT_DIR$/js/BuildingRandom.js" />
         <option value="$PROJECT_DIR$/js/Geometry.js" />
         <option value="$PROJECT_DIR$/js/rooms/RoomList.js" />
-        <option value="$PROJECT_DIR$/js/doors/Door.js" />
         <option value="$PROJECT_DIR$/js/buildings/buildingTypes/BuildingPlaceRooms.js" />
         <option value="$PROJECT_DIR$/js/buildings/BuildingSnap.js" />
         <option value="$PROJECT_DIR$/js/eventHandlers.js" />
@@ -292,14 +378,15 @@
         <option value="$PROJECT_DIR$/js/buildings/BuildingGaps.js" />
         <option value="$PROJECT_DIR$/js/rooms/RoomType.js" />
         <option value="$PROJECT_DIR$/js/RoomChoiceRule.js" />
-        <option value="$PROJECT_DIR$/js/buildings/BuildingType.js" />
-        <option value="$PROJECT_DIR$/js/Utilities.js" />
-        <option value="$PROJECT_DIR$/js/buildings/buildingTypes/House.js" />
-        <option value="$PROJECT_DIR$/js/buildings/Building.js" />
         <option value="$PROJECT_DIR$/js/buildings/BuildingPlaceRooms.js" />
         <option value="$PROJECT_DIR$/js/rooms/Room.js" />
-        <option value="$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js" />
         <option value="$PROJECT_DIR$/js/rooms/RoomUtilities.js" />
+        <option value="$PROJECT_DIR$/js/buildings/BuildingType.js" />
+        <option value="$PROJECT_DIR$/js/Utilities.js" />
+        <option value="$PROJECT_DIR$/js/buildings/Building.js" />
+        <option value="$PROJECT_DIR$/js/doors/Door.js" />
+        <option value="$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js" />
+        <option value="$PROJECT_DIR$/js/buildings/buildingTypes/House.js" />
       </list>
     </option>
   </component>
@@ -311,7 +398,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="924" />
+    <option name="width" value="1230" />
     <option name="height" value="777" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -453,18 +540,18 @@
       <workItem from="1525124989019" duration="3011000" />
       <workItem from="1525130211256" duration="78000" />
       <workItem from="1525296873821" duration="9294000" />
-      <workItem from="1525468857532" duration="1229000" />
+      <workItem from="1525468857532" duration="2808000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="468023000" />
+    <option name="totallyTimeSpent" value="469602000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="924" height="777" extended-state="0" />
+    <frame x="0" y="23" width="1230" height="777" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28246754" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21219513" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39311334" sideWeight="0.50358975" order="7" side_tool="true" content_ui="tabs" />
@@ -494,13 +581,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/js/buildings/buildingTypes/House.js</url>
-          <line>76</line>
-          <option name="timeStamp" value="232" />
-        </line-breakpoint>
-      </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
@@ -509,7 +589,7 @@
           <properties />
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="236" />
+      <option name="time" value="237" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JavascriptDebugType">
@@ -613,7 +693,36 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="22" column="3" lean-forward="false" selection-start-line="22" selection-start-column="3" selection-end-line="22" selection-end-column="3" />
-          <folding />
+          <folding>
+            <element signature="e#2690#2787#0" expanded="false" />
+            <element signature="e#2845#2911#0" expanded="false" />
+            <element signature="e#2914#2995#0" expanded="false" />
+            <element signature="e#3044#3105#0" expanded="false" />
+            <element signature="e#3108#3247#0" expanded="false" />
+            <element signature="e#3313#3698#0" expanded="false" />
+            <element signature="e#3701#3929#0" expanded="false" />
+            <element signature="e#3995#4128#0" expanded="false" />
+            <element signature="e#4131#4372#0" expanded="false" />
+            <element signature="e#4424#5344#0" expanded="false" />
+            <element signature="e#5347#5450#0" expanded="false" />
+            <element signature="e#5501#6978#0" expanded="false" />
+            <element signature="e#6981#7061#0" expanded="false" />
+            <element signature="e#7104#7249#0" expanded="false" />
+            <element signature="e#7252#7376#0" expanded="false" />
+            <element signature="e#7438#7703#0" expanded="false" />
+            <element signature="e#7706#7817#0" expanded="false" />
+            <element signature="e#7900#8301#0" expanded="false" />
+            <element signature="e#8304#8402#0" expanded="false" />
+            <element signature="e#8457#8859#0" expanded="false" />
+            <element signature="e#8862#8992#0" expanded="false" />
+            <element signature="e#9052#9304#0" expanded="false" />
+            <element signature="e#9307#9556#0" expanded="false" />
+            <element signature="e#9613#9865#0" expanded="false" />
+            <element signature="e#9868#10067#0" expanded="false" />
+            <element signature="e#10138#10907#0" expanded="false" />
+            <element signature="e#10910#10985#0" expanded="false" />
+            <element signature="e#11040#11124#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -628,7 +737,36 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="495">
           <caret line="36" column="46" lean-forward="false" selection-start-line="36" selection-start-column="46" selection-end-line="36" selection-end-column="46" />
-          <folding />
+          <folding>
+            <element signature="e#2690#2787#0" expanded="false" />
+            <element signature="e#2845#2911#0" expanded="false" />
+            <element signature="e#2914#2995#0" expanded="false" />
+            <element signature="e#3044#3105#0" expanded="false" />
+            <element signature="e#3108#3247#0" expanded="false" />
+            <element signature="e#3313#3698#0" expanded="false" />
+            <element signature="e#3701#3929#0" expanded="false" />
+            <element signature="e#3995#4128#0" expanded="false" />
+            <element signature="e#4131#4372#0" expanded="false" />
+            <element signature="e#4424#5344#0" expanded="false" />
+            <element signature="e#5347#5450#0" expanded="false" />
+            <element signature="e#5501#6978#0" expanded="false" />
+            <element signature="e#6981#7061#0" expanded="false" />
+            <element signature="e#7104#7249#0" expanded="false" />
+            <element signature="e#7252#7376#0" expanded="false" />
+            <element signature="e#7438#7703#0" expanded="false" />
+            <element signature="e#7706#7817#0" expanded="false" />
+            <element signature="e#7900#8301#0" expanded="false" />
+            <element signature="e#8304#8402#0" expanded="false" />
+            <element signature="e#8457#8859#0" expanded="false" />
+            <element signature="e#8862#8992#0" expanded="false" />
+            <element signature="e#9052#9304#0" expanded="false" />
+            <element signature="e#9307#9556#0" expanded="false" />
+            <element signature="e#9613#9865#0" expanded="false" />
+            <element signature="e#9868#10067#0" expanded="false" />
+            <element signature="e#10138#10907#0" expanded="false" />
+            <element signature="e#10910#10985#0" expanded="false" />
+            <element signature="e#11040#11124#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -672,7 +810,36 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="465">
           <caret line="34" column="34" lean-forward="false" selection-start-line="34" selection-start-column="34" selection-end-line="34" selection-end-column="34" />
-          <folding />
+          <folding>
+            <element signature="e#2690#2787#0" expanded="false" />
+            <element signature="e#2845#2911#0" expanded="false" />
+            <element signature="e#2914#2995#0" expanded="false" />
+            <element signature="e#3044#3105#0" expanded="false" />
+            <element signature="e#3108#3247#0" expanded="false" />
+            <element signature="e#3313#3698#0" expanded="false" />
+            <element signature="e#3701#3929#0" expanded="false" />
+            <element signature="e#3995#4128#0" expanded="false" />
+            <element signature="e#4131#4372#0" expanded="false" />
+            <element signature="e#4424#5344#0" expanded="false" />
+            <element signature="e#5347#5450#0" expanded="false" />
+            <element signature="e#5501#6978#0" expanded="false" />
+            <element signature="e#6981#7061#0" expanded="false" />
+            <element signature="e#7104#7249#0" expanded="false" />
+            <element signature="e#7252#7376#0" expanded="false" />
+            <element signature="e#7438#7703#0" expanded="false" />
+            <element signature="e#7706#7817#0" expanded="false" />
+            <element signature="e#7900#8301#0" expanded="false" />
+            <element signature="e#8304#8402#0" expanded="false" />
+            <element signature="e#8457#8859#0" expanded="false" />
+            <element signature="e#8862#8992#0" expanded="false" />
+            <element signature="e#9052#9304#0" expanded="false" />
+            <element signature="e#9307#9556#0" expanded="false" />
+            <element signature="e#9613#9865#0" expanded="false" />
+            <element signature="e#9868#10067#0" expanded="false" />
+            <element signature="e#10138#10907#0" expanded="false" />
+            <element signature="e#10910#10985#0" expanded="false" />
+            <element signature="e#11040#11124#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -787,13 +954,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/doors/Door.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="271">
-          <caret line="402" column="0" lean-forward="false" selection-start-line="402" selection-start-column="0" selection-end-line="402" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/buildings/BuildingSnap.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -833,10 +993,67 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/RoomChoiceRule.js" />
+    <entry file="file://$PROJECT_DIR$/js/BuildingRandom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="72" column="32" lean-forward="false" selection-start-line="72" selection-start-column="32" selection-end-line="72" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" column="74" lean-forward="false" selection-start-line="31" selection-start-column="74" selection-end-line="31" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/rooms/RoomList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="555">
+          <caret line="40" column="16" lean-forward="false" selection-start-line="40" selection-start-column="16" selection-end-line="40" selection-end-column="16" />
+          <folding>
+            <element signature="e#796#893#0" expanded="false" />
+            <element signature="e#943#1100#0" expanded="false" />
+            <element signature="e#1103#1202#0" expanded="false" />
+            <element signature="e#1252#1454#0" expanded="false" />
+            <element signature="e#1457#1547#0" expanded="false" />
+            <element signature="e#1593#1693#0" expanded="false" />
+            <element signature="e#1696#1807#0" expanded="false" />
+            <element signature="e#1860#2102#0" expanded="false" />
+            <element signature="e#2105#2210#0" expanded="false" />
+            <element signature="e#2262#2443#0" expanded="false" />
+            <element signature="e#2446#2553#0" expanded="false" />
+            <element signature="e#2612#3053#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/buildings/BuildingPlaceRooms.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="570">
+          <caret line="40" column="14" lean-forward="false" selection-start-line="40" selection-start-column="14" selection-end-line="40" selection-end-column="14" />
+          <folding>
+            <element signature="e#1#54#0" expanded="false" />
+            <element signature="e#4284#4513#0" expanded="false" />
+            <element signature="e#5396#5640#0" expanded="false" />
+            <element signature="e#5699#7331#0" expanded="false" />
+            <element signature="e#7334#7631#0" expanded="false" />
+            <element signature="e#7709#8051#0" expanded="false" />
+            <element signature="e#8054#8266#0" expanded="false" />
+            <element signature="e#8327#9752#0" expanded="false" />
+            <element signature="e#8424#9197#0" expanded="false" />
+            <element signature="e#9755#10018#0" expanded="false" />
+            <element signature="e#10084#11825#0" expanded="false" />
+            <element signature="e#11828#12070#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/Utilities.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="795">
-          <caret line="275" column="1" lean-forward="false" selection-start-line="275" selection-start-column="1" selection-end-line="275" selection-end-column="1" />
+        <state relative-caret-position="625">
+          <caret line="284" column="1" lean-forward="false" selection-start-line="284" selection-start-column="1" selection-end-line="284" selection-end-column="1" />
           <folding>
             <element signature="n#!!doc;n#nonZero#0" expanded="false" />
             <element signature="n#!!block;n#nonZero#0" expanded="false" />
@@ -869,113 +1086,52 @@
             <element signature="n#!!block;n#spit#0" expanded="false" />
             <element signature="n#!!doc;n#RoomChoiceRule#0" expanded="false" />
             <element signature="n#!!block;n#RoomChoiceRule#0" expanded="false" />
+            <element signature="n#!!block;n#queueRooms#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/BuildingRandom.js">
+    <entry file="file://$PROJECT_DIR$/js/buildings/Building.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="72" column="32" lean-forward="false" selection-start-line="72" selection-start-column="32" selection-end-line="72" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="31" column="74" lean-forward="false" selection-start-line="31" selection-start-column="74" selection-end-line="31" selection-end-column="74" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/buildings/BuildingType.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="32" column="65" lean-forward="false" selection-start-line="32" selection-start-column="65" selection-end-line="32" selection-end-column="65" />
+        <state relative-caret-position="495">
+          <caret line="79" column="43" lean-forward="false" selection-start-line="79" selection-start-column="43" selection-end-line="79" selection-end-column="43" />
           <folding>
-            <element signature="n#!!doc;n#initBuildingTypes#0" expanded="false" />
-            <element signature="n#!!doc;n#BuildingType#0" expanded="false" />
-            <element signature="e#1235#1287#0" expanded="false" />
-            <element signature="e#1337#1422#0" expanded="false" />
-            <element signature="e#1425#1485#0" expanded="false" />
-            <element signature="e#1543#1636#0" expanded="false" />
-            <element signature="e#1639#1708#0" expanded="false" />
-            <element signature="e#1774#1875#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/rooms/RoomType.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="23" column="19" lean-forward="false" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/rooms/RoomList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="555">
-          <caret line="40" column="16" lean-forward="false" selection-start-line="40" selection-start-column="16" selection-end-line="40" selection-end-column="16" />
-          <folding>
-            <element signature="e#796#893#0" expanded="false" />
-            <element signature="e#943#1100#0" expanded="false" />
-            <element signature="e#1103#1202#0" expanded="false" />
-            <element signature="e#1252#1454#0" expanded="false" />
-            <element signature="e#1457#1547#0" expanded="false" />
-            <element signature="e#1593#1693#0" expanded="false" />
-            <element signature="e#1696#1807#0" expanded="false" />
-            <element signature="e#1860#2102#0" expanded="false" />
-            <element signature="e#2105#2210#0" expanded="false" />
-            <element signature="e#2262#2443#0" expanded="false" />
-            <element signature="e#2446#2553#0" expanded="false" />
-            <element signature="e#2612#3053#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/buildings/buildingTypes/House.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="960">
-          <caret line="105" column="0" lean-forward="false" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!block;n#bedBathAndBeyondRule#0" expanded="false" />
-            <element signature="n#!!block;n#diningAndKitchenRule#0" expanded="false" />
-            <element signature="n#!!block;n#outsideDoorsRuleHouse#0" expanded="false" />
-            <element signature="n#!!block;n#outsideDoorsRuleHouseSingleYard#0" expanded="false" />
-            <element signature="n#!!block;n#outsideDoorsRuleHouseMultipleYards#0" expanded="false" />
-            <element signature="e#4865#6081#0" expanded="false" />
-            <element signature="n#!!block;n#fillGapWithClosets#0" expanded="false" />
-            <element signature="n#!!block;n#placeFirstRoomHouse#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/buildings/BuildingPlaceRooms.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="40" column="14" lean-forward="false" selection-start-line="40" selection-start-column="14" selection-end-line="40" selection-end-column="14" />
-          <folding>
-            <element signature="e#1#54#0" expanded="false" />
-            <element signature="e#4284#4513#0" expanded="false" />
-            <element signature="e#5396#5640#0" expanded="false" />
-            <element signature="e#5699#7331#0" expanded="false" />
-            <element signature="e#7334#7631#0" expanded="false" />
-            <element signature="e#7709#8051#0" expanded="false" />
-            <element signature="e#8054#8266#0" expanded="false" />
-            <element signature="e#8327#9752#0" expanded="false" />
-            <element signature="e#8424#9197#0" expanded="false" />
-            <element signature="e#9755#10018#0" expanded="false" />
-            <element signature="e#10084#11825#0" expanded="false" />
-            <element signature="e#11828#12070#0" expanded="false" />
+            <element signature="e#2690#2787#0" expanded="false" />
+            <element signature="e#2845#2911#0" expanded="false" />
+            <element signature="e#2914#2995#0" expanded="false" />
+            <element signature="e#3044#3105#0" expanded="false" />
+            <element signature="e#3108#3247#0" expanded="false" />
+            <element signature="e#3313#3698#0" expanded="false" />
+            <element signature="e#3701#3929#0" expanded="false" />
+            <element signature="e#3995#4128#0" expanded="false" />
+            <element signature="e#4131#4372#0" expanded="false" />
+            <element signature="e#4424#5344#0" expanded="false" />
+            <element signature="e#5347#5450#0" expanded="false" />
+            <element signature="e#5501#6978#0" expanded="false" />
+            <element signature="e#6981#7061#0" expanded="false" />
+            <element signature="e#7104#7249#0" expanded="false" />
+            <element signature="e#7252#7376#0" expanded="false" />
+            <element signature="e#7438#7703#0" expanded="false" />
+            <element signature="e#7706#7817#0" expanded="false" />
+            <element signature="e#7900#8301#0" expanded="false" />
+            <element signature="e#8304#8402#0" expanded="false" />
+            <element signature="e#8457#8859#0" expanded="false" />
+            <element signature="e#8862#8992#0" expanded="false" />
+            <element signature="e#9052#9304#0" expanded="false" />
+            <element signature="e#9307#9556#0" expanded="false" />
+            <element signature="e#9613#9865#0" expanded="false" />
+            <element signature="e#9868#10067#0" expanded="false" />
+            <element signature="e#10138#10907#0" expanded="false" />
+            <element signature="e#10910#10985#0" expanded="false" />
+            <element signature="e#11040#11124#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/rooms/Room.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="325">
-          <caret line="571" column="38" lean-forward="false" selection-start-line="571" selection-start-column="38" selection-end-line="571" selection-end-column="38" />
+        <state relative-caret-position="163">
+          <caret line="329" column="0" lean-forward="false" selection-start-line="329" selection-start-column="0" selection-end-line="329" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc;n#drawRoom#0" expanded="false" />
             <element signature="n#!!block;n#drawRoom#0" expanded="false" />
@@ -986,6 +1142,8 @@
             <element signature="e#5707#5816#0" expanded="false" />
             <element signature="e#5951#6073#0" expanded="false" />
             <element signature="e#6163#6395#0" expanded="false" />
+            <element signature="e#10193#10290#0" expanded="false" />
+            <element signature="e#10337#10940#0" expanded="false" />
             <element signature="e#17910#18082#0" expanded="false" />
             <element signature="e#18130#18383#0" expanded="false" />
             <element signature="e#18386#18456#0" expanded="false" />
@@ -1004,42 +1162,70 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/buildings/Building.js">
+    <entry file="file://$PROJECT_DIR$/js/doors/Door.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="403" column="23" lean-forward="false" selection-start-line="403" selection-start-column="16" selection-end-line="403" selection-end-column="23" />
+        <state relative-caret-position="652">
+          <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="412" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc;n#OutsideDoor#0" expanded="false" />
+            <element signature="e#9356#9434#0" expanded="false" />
+            <element signature="e#9482#10019#0" expanded="false" />
+            <element signature="e#10022#10137#0" expanded="false" />
+            <element signature="e#10210#10673#0" expanded="false" />
+            <element signature="e#10676#10728#0" expanded="false" />
+            <element signature="e#10775#10811#0" expanded="false" />
+            <element signature="e#10814#10864#0" expanded="false" />
+            <element signature="e#10910#10944#0" expanded="false" />
+            <element signature="e#10947#11013#0" expanded="false" />
+            <element signature="e#11056#11077#0" expanded="false" />
+            <element signature="e#11080#11191#0" expanded="false" />
+            <element signature="e#11240#11275#0" expanded="false" />
+            <element signature="e#11278#11339#0" expanded="false" />
+            <element signature="e#11383#11419#0" expanded="false" />
+            <element signature="e#11422#11566#0" expanded="false" />
+            <element signature="e#11616#11684#0" expanded="false" />
+            <element signature="n#!!doc;n#addOutsideDoor#0" expanded="false" />
+            <element signature="n#!!block;n#addOutsideDoor#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/rooms/RoomType.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="149">
+          <caret line="23" column="19" lean-forward="false" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js">
+    <entry file="file://$PROJECT_DIR$/js/buildings/BuildingType.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="520">
-          <caret line="132" column="0" lean-forward="false" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
+        <state relative-caret-position="554">
+          <caret line="65" column="0" lean-forward="false" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
           <folding>
-            <element signature="e#26#91#0" expanded="false" />
-            <element signature="e#286#342#0" expanded="false" />
-            <element signature="e#1530#1639#0" expanded="false" />
-            <element signature="e#1688#1963#0" expanded="false" />
-            <element signature="e#1966#2028#0" expanded="false" />
-            <element signature="e#2071#2549#0" expanded="false" />
-            <element signature="e#2582#2669#0" expanded="false" />
-            <element signature="e#2729#2807#0" expanded="false" />
-            <element signature="e#2810#2860#0" expanded="false" />
-            <element signature="e#2915#4118#0" expanded="false" />
-            <element signature="e#4186#4769#0" expanded="false" />
+            <element signature="n#!!doc;n#initBuildingTypes#0" expanded="false" />
+            <element signature="n#!!doc;n#BuildingType#0" expanded="false" />
+            <element signature="e#1261#1313#0" expanded="false" />
+            <element signature="e#1363#1448#0" expanded="false" />
+            <element signature="e#1451#1511#0" expanded="false" />
+            <element signature="e#1569#1662#0" expanded="false" />
+            <element signature="e#1665#1734#0" expanded="false" />
+            <element signature="e#1800#1901#0" expanded="false" />
+            <element signature="e#1904#1958#0" expanded="false" />
+            <element signature="e#2009#2095#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/rooms/RoomUtilities.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
+        <state relative-caret-position="750">
           <caret line="345" column="0" lean-forward="true" selection-start-line="345" selection-start-column="0" selection-end-line="345" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc;n#ComparePrivacy#0" expanded="false" />
             <element signature="n#!!block;n#ComparePrivacy#0" expanded="false" />
             <element signature="n#!!doc;n#compareTotalArea#0" expanded="false" />
+            <element signature="n#!!block;n#compareTotalArea#0" expanded="false" />
             <element signature="n#!!doc;n#compareArea#0" expanded="false" />
             <element signature="n#!!block;n#compareArea#0" expanded="false" />
             <element signature="n#!!doc;n#comparePriority#0" expanded="false" />
@@ -1074,6 +1260,47 @@
             <element signature="n#!!block;n#compareNumberOfDoors#0" expanded="false" />
             <element signature="n#!!doc;n#addChildrenToList#0" expanded="false" />
             <element signature="n#!!block;n#addChildrenToList#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/buildings/BuildingConnectivityGraph.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="17" column="58" lean-forward="false" selection-start-line="17" selection-start-column="58" selection-end-line="17" selection-end-column="58" />
+          <folding>
+            <element signature="e#26#91#0" expanded="false" />
+            <element signature="e#142#283#0" expanded="false" />
+            <element signature="e#286#342#0" expanded="false" />
+            <element signature="e#401#1148#0" expanded="false" />
+            <element signature="e#1151#1260#0" expanded="false" />
+            <element signature="e#1309#1550#0" expanded="false" />
+            <element signature="e#1553#1615#0" expanded="false" />
+            <element signature="e#1658#2136#0" expanded="false" />
+            <element signature="e#2169#2256#0" expanded="false" />
+            <element signature="e#2316#2394#0" expanded="false" />
+            <element signature="e#2397#2447#0" expanded="false" />
+            <element signature="e#2502#3705#0" expanded="false" />
+            <element signature="e#3708#3915#0" expanded="false" />
+            <element signature="e#3979#4439#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/buildings/buildingTypes/House.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="24" lean-forward="false" selection-start-line="22" selection-start-column="24" selection-end-line="22" selection-end-column="24" />
+          <folding>
+            <element signature="n#!!block;n#bedBathAndBeyondRule#0" expanded="false" />
+            <element signature="n#!!block;n#diningAndKitchenRule#0" expanded="false" />
+            <element signature="n#!!block;n#upstairsBedroomRule#0" expanded="false" />
+            <element signature="n#!!block;n#outsideDoorsRuleHouse#0" expanded="false" />
+            <element signature="n#!!block;n#outsideDoorsRuleHouseSingleYard#0" expanded="false" />
+            <element signature="n#!!block;n#outsideDoorsRuleHouseMultipleYards#0" expanded="false" />
+            <element signature="e#4904#6120#0" expanded="false" />
+            <element signature="n#!!block;n#fillGapWithClosets#0" expanded="false" />
+            <element signature="n#!!block;n#placeFirstRoomHouse#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -275,4 +275,13 @@ function RoomChoiceRule(purpose, min, max) {
     this.max = max;
 }
 
+function queueRooms(room, list) {
+    for (var i = 0; i < room.adjacent.length; i++) {
+        var toPlace = room.adjacent[i];
+        if (!toPlace.isPlaced) {
+            list.push(toPlace);
+        }
+    }
+}
+
 

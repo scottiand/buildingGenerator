@@ -30,7 +30,7 @@ function Building(buildingType) {
     this.placeFirstRoom = buildingType.placeFirstRoom;
     this.addOutsideDoorsToYards = buildingType.addOutsideDoors;
     this.fillSmallGaps = buildingType.fillSmallGaps;
-
+    this.finalRules = buildingType.finalRules;
 
     this.protoRooms = [];
 
@@ -77,8 +77,7 @@ Building.prototype.build = function () {
         this.addOutsideDoors();
         //console.log('Doors added');
         this.expandDoors();
-        //console.log('Doors Expanded');
-        //console.log(this.roomList.toString());
+        this.performRules(this.finalRules);
         if (this.draw) this.drawRooms(context);
         return true;
     }
@@ -158,15 +157,6 @@ Building.prototype.getSideSpace = function(parent) {
     }
     return [{direction: "north", area: northRect.area},{direction: "south", area: southRect.area},{direction: "east", area: eastRect.area},{direction: "west", area: westRect.area}];
 };
-
-function queueRooms(room, list) {
-    for (var i = 0; i < room.adjacent.length; i++) {
-        var toPlace = room.adjacent[i];
-        if (!toPlace.isPlaced) {
-            list.push(toPlace);
-        }
-    }
-}
 
 /**
  * Draws the room in the given context

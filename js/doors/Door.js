@@ -410,6 +410,10 @@ OutsideDoor.prototype.otherRoom = function(room) {
     return this.room1;
 };
 
+/**
+ * Adds an OutsideDoor to the given edge
+ * @param edge
+ */
 function addOutsideDoor(edge) {
     var room = edge.room;
     //console.log(room);

@@ -39,6 +39,7 @@ function BuildingType(name, avgPlotSize, plotSnap, roomSnap, cyclingPrivacy, cyc
     this.fillSmallGaps = function (building, rect, floor) {
         // Replace with a function that does something in the init function for this buildingType
     };
+    this.finalRules = [];
 }
 
 /**
@@ -60,4 +61,11 @@ BuildingType.prototype.addConnectivityRules = function() {
  */
 BuildingType.prototype.addConnectivityRulesUpstairs = function() {
     for (var i = 0; i < arguments.length; i++) this.connectivityRulesUpstairs.push(arguments[i]);
+};
+
+/**
+ * Adds given functions to the finalRules list
+ */
+BuildingType.prototype.addFinalRules = function() {
+    for (var i = 0; i < arguments.length; i++) this.finalRules.push(arguments[i]);
 };

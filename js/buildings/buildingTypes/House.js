@@ -20,6 +20,7 @@ function initHouse() {
     house.addOutsideDoors = outsideDoorsRuleHouse;
     house.fillSmallGaps = fillGapWithClosets;
     house.placeFirstRoom = placeFirstRoomHouse;
+    house.addFinalRules(entranceRule);
     return house;
 }
 
@@ -258,4 +259,23 @@ function placeFirstRoomHouse(building, firstRoom) {
 
     }
     firstRoom.isPlaced = true;
+}
+
+// FINAL RULES
+function entranceRule(building) {
+    for (var i = 0; i < building.allRooms.length; i++) {
+        var room = building.allRooms.get(i);
+        if (room.purpose === 'entrance') {
+            var doors = room.getDoors();
+            console.log(doors);
+            var hasOutsideDoor = false;
+            for (var j = 0; j < doors.length; j++) {
+                if (doors[j].room2 === null) hasOutsideDoor = true;
+            }
+            if (!hasOutsideDoor) {
+                room.name = "Hallway";
+                room.purpose = "Hallway";
+            }
+        }
+    }
 }
