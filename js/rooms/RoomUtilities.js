@@ -1,73 +1,11 @@
-/**
- * A function for comparing based on privacy for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
+/*
+These are function that are helpful in the manipulation of Rooms
  */
-function ComparePrivacy(a, b) {
-    if (a.privacy < b.privacy) {
-        return -1;
-    }
-    if (a.privacy > b.privacy) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on the total area of a room and it's descendants for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function compareTotalArea(a, b) {
-    if (a.totalArea < b.totalArea) {
-        return -1;
-    }
-    if (a.totalArea > b.totalArea) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on area for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function compareArea(a, b) {
-    if (a.area < b.area) {
-        return -1;
-    }
-    if (a.area > b.area) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on priority for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function comparePriority(a, b) {
-    if (a.priority < b.priority) {
-        return -1;
-    }
-    if (a.priority > b.priority) {
-        return 1;
-    }
-    return 0;
-}
 
 /**
  * Returns a line that represents the overlap between the two rooms in the given direction
+ * That is, for North or South, the horizontal overlap is returned
+ * for East or West, the vertical overlap is returned
  * @param room1
  * @param room2
  * @param direction
@@ -101,7 +39,7 @@ function getOverlap(room1, room2, direction) {
  * From a given list of doors, returns the door that is farthest in the given direction
  * @param doorList
  * @param direction
- * @returns {*}
+ * @returns {Door}
  */
 function getMaxDoor(doorList, direction) {
     var maxDoor;
@@ -157,7 +95,6 @@ function sortByGivenSide(list, direction) {
     switch (direction) {
         case 'north':
             list.sort(compareLocY);
-            //list.reverse();
             break;
         case 'south':
             list.sort(compareBottom);
@@ -167,79 +104,10 @@ function sortByGivenSide(list, direction) {
             break;
         case 'west':
             list.sort(compareLocX);
-            //list.reverse();
             break;
         default:
             throw("invalid direction: " + direction);
     }
-}
-
-/**
- * A function for comparing based on locX for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function compareLocX(a, b) {
-    if (a.locX < b.locX) {
-        return -1;
-    }
-    if (a.locX > b.locX) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on locY for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function compareLocY(a, b) {
-    if (a.locY < b.locY) {
-        return -1;
-    }
-    if (a.locY > b.locY) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on right() for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function compareRight(a, b) {
-    if (a.right() < b.right()) {
-        return -1;
-    }
-    if (a.right() > b.right()) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on bottom() for sorting
- * @param a
- * @param b
- * @returns {number}
- * @constructor
- */
-function compareBottom(a, b) {
-    if (a.bottom() < b.bottom()) {
-        return -1;
-    }
-    if (a.bottom() > b.bottom()) {
-        return 1;
-    }
-    return 0;
 }
 
 /**
@@ -284,11 +152,14 @@ function getAllOf(list, purpose) {
 }
 
 /**
- * Returns a dummy room not meant to be placed in a house, but instead used for other types of calculations
+ * Returns a dummy room with the given size and locations
+ * Dummy rooms do not represent real rooms in the house,
+ * but can be useful for making certain calculation, or for adding in filler space (such as with the wallRoom function)
  * @param x
  * @param y
  * @param width
  * @param height
+ * @param floor
  * @returns {Room}
  */
 function dummyRoom(x, y, width, height, floor) {
@@ -306,6 +177,7 @@ function dummyRoom(x, y, width, height, floor) {
  * @param y
  * @param width
  * @param height
+ * @param floor
  * @returns {Room}
  */
 function wallRoom(x, y, width, height, floor) {
@@ -340,24 +212,156 @@ function stairwellRoom(x, y, width, height) {
         newRoom.setLocation(x, y);
         newRoom.setSize(width, height);
     }
-    // Make stairs and edit draw function
     return newRoom;
 }
 
-// function hallwayToStairwell(hallway) {
-//     var newRoom = stairwellRoom(hallway.locX, hallway.locY, hallway.width, hallway.height);
-//
-//     newRoom.northDoors = hallway.northDoors;
-//     newRoom.southDoors = hallway.southDoors;
-//     newRoom.eastDoors = hallway.eastDoors;
-//     newRoom.westDoors = hallway.westDoors;
-//     newRoom.floor = hallway.floor;
-//     newRoom.adjacent = hallway.adjacent;
-//     newRoom.parent = hallway.parent;
-//     newRoom.isPlaced = hallway.isPlaced;
-//     console.log(newRoom);
-//     return newRoom;
-// }
+/**
+ * Adds all of the descendants of the given room to the given list
+ * @param room
+ * @param list
+ * @returns {Array}
+ */
+function addChildrenToList(room, list) {
+    for (var i = 0; i < room.adjacent.length; i++) {
+        var adjRoom = room.adjacent[i];
+        list.push(adjRoom);
+        addChildrenToList(adjRoom, list);
+    }
+    return list;
+}
+
+/*
+COMPARISON FUNCTIONS
+Used for array.sort(func)
+ */
+
+/**
+ * A function for comparing based on privacy for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function comparePrivacy(a, b) {
+    if (a.privacy < b.privacy) {
+        return -1;
+    }
+    if (a.privacy > b.privacy) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on the total area of a room and it's descendants for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareTotalArea(a, b) {
+    if (a.totalArea < b.totalArea) {
+        return -1;
+    }
+    if (a.totalArea > b.totalArea) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on area for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareArea(a, b) {
+    if (a.area < b.area) {
+        return -1;
+    }
+    if (a.area > b.area) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on priority for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function comparePriority(a, b) {
+    if (a.priority < b.priority) {
+        return -1;
+    }
+    if (a.priority > b.priority) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on locX for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareLocX(a, b) {
+    if (a.locX < b.locX) {
+        return -1;
+    }
+    if (a.locX > b.locX) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on locY for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareLocY(a, b) {
+    if (a.locY < b.locY) {
+        return -1;
+    }
+    if (a.locY > b.locY) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on right() for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareRight(a, b) {
+    if (a.right() < b.right()) {
+        return -1;
+    }
+    if (a.right() > b.right()) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on bottom() for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareBottom(a, b) {
+    if (a.bottom() < b.bottom()) {
+        return -1;
+    }
+    if (a.bottom() > b.bottom()) {
+        return 1;
+    }
+    return 0;
+}
 
 /**
  * A function for comparing rooms based on the number of doors
@@ -373,21 +377,4 @@ function compareNumberOfDoors(a, b) {
         return 1;
     }
     return 0;
-}
-
-/**
- *
- * @param room
- * @param list
- * @returns {*}
- */
-function addChildrenToList(room, list) {
-
-    for (var i = 0; i < room.adjacent.length; i++) {
-        var adjRoom = room.adjacent[i];
-        list.push(adjRoom);
-        addChildrenToList(adjRoom, list);
-    }
-
-    return list;
 }

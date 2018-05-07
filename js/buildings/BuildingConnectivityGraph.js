@@ -1,5 +1,10 @@
+/*
+Building.prototype functions that deal with the creation of the connectivity graph
+ */
 
-// GENERATING ROOM LIST
+/*
+GENERATING THE ROOM LIST
+ */
 
 /**
  * Creates a list of rooms to be placed into the building
@@ -54,7 +59,7 @@ Building.prototype.addRoomsToList = function () {
  */
 Building.prototype.trimSize = function () {
     var i = 0;
-    this.allRooms.sort(ComparePrivacy);
+    this.allRooms.sort(comparePrivacy);
     while (this.area > this.maxPlotPortion) {
         this.area = 0;
         for (var roomNum = 0; roomNum < this.allRooms.length; roomNum++) {
@@ -68,7 +73,9 @@ Building.prototype.trimSize = function () {
     }
 };
 
-// CREATE CONNECTIVITY GRAPH
+/*
+ CREATING THE CONNECTIVITY GRAPH
+ */
 
 /**
  * Creates the abstract graph that represents the flow of rooms in the building
@@ -84,38 +91,21 @@ Building.prototype.generateConnectivityGraph = function () {
 Building.prototype.connectSubtrees = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
     var roomList = this.getFloor(floor).copy();
-    //console.log(this.getAllRooms(floor).length);
-    //console.log(roomList)
-    roomList.sort(ComparePrivacy);
+    roomList.sort(comparePrivacy);
     var finalList = new RoomList();
     finalList.push(roomList.peek());
-    //var finalList = [roomList.peek()];
     finalList = addChildrenToList(roomList.peek(), finalList);
-    //console.log(f);
-    console.log('finalList');
-    console.log(finalList.toString());
-    console.log('roomList before removal');
-    console.log(roomList.toString());
-
     if (floor === 1) this.entry = roomList.peek();
     for (var i = 0; i < finalList.length; i++) {
         var toRemove = finalList.get(i);
         if (roomList.includes(toRemove)) roomList.remove(roomList.getIndexOf(toRemove));
     }
-    console.log('roomList after removal');
-    console.log(roomList.toString());
-    //console.log(finalList.length);
     for (var i = 0; i < roomList.length; i++) {
-
         var room = roomList.get(i);
         this.connectRoom(room, finalList);
         finalList.push(room);
         addChildrenToList(room, finalList);
     }
-    console.log("All Rooms");
-    console.log(this.allRooms.toString());
-
-
 };
 
 /**
@@ -123,7 +113,7 @@ Building.prototype.connectSubtrees = function (floor) {
  * Rooms are rated using privacy, number of connections, and if they are a hallway.
  * @param room
  * @param possibilities
- * @returns {*}
+ * @returns {Room}
  */
 Building.prototype.connectRoom = function(room, possibilities) {
     var toConnect;

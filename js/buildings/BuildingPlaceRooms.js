@@ -1,26 +1,21 @@
+/*
+Building.prototype functions that deal with placing rooms on the plot
+ */
 
 /**
  * Sets the rooms coordinates within the plot
  */
 Building.prototype.placeRooms = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
-    //console.log('placeRooms' + floor);
     var roomList = this.floors[floor - 1];
-    //console.log('------------------');
-    //console.log(roomList);
     var roomQueue = [];
     // Place the first room
     if (floor === 1) {
-        //console.log('if');
         firstRoom = this.entry;
-        //console.log(firstRoom);
     } else {
-        //console.log("else");
         var firstRoom = roomList.peek();
     }
-
     this.placeFirstRoom(this, firstRoom);
-
     queueRooms(firstRoom, roomQueue);
     var usedRooms = roomQueue.slice();
     usedRooms.push(firstRoom);
@@ -35,15 +30,12 @@ Building.prototype.placeRooms = function (floor) {
     spit(' before while loop in placeRooms')
     while (roomQueue.length !== 0) {
         var current = roomQueue.shift();
-
         var parent = current.parent;
         if (current.floor === floor && !current.isPlaced) {
-            //console.log(current);
             var sides = this.getSideSpace(parent);
             sides.sort(compareArea);
             sides.reverse();
             for (var i = 0; i < sides.length; i++) {
-
                 if (this.placeRoom(current, sides[i].direction)) break;
                 current.rotate();
                 if (this.placeRoom(current, sides[i].direction)) break;
@@ -83,7 +75,6 @@ Building.prototype.placeRooms = function (floor) {
             }
             if (typeof current === 'undefined') break;
             usedRooms.push(current);
-            //current.isPlaced = true;
             var children = current.adjacent.slice();
             for (var i = 0; i < usedRooms.length; i++) {
                 if (children.includes(usedRooms[i])) {
@@ -107,33 +98,16 @@ Building.prototype.placeRooms = function (floor) {
             this.allRooms.remove(this.allRooms.getIndexOf(this.allRooms.get(i)));
         }
     }
-    //spit(this.allRooms);
     spit(' before fillGaps');
     this.fillGaps(floor);
     spit(' before addCycles');
     this.addCycles(floor);
-    spit(' after addCycles');
-
-    // for (var i = 0; i < this.allRooms.length; i++) {
-    //     if ((!this.allRooms.get(i).isPlaced || lessThan(this.allRooms.get(i).locX, 0)) && this.allRooms.get(i).floor === floor) {
-    //         this.allRooms.remove(this.allRooms.getIndexOf(this.allRooms.get(i)));
-    //     }
-    // }
-
     if (this.numFloors > floor) {
         var list = this.getFloorOutline(floor);
-
         this.floorOutlines[floor - 1] = list;
-        // for (var i = 0; i < this.floorOutlines[floor].length; i++) {
-        //     this.floorOutlines[floor].get(i).draw(context);
-        // }
-
         var success = this.placeRooms(floor + 1);
-
-        //console.log(success);
         return success;
     }
-
     return true;
 };
 
@@ -145,7 +119,6 @@ Building.prototype.placeRooms = function (floor) {
  */
 Building.prototype.placeRoom = function (room, direction) {
     var openings = this.getOpenings(room, direction);
-
     // If there are no openings, the room cannot be placed on this side
     if (openings.length === 0) return false;
     var opening = openings[randInt(openings.length)];
@@ -173,7 +146,6 @@ Building.prototype.placeRoom = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    //console.log('placement calculated');
     if (isNaN(placeX) || isNaN(placeY) || this.intersection(new Rectangle(placeX, placeY, room.width, room.height), room.floor)) {
         return false;
     }
@@ -191,7 +163,8 @@ Building.prototype.placeRoom = function (room, direction) {
  * Chooses a random location within the given opening for the given side length
  * @param opening The opening (Line1D) that is being used
  * @param sideLength The size of the relevant side of the room being placed
- * @returns {*} The random location of the room within the given parameters
+ * @param parentSide A Line1D representing the relevant side of the parent room
+ * @returns {number} The random location of the room within the given parameters
  */
 Building.prototype.getPlacement = function (opening, sideLength, parentSide) {
     var availableSpace = new Line1D(opening.start, opening.end);
@@ -233,9 +206,7 @@ Building.prototype.getObstacles = function(room, direction) {
             throw("invalid direction: " + direction);
     }
     var relevantRooms = this.getRoomsOnFloor(room.floor);
-    //console.log(room.floor);
     relevantRooms = this.addFloorOutlineToList(relevantRooms, room.floor);
-
     for (var i = 0; i < relevantRooms.length; i++) {
         var current = relevantRooms[i];
         if (current.intersection(range, room.floor) > 0) {
@@ -298,11 +269,7 @@ Building.prototype.collapseObstacles= function (list, direction) {
  * @returns {Array} All sufficient openings
  */
 Building.prototype.getOpenings = function (room, direction) {
-
-
     var parent = room.parent;
-    //console.log(room);
-    //console.log(parent);
     // Return 0 openings if the room would extend outside the plot
     switch (direction) {
         case 'north':

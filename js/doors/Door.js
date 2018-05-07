@@ -1,9 +1,13 @@
-// Scotti Anderson
-// Door
-// A door between two rooms
+/*
+Doors provide connections between rooms
+ */
 
+// How likely a wall is to be removed when possible
 var CHANCE_TO_REMOVE_WALL = 20;
-var MIN_PRIVACY_TO_REMOVE_WALL = 50;
+
+/*
+INSIDE DOORS
+ */
 
 /**
  * Creates a door between two rooms, in the given direction
@@ -22,9 +26,7 @@ function Door(room1, room2, direction) {
     this.privacy = Math.max(this.room1.privacy, this.room2.privacy);
     this.overlap;
     this.removalChance = CHANCE_TO_REMOVE_WALL;
-
     this.setLocation();
-
     this.doorTypes = [smallDoor, singleDoor, doubleDoor];
     this.doorType = smallDoor;
     this.expanded = false;
@@ -37,7 +39,6 @@ function Door(room1, room2, direction) {
 Door.prototype.setLocation = function() {
     var overlap = this.calcOverlap();
     var spot = (overlap.start + overlap.end) / 2;
-    if (overlap.start > overlap.end) {console.log("Ohhhhh nooooooo")}
     if (greaterThanEqual(overlap.length, 3) && lessThanEqual(overlap.length, 4)) {
         placement = spot;
         this.setExactLocation(placement, this.direction);
@@ -60,6 +61,10 @@ Door.prototype.setLocation = function() {
     }
 };
 
+/**
+ * Adds the door the the door lists of its rooms
+ * @param direction
+ */
 Door.prototype.addDoorToRooms = function(direction) {
     switch (direction) {
         case 'north':
@@ -140,7 +145,7 @@ Door.prototype.draw = function(context) {
 
 /**
  * Returns the endpoint of the door (right or bottom side, depending on the orientation)
- * @returns {*}
+ * @returns {number}
  */
 Door.prototype.end = function () {
     switch (this.direction) {
@@ -159,14 +164,14 @@ Door.prototype.end = function () {
  * Returns the point that the door ends at
  */
 Door.prototype.endPoint = function () {
-    return DoorEndPoint(this);
+    return doorEndPoint(this);
 };
 
 /**
  * Returns the point that the door starts at
  */
 Door.prototype.startPoint = function() {
-    return DoorStartPoint(this);
+    return doorStartPoint(this);
 };
 
 /**
@@ -180,51 +185,27 @@ Door.prototype.expand = function () {
  * Returns the door that is not the given door
  * If there is no match to the given door, returns null
  * @param room The room to match
- * @returns {*} The other room
+ * @returns {Room} The other room
  */
 Door.prototype.otherRoom = function(room) {
     if (room === this.room1) return this.room2;
     if (room === this.room2) return this.room1;
     return null;
 };
-
-/**
- * Returns true if there is enough space to place the given type of door
- * @param current
- * @param door
- * @returns {boolean}
- */
-function doorFits(current, door) {
-    var halfSize = current.size / 2;
-    var placement;
-    switch (door.direction) {
-        case 'north':
-        case 'south':
-            placement = door.x;
-            break;
-        case 'east':
-        case 'west':
-            placement = door.y;
-            break;
-        default:
-            throw("invalid direction: " + door.direction);
-    }
-    var overlap = door.overlap;
-    var extraSpace = Math.min(placement - overlap.start, overlap.end - placement) - 0.5;
-    return halfSize <= extraSpace;
-}
-
 /**
  * Calculates the shared space between the
  * @returns {Line1D}
  */
 Door.prototype.calcOverlap = function() {
-    //console.log(currentBuilding.allRooms);
     return getOverlap(this.room1, this.room2, this.direction);
 };
 
+/**
+ * Returns a string representation of this door
+ * @returns {string}
+ */
 Door.prototype.toString = function () {
-    return this.size;
+    return this.size + "";
 };
 
 /**
@@ -239,65 +220,9 @@ Door.prototype.delete = function() {
     if (adj2.includes(this.room1) && this.room2.isPlaced) adj2.splice(adj2.indexOf(this.room1), 1);
 };
 
-/**
- * Takes a default door and randomly assigns a door from the door's DoorType list
- * Can also eliminate walls in less private areas
- * @param door
+/*
+OUTSIDE DOORS
  */
-function expand(door) {
-    if (door.expanded) return;
-    door.overlap = door.calcOverlap();
-    if (percentChance(door.removalChance) && door.privacy <= 50) {
-        takeDownWall(door);
-        return;
-    }
-    var validDoors = [];
-    for (var i = 0; i < door.doorTypes.length; i++) {
-        var current = door.doorTypes[i];
-        if (current.privacy >= door.privacy && doorFits(current, door)) validDoors.push(current);
-    }
-    if (validDoors.length > 0) {
-        door.doorType = validDoors[randInt(validDoors.length)];
-        //console.log(door.doorType);
-        door.size = door.doorType.size;
-    }
-
-    door.expanded = true;
-}
-
-/**
- * Sets the door's length to the total overlap between the two rooms.
- * @param door
- */
-function takeDownWall(door) {
-    door.size = door.overlap.length;
-    door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
-}
-
-function DoorEndPoint(door) {
-    switch (door.direction) {
-        case 'north':
-        case 'south':
-            return {x: door.x + (door.size / 2), y: door.y};
-        case 'east':
-        case 'west':
-            return {x: door.x, y: door.y + (door.size / 2)};
-        default:
-            throw("invalid direction: " + door.direction);
-    }
-}
-function DoorStartPoint(door) {
-    switch (door.direction) {
-        case 'north':
-        case 'south':
-            return {x: door.x - (door.size / 2), y: door.y};
-        case 'east':
-        case 'west':
-            return {x: door.x, y: door.y - (door.size / 2)};
-        default:
-            throw("invalid direction: " + door.direction);
-    }
-}
 
 /**
  * Creates a new door to the outside at on the given side of the given room
@@ -360,7 +285,6 @@ OutsideDoor.prototype.setExactLocation = function(placement, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    //console.log(this);
     this.room1.addDoor(this, direction);
 };
 
@@ -368,14 +292,14 @@ OutsideDoor.prototype.setExactLocation = function(placement, direction) {
  * Returns the point that the door starts at
  */
 OutsideDoor.prototype.startPoint = function() {
-    return DoorStartPoint(this);
+    return doorStartPoint(this);
 };
 
 /**
  * Returns the point that the door ends at
  */
 OutsideDoor.prototype.endPoint = function () {
-    return DoorEndPoint(this);
+    return doorEndPoint(this);
 };
 
 /**
@@ -387,10 +311,10 @@ OutsideDoor.prototype.expand = function() {
 
 /**
  * Returns a Line1D that represents the available space on the outside edge of the room
- * @returns {*}
+ * @returns {Line1D}
  */
 OutsideDoor.prototype.calcOverlap = function () {
-  return this.edge.getLine1D();
+    return this.edge.getLine1D();
 };
 
 /**
@@ -403,7 +327,7 @@ OutsideDoor.prototype.delete = function () {
 /**
  * Returns null if the given room has this door, or room1 if it does not
  * @param room The room to match
- * @returns {*} null, or room1
+ * @returns {Room} null, or room1
  */
 OutsideDoor.prototype.otherRoom = function(room) {
     if (room === this.room1) return null;
@@ -416,10 +340,105 @@ OutsideDoor.prototype.otherRoom = function(room) {
  */
 function addOutsideDoor(edge) {
     var room = edge.room;
-    //console.log(room);
     var direction = getOppositeDirection(edge.directionOfRoom);
-    //console.log('1');
     currentBuilding.doors.push(new OutsideDoor(room, edge, direction));
-    //console.log('2');
+}
 
+/*
+GENERIC DOOR FUNCTIONS
+ */
+
+/**
+ * Returns true if there is enough space to place the given type of door
+ * @param current
+ * @param door
+ * @returns {boolean}
+ */
+function doorFits(current, door) {
+    var halfSize = current.size / 2;
+    var placement;
+    switch (door.direction) {
+        case 'north':
+        case 'south':
+            placement = door.x;
+            break;
+        case 'east':
+        case 'west':
+            placement = door.y;
+            break;
+        default:
+            throw("invalid direction: " + door.direction);
+    }
+    var overlap = door.overlap;
+    var extraSpace = Math.min(placement - overlap.start, overlap.end - placement) - 0.5;
+    return halfSize <= extraSpace;
+}
+
+/**
+ * Takes a default door and randomly assigns a door from the door's DoorType list
+ * Can also eliminate walls in less private areas
+ * @param door
+ */
+function expand(door) {
+    if (door.expanded) return;
+    door.overlap = door.calcOverlap();
+    if (percentChance(door.removalChance) && door.privacy <= 50) {
+        takeDownWall(door);
+        return;
+    }
+    var validDoors = [];
+    for (var i = 0; i < door.doorTypes.length; i++) {
+        var current = door.doorTypes[i];
+        if (current.privacy >= door.privacy && doorFits(current, door)) validDoors.push(current);
+    }
+    if (validDoors.length > 0) {
+        door.doorType = validDoors[randInt(validDoors.length)];
+        door.size = door.doorType.size;
+    }
+    door.expanded = true;
+}
+
+/**
+ * Sets the door's length to the total overlap between the two rooms.
+ * @param door
+ */
+function takeDownWall(door) {
+    door.size = door.overlap.length;
+    door.setExactLocation((door.overlap.start + door.overlap.end) / 2, door.direction);
+}
+
+/**
+ * Returns the end point (rightmost or bottommost point) of the door
+ * @param door
+ * @returns {number}
+ */
+function doorEndPoint(door) {
+    switch (door.direction) {
+        case 'north':
+        case 'south':
+            return {x: door.x + (door.size / 2), y: door.y};
+        case 'east':
+        case 'west':
+            return {x: door.x, y: door.y + (door.size / 2)};
+        default:
+            throw("invalid direction: " + door.direction);
+    }
+}
+
+/**
+ * Returns the start point (leftmost or topmost point) of the door
+ * @param door
+ * @returns {number}
+ */
+function doorStartPoint(door) {
+    switch (door.direction) {
+        case 'north':
+        case 'south':
+            return {x: door.x - (door.size / 2), y: door.y};
+        case 'east':
+        case 'west':
+            return {x: door.x, y: door.y - (door.size / 2)};
+        default:
+            throw("invalid direction: " + door.direction);
+    }
 }

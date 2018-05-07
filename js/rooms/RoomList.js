@@ -1,22 +1,26 @@
-// Scotti Anderson
-// RoomList
-// Wrapper for arrays that contains special function for extracting values
-//
+/*
+RoomList
+The RoomList is a list that contains functions for extracting certain values based on room purpose
+ */
 
+/**
+ * The RoomList is a list that contains functions for extracting certain values based on room purpose
+ * @constructor
+ */
 function RoomList() {
     this.content = [];
     this.length = this.content.length;
 }
 
 /**
- * Resets the length variable
+ * Sets length equal to the length of the content
  */
 RoomList.prototype.resetLength = function () {
     this.length = this.content.length;
 };
 
 /**
- * Pushes item into the list. Item should be a Room
+ * Pushes item into this.content. Item should be a Room
  * @param item
  */
 RoomList.prototype.push = function (item) {
@@ -27,7 +31,7 @@ RoomList.prototype.push = function (item) {
 /**
  *  Returns the Room at the given index
  * @param index
- * @returns {*}
+ * @returns {Room}
  */
 RoomList.prototype.get = function (index) {
     return this.content[index];
@@ -35,7 +39,7 @@ RoomList.prototype.get = function (index) {
 
 /**
  * Returns the first Room (at index 0)
- * @returns {*}
+ * @returns {Room}
  */
 RoomList.prototype.peek = function () {
     return this.content[0];
@@ -73,7 +77,7 @@ RoomList.prototype.getAllOf = function (purpose) {
 /**
  * Removes and returns the Room at the given index
  * @param index
- * @returns {*}
+ * @returns {Room}
  */
 RoomList.prototype.remove = function (index) {
     var toReturn = this.content.splice(index,1)[0];
@@ -117,7 +121,7 @@ RoomList.prototype.countAllOf = function (purpose) {
  * Returns [number] Rooms with the given purpose
  * @param purpose
  * @param number
- * @returns {*}
+ * @returns {Array}
  */
 RoomList.prototype.getSomeOf = function (purpose, number) {
     var toReturn = [];
@@ -141,7 +145,7 @@ RoomList.prototype.getSomeOf = function (purpose, number) {
 /**
  * Returns the first Room with the given purpose
  * @param purpose
- * @returns {*}
+ * @returns {Room}
  */
 RoomList.prototype.getFirstOf = function(purpose) {
     for (var i = 0; i < this.length; i++) {
@@ -180,7 +184,7 @@ RoomList.prototype.removeSomeOf = function (purpose, number) {
 
 /**
  * Removes the first Room with the given purpose
- * @param purpose The purpose of room to remove
+ * @param purpose
  */
 RoomList.prototype.removeFirstOf = function (purpose) {
     for (var i = 0; i < this.length; i++) {
@@ -208,6 +212,7 @@ RoomList.prototype.reverse = function () {
 
 /**
  * Returns a copy of this roomList
+ * @returns {RoomList}
  */
 RoomList.prototype.copy = function() {
     var list = new RoomList();
@@ -219,6 +224,7 @@ RoomList.prototype.copy = function() {
 /**
  * Returns the index of the given room
  * @param room
+ * @returns {number}
  */
 RoomList.prototype.getIndexOf = function (room) {
     return this.content.indexOf(room);
@@ -232,18 +238,28 @@ RoomList.prototype.toString = function() {
   return this.content.toString();
 };
 
+/**
+ * Return true if this.content contains the given Room
+ * @param room
+ * @returns {boolean}
+ */
 RoomList.prototype.includes = function (room) {
     return this.content.includes(room);
 };
 
+/**
+ * Returns an array containing all the Rooms that match the given filter function
+ * @param func
+ * @returns {Array}
+ */
 RoomList.prototype.filter = function (func) {
     return this.content.filter(func);
 };
 
 /**
- * Creates a new roomlist combinint this list with the given list
- * @param roomList roomlist is added to the end of this.content
- * @returns {*} A new RoomList
+ * Creates a new Roomlist combining this list with the given list
+ * @param roomList Roomlist is added to the end of this.content
+ * @returns {RoomList} A new RoomList
  */
 RoomList.prototype.concat = function (roomList) {
     var newList = new RoomList();

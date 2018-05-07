@@ -1,7 +1,7 @@
-// Scotti Anderson
-// Room Prototypes
-// Used by buildings when creating the room list
-//
+/*
+The intermediate stage between RoomTypes and rooms
+Prototypes are used in the RoomList generating algorithm
+ */
 
 /**
  * Prototype for rooms.
@@ -10,7 +10,7 @@
  * @constructor
  */
 function ProtoRoom(type) {
-    if (typeof type != 'undefined') {
+    if (typeof type !== 'undefined') {
         this.type = Object.assign(type);
         this.name = this.type.name;
         this.purpose = this.type.purpose;

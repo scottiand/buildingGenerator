@@ -1,19 +1,15 @@
-// Scotti Anderson
-// eventHandlers
-// Functions that respond to the use of UI controls
-//
+/*
+Event handlers and other function dealing with the user interface
+ */
 
 /**
  * Generates a new building based on the seed entry
  */
 function generateButtonOnClick(draw) {
 
-    //testRun(10000);
-
     draw = typeof draw === 'undefined' ? true : draw;
     initRandom(seedEntry.value);
     failures = 0;
-    //var success = false;
     currentBuilding = new Building(house);
     currentBuilding.draw = draw;
     while (!currentBuilding.build()) {
@@ -27,7 +23,7 @@ function generateButtonOnClick(draw) {
 }
 
 /**
- * Prints the mouse location out when the canvas is clicked
+ * Prints the mouse location to the console when the canvas is clicked
  */
 function canvasClicked(event) {
     var rect = canvas.getBoundingClientRect();
@@ -52,7 +48,7 @@ function canvasMouseOver(event) {
 }
 
 /**
- * Initializes controls
+ * Initializes controls, must be called for the slider to funciton
  */
 function initControls() {
     var slider = document.getElementById("myRange");
@@ -60,7 +56,6 @@ function initControls() {
         scale = this.value / 10;
         canvas.width = currentBuilding.plot.width * scale;
         canvas.height =  currentBuilding.plot.height * scale;
-        //canvas.clear();
         currentBuilding.drawRooms(context);
     };
 }
@@ -72,14 +67,13 @@ function initControls() {
  */
 function openFloor(event, number) {
     context.clearRect(0,0,canvas.width,canvas.height);
-    console.log('-------------------');
-    console.log(number);
     currentBuilding.selectedFloor = number;
     currentBuilding.drawRooms(context);
 }
 
 /**
  * Sets the floor tabs depending on the number of floors in the current building
+ * Must be called each time a building is generated
  */
 function setTabs() {
     var div = document.getElementById('tabs');

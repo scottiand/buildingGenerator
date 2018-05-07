@@ -1,14 +1,22 @@
+/*
+The plot represents the space that the building can be placed in
+ */
 
+/**
+ * Creates a plot with random dimension based on the average plot size.
+ * @param avgPlotSize
+ * @constructor
+ */
 function Plot(avgPlotSize) {
-    this.width = randGauss(avgPlotSize,5);
-    this.height = randGauss(avgPlotSize,5);
+    this.width = randGauss(avgPlotSize, avgPlotSize / 10);
+    this.height = randGauss(avgPlotSize,avgPlotSize / 10);
     this.area = this.width * this.height;
 }
 
 /**
  * Returns the location of the side based on the given direction
  * @param direction
- * @returns {*}
+ * @returns {number}
  */
 Plot.prototype.getSide = function (direction) {
     switch (direction) {

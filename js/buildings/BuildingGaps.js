@@ -1,3 +1,6 @@
+/*
+Building.prototype functions that deal with filling plot gaps
+ */
 
 /**
  * Fills the gaps in the building.
@@ -6,10 +9,6 @@
 Building.prototype.fillGaps = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
     for (var i = 0; i < 100; i++) {
-        //console.log('fillGaps');
-        // context.fillStyle = 'rgb(255,255,255)';
-        // context.fillRect(0,0, this.plot.width * scale, this.plot.height.scale);
-        // this.drawRooms(context);
         if (!this.findGap(floor)) break;
     }
 };
@@ -20,10 +19,8 @@ Building.prototype.fillGaps = function (floor) {
  */
 Building.prototype.findGap = function (floor) {
     if (typeof(floor) === 'undefined') floor = 1;
-    var foundGap = false;
     var filledGap = false;
     var edges = this.getOutsideEdges(floor);
-    //console.log(edges.length);
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
         var oppositeDirection = getOppositeDirection(direction);
@@ -31,7 +28,6 @@ Building.prototype.findGap = function (floor) {
         for (var j = 0; j < edges.length; j++) {
             if (edges[j].directionOfRoom === oppositeDirection) thisSideEdges.push(edges[j]);
         }
-        //console.log(thisSideEdges.length);
         for (var j = 0; j < thisSideEdges.length; j++) {
             var edge = thisSideEdges[j];
             var space = edge.getSpace(this.plot);
@@ -53,9 +49,7 @@ Building.prototype.findGap = function (floor) {
                         rect = new Rectangle(gap.start, Math.min(edge.line.y1, edge.line.y2), gap.length, edge.line.length);
                         break;
                 }
-                //spit(rect);
                 if (this.rectangleIsClosed(rect, 1, floor)) {
-                    //if (this.rectangleIsClosed(rect, 0, floor)) foundGap = true;
                     this.fillGap(rect, floor);
                     filledGap = true;
                     break;
@@ -79,7 +73,6 @@ Building.prototype.findGap = function (floor) {
 Building.prototype.rectangleIsClosed = function (rect, number, floor) {
     var openSides = 0;
     for (var i = 0; i < 4; i++) {
-        //console.log('here');
         var direction = directions[i];
         var touchingSide = false;
         for (var j = 0; j < this.allRooms.length; j++) {
@@ -95,16 +88,15 @@ Building.prototype.rectangleIsClosed = function (rect, number, floor) {
             openSides++;
         }
     }
-    //console.log(false);
     return openSides <= number;
 };
 
 /**
- * Fills the given gap by expanding or adding rooms
+ * Fills the given gap by expanding or adding rooms on the given floor
  * @param rect
+ * @param floor
  */
 Building.prototype.fillGap = function(rect, floor) {
-
     if (typeof(floor) === 'undefined') floor = 1;
     if (rect.height < 1 || rect.width < 1) {
         if (!this.tryToStretchRoomToFillGap(rect)) {
@@ -112,8 +104,7 @@ Building.prototype.fillGap = function(rect, floor) {
             this.push(wallRoom(rect.left, rect.top, rect.width, rect.height, floor));
         }
     } else if (rect.height < 4 || rect.width < 4) {
-        if (rect.width >= 3 || rect.height >=3) { // Only add a closet if a door can fit
-            // Make some closets
+        if (rect.width >= 3 || rect.height >=3) { // If a room with a door could fit
             this.fillSmallGaps(this, rect, floor);
         } else {
             if (!this.tryToStretchRoomToFillGap(rect)) {
@@ -122,26 +113,23 @@ Building.prototype.fillGap = function(rect, floor) {
             }
         }
     } else {
-
         if (this.rectangleIsClosed(rect, 0, floor)) {
             this.fillRectWithRoom(rect, floor);
         }
     }
-
 };
 
 /**
- * Files the given rect with the next possible room in the proto rooms list.
+ * Files the given rect with the next possible room in the proto rooms list
  * @param rect
+ * @param floor
  */
 Building.prototype.fillRectWithRoom = function(rect, floor) {
     this.protoRooms.sort(comparePriority);
     spit('   begin fillRectWithRoom');
-    spit(this.allRooms.length);
     var current = 0;
     var room = new Room(this.protoRooms[0]);
     while (room.proto.minSize >= rect.width && room.proto.minSize >= rect.height) {
-        //console.log(current);
         current++;
         if (this.protoRooms.length > current) {
             room = new Room(this.protoRooms[current]);
@@ -200,11 +188,6 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
             var room = this.allRooms.get(j);
             if (equals(room.getSide(oppositeDirection), rect.getSide(direction))) {
                 var overlap = getOverlap(room, dummyRoom(rect.left, rect.top, rect.width, rect.height), direction);
-                // console.log(room);
-                // console.log(room.bottom());
-                // console.log(direction);
-                // console.log(overlap);
-                // console.log(rect);
                 switch (direction) {
                     case 'north':
                     case 'south':
@@ -223,11 +206,6 @@ Building.prototype.tryToStretchRoomToFillGap = function (rect) {
                     default:
                         throw("invalid direction: " + direction);
                 }
-
-                // if (room.getSide(getNextDirection(direction)) === rect.getSide(getNextDirection(direction)) && room.getSide(getNextDirection(direction, false)) === rect.getSide(getNextDirection(direction, false))) {
-                //     room.stretch(rect.getSide(oppositeDirection),oppositeDirection, true);
-                //     return true;
-                // }
             }
         }
     }

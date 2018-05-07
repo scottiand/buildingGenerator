@@ -1,6 +1,10 @@
-// Scotti Anderson
-// Geometry
-// functions involved in geometry
+/*
+Functions and objects dealing with geometry, such as lines, rectangles, and edges
+ */
+
+/*
+ RECTANGLES
+ */
 
 /**\
  * Creates a rectangle
@@ -23,7 +27,7 @@ function Rectangle(left, top, width, height) {
 /**
  * Returns the location of the given side
  * @param direction
- * @returns {*}
+ * @returns {number}
  */
 Rectangle.prototype.getSide = function (direction) {
     switch (direction) {
@@ -40,10 +44,14 @@ Rectangle.prototype.getSide = function (direction) {
     }
 };
 
+/*
+ONE DIMENSIONAL LINE SEGMENTS
+ */
+
 /**
  * A 1 Dimensional line segment
  * @param start The line's start point
- * @param end THe lines end point
+ * @param end The lines end point
  * @constructor
  */
 function Line1D(start, end) {
@@ -118,8 +126,6 @@ Line1D.prototype.split = function (line) {
     } else {
         toReturn = {line1: (line2 !=null ? new Line1D(line2.end, line2.start) : null), line2: (line1 !=null ? new Line1D(line1.end, line1.start) : null)};
     } // Return a line moving in the same direction as the original
-    //if (toReturn.line1 != null && toReturn.line1.length <= 0) toReturn.line1 = null; // Only return lines with length greater than 0
-    //if (toReturn.line2 != null && toReturn.line2.length <= 0) toReturn.line2 = null;
     if (toReturn.line1 === null) {
         toReturn.line1 = toReturn.line2;
         toReturn.line2 = null;
@@ -175,6 +181,10 @@ Line1D.prototype.makeStartLowerThanEnd = function () {
   this.end = Math.max(this.start, this.end);
 };
 
+/*
+TWO DIMENSIONAL LINE SEGMENTS
+ */
+
 /**
  * A two-dimensional line segment
  * @param x1 The x value of the first point
@@ -192,7 +202,6 @@ function Line2D(x1, y1, x2, y2) {
     if (Math.abs(y1 - y2) <= precision) y1 = y2;
 
     this.length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    //if (this.length < precision) this.length = 0;
 }
 
 /**
@@ -213,53 +222,9 @@ Line2D.prototype.toString = function () {
     return "(" + this.x1 + ", " + this.y1 + ") - (" + this.x2 + ", " + this.y2 + ")";
 };
 
-/**
- * A function for comparing based on the left edge for sorting
- * @param a
- * @param b
- * @returns {number}
+/*
+EDGES
  */
-function compareLeft(a, b) {
-    if (a.left < b.left) {
-        return -1;
-    }
-    if (a.left > b.left) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on the top edge for sorting
- * @param a
- * @param b
- * @returns {number}
- */
-function compareTop(a, b) {
-    if (a.top < b.top) {
-        return -1;
-    }
-    if (a.top > b.top) {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * A function for comparing based on the length for sorting
- * @param a
- * @param b
- * @returns {number}
- */
-function compareLength(a, b) {
-    if (a.length < b.length) {
-        return -1;
-    }
-    if (a.length > b.length) {
-        return 1;
-    }
-    return 0;
-}
 
 /**
  * Represents an edge connected to a room. Contains a Line2D, a room, and a direction representing the side of the edge the room is on
@@ -278,33 +243,33 @@ function Edge(line, room) {
         this.location = 0;
         this.directionOfRoom = 'north';
     } else {
-    if (equals(this.line.x1, this.line.x2)) {
-        this.vertical = true;
-        this.location = this.line.x1;
+        if (equals(this.line.x1, this.line.x2)) {
+            this.vertical = true;
+            this.location = this.line.x1;
 
-    } else if (equals(this.line.y1, this.line.y2)) {
-        this.vertical = false;
-        this.location = this.line.y1;
-    } else {
-        throw("Edge must be a strait line");
-    }
-    if (this.vertical) {
-        if (equals(this.room.locX, this.location)) {
-            this.directionOfRoom = 'east';
-        } else if (equals(this.room.right(), this.location)) {
-            this.directionOfRoom = 'west';
+        } else if (equals(this.line.y1, this.line.y2)) {
+            this.vertical = false;
+            this.location = this.line.y1;
         } else {
-            throw("Edge must connect to room");
+            throw("Edge must be a strait line");
         }
-    } else {
-        if (equals(this.room.locY, this.location)) {
-            this.directionOfRoom = 'south';
-        } else if (equals(this.room.bottom(), this.location)) {
-            this.directionOfRoom = 'north';
+        if (this.vertical) {
+            if (equals(this.room.locX, this.location)) {
+                this.directionOfRoom = 'east';
+            } else if (equals(this.room.right(), this.location)) {
+                this.directionOfRoom = 'west';
+            } else {
+                throw("Edge must connect to room");
+            }
         } else {
-            throw("Edge must connect to room");
+            if (equals(this.room.locY, this.location)) {
+                this.directionOfRoom = 'south';
+            } else if (equals(this.room.bottom(), this.location)) {
+                this.directionOfRoom = 'north';
+            } else {
+                throw("Edge must connect to room");
+            }
         }
-    }
     }
 }
 
@@ -321,7 +286,7 @@ Edge.prototype.hasPoint = function (x, y) {
 /**
  * Given one of the points on the edge, returns the other point
  * @param point
- * @returns {{x: *|number|SVGAnimatedLength, y: *|SVGAnimatedLength|number}}
+ * @returns {{x: number, y: number}}
  */
 Edge.prototype.getOtherPoint = function (point) {
     if (this.hasPoint(point.x, point.y)) {
@@ -348,7 +313,7 @@ Edge.prototype.contacts = function(structure) {
 
 /**
  * Returns this edge as a Line1D
- * @returns {*}
+ * @returns {Line1D}
  */
 Edge.prototype.getLine1D = function () {
     return this.line.toLine1D();
@@ -401,7 +366,7 @@ Edge.prototype.draw = function (context, thickness) {
     } else {
         pointX1 -= thickness / 2;
         pointX2 += thickness / 2;
-     }
+    }
     var doors = this.room.getDoors(getOppositeDirection(this.directionOfRoom));
     var invalidDoors = [];
     for (var i = 0; i < doors.length; i++) {
@@ -428,7 +393,7 @@ Edge.prototype.draw = function (context, thickness) {
  * Returns the first edge in the list that contains the given point
  * @param edgeList
  * @param point
- * @returns {*}
+ * @returns {Edge}
  */
 function getEdge(edgeList, point) {
     //console.log("-------------------------")
@@ -445,7 +410,7 @@ function getEdge(edgeList, point) {
  * Removes and returns the first edge in the list that contains the given point
  * @param edgeList
  * @param point
- * @returns {*}
+ * @returns {Edge}
  */
 function removeEdge(edgeList, point) {
     var edge = getEdge(edgeList, point);
@@ -453,6 +418,12 @@ function removeEdge(edgeList, point) {
     return edge;
 }
 
+/**
+ * Compares edges based on the privacy of the rooms they're connected to.
+ * @param a
+ * @param b
+ * @returns {number}
+ */
 function sortEdgesByRoomPrivacy(a, b) {
     var aPriv = a.room.privacy;
     var bPriv = b.room.privacy;
@@ -460,6 +431,68 @@ function sortEdgesByRoomPrivacy(a, b) {
         return -1;
     }
     if (aPriv > bPriv) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * Returns true if the edge is large enough to contain a door.
+ * @param edge
+ * @returns {boolean}
+ */
+function largeEnoughForDoor(edge) {
+    return greaterThan(edge.line.length, 3);
+}
+
+/*
+COMPARISON FUNCTIONS
+For use with array.sort(func)
+ */
+
+/**
+ * A function for comparing based on the left edge for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareLeft(a, b) {
+    if (a.left < b.left) {
+        return -1;
+    }
+    if (a.left > b.left) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on the top edge for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareTop(a, b) {
+    if (a.top < b.top) {
+        return -1;
+    }
+    if (a.top > b.top) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * A function for comparing based on the length for sorting
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function compareLength(a, b) {
+    if (a.length < b.length) {
+        return -1;
+    }
+    if (a.length > b.length) {
         return 1;
     }
     return 0;

@@ -1,4 +1,8 @@
 /**
+ * Building.prototype function that relate to the snapping algorithms
+ */
+
+/**
  * Snaps all the rooms, repeating the given number of times
  * @param num
  */
@@ -81,13 +85,6 @@ Building.prototype.snapTo = function (room) {
  */
 Building.prototype.snapToSingleDirection = function (room, direction) {
     var floor = room.floor;
-    if (room.name === 'Kitchen') {
-        spit('here');
-    }
-
-    // context.clearRect(0,0,canvas.width,canvas.height);
-    // this.drawRooms(context, floor);
-
     var roomList = this.getIntersectingRooms(room.getSpace(this.plot, direction), floor, this.getFloorOutline(floor - 1));
     var list = [];
     if (roomList.length <= 0) return;
@@ -103,14 +100,12 @@ Building.prototype.snapToSingleDirection = function (room, direction) {
         case 'south':
             roomList.forEach(function (value) { list.push(value.locY) });
             list.sort(numericSort);
-            //list.reverse();
             var rect = new Rectangle(room.locX, room.bottom(), room.width, list[0] - room.bottom());
             validSnap = list[0] > room.bottom() && list[0] - room.bottom() <= this.roomSnap && this.empty(room, rect, this.getFloorOutline(floor - 1));
             break;
         case 'east':
             roomList.forEach(function (value) { list.push(value.locX) });
             list.sort(numericSort);
-            //list.reverse();
             var rect = new Rectangle(room.right(), room.locY, list[0] - room.right(), room.width);
             validSnap = list[0] > room.right() && list[0] - room.right() <= this.roomSnap && this.empty(room, rect, this.getFloorOutline(floor - 1));
             break;
@@ -124,8 +119,7 @@ Building.prototype.snapToSingleDirection = function (room, direction) {
         default:
             throw("invalid direction: " + direction);
     }
-    //if (!this.empty(room, rect, this.getFloorOutline(floor - 1))) return;
-    if (validSnap) room.stretch(list[0], direction);//this.snapRoom(room, direction, list[0]);
+    if (validSnap) room.stretch(list[0], direction);
 };
 
 /**
@@ -133,7 +127,6 @@ Building.prototype.snapToSingleDirection = function (room, direction) {
  * @param room The room to snap
  */
 Building.prototype.snapAlign = function (room) {
-
     for (var i = 0; i < 4;i++) {
         this.snapAlignSingleDirection(room, directions[i]);
 
@@ -146,12 +139,6 @@ Building.prototype.snapAlign = function (room) {
  * @param direction
  */
 Building.prototype.snapAlignSingleDirection = function(room, direction) {
-    // if (room.purpose === 'bedroom' && room.floor === 2) {
-    //     this.selectedFloor = room.floor;
-    //     context.fillStyle = 'rgb(255,255,255)';
-    //     context.fillRect(0,0,this.plot.width * scale, this.plot.height * scale);
-    //     this.drawRooms(context);
-    // }
     var floor = room.floor;
     if (room.hasDoor(direction)) return; //Do not snap if it would disconnect rooms connected by a door
     var nearSide = room.getSide(direction) - this.roomSnap;
@@ -171,24 +158,20 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
     var doors = [];
     var max;
     var spot = near.end;
-    //var shrinking = room.isShrinking(direction, spot);
     switch (direction) {
         case 'north':
-            //rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
             rect = new Rectangle(room.locX, Math.min(near.start, near.end), room.width, near.length);
             doors = room.getDoors('east').concat(room.getDoors('west'));
             max = doors.length > 0 ? getMaxDoor(doors, direction).y - this.doorSpace : Infinity;
             if (spot > max) return; // Do not snap if it would move past a door
             break;
         case 'south':
-            //rect = new Rectangle(room.locX, Math.max(near.start, near.end), room.width, near.length);
             rect = new Rectangle(room.locX, room.bottom(), room.width, near.length);
             doors = room.getDoors('east').concat(room.getDoors('west'));
             max = doors.length > 0 ? getMaxDoor(doors, 'south').end() + this.doorSpace: 0;
             if (spot < max) return; // Do not snap if it would move past a door
             break;
         case 'east':
-            //rect = new Rectangle(Math.max(near.start, near.end), room.locY, near.length,  room.height);
             rect = new Rectangle(room.right(), room.locY, near.length,  room.height);
             doors = room.getDoors('north').concat(room.getDoors('south'));
             max = doors.length > 0 ? getMaxDoor(doors, 'east').end() + this.doorSpace : 0;
@@ -203,8 +186,6 @@ Building.prototype.snapAlignSingleDirection = function(room, direction) {
         default:
             throw("invalid direction: " + this.direction);
     }
-    //console.log(this.getFloorOutline(floor - 1));
-    //console.log(this.empty(room, rect, this.getFloorOutline(floor - 1)));
     if (!this.empty(room, rect, this.getFloorOutline(floor - 1))) return; // If the space is occupied, do not snap
-    room.stretch(spot, direction);//this.snapRoom(room, direction, spot);
+    room.stretch(spot, direction);
 };

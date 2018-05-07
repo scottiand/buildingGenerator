@@ -1,8 +1,8 @@
-// Scotti Anderson
-// BuildingRandom
-// A collection of functions regarding the production of random numbers
-//
+/*
+Functions that deal with the random number generation
+ */
 
+// Used for the randGuass function
 var useLast;
 var y2;
 var truncation = 1000;
@@ -12,7 +12,7 @@ var truncation = 1000;
  * Algorithm by Dr. Everett (Skip) Carter Jr.
  * @param mean The number at the height of the normal curve
  * @param standDev The size of a single standard deviation
- * @returns {*} A random number between 0 (inclusive) and 1 (exclusive)
+ * @returns {number} A random number between 0 (inclusive) and 1 (exclusive)
  */
 function randGauss(mean, standDev) {
     var x1, x2, w, y1;
@@ -36,7 +36,7 @@ function randGauss(mean, standDev) {
 
 /**
  * Initialize the Math.random function to work from a given string
- * @param string THe string to act as the random seed
+ * @param string The string to act as the random seed
  */
 function initRandom(string) {
     Math.seedrandom(string);

@@ -1,9 +1,11 @@
-// Scotti Anderson
-// Room
-// Setup for Rooms, which represent individual rooms
+/*
+The Room structure represents individual rooms that can be placed into a building.s
+ */
 
 /**
  * Generates a room based on a given room proto, with randomized size
+ * name: How the room will be labeled
+ * purpose: the room's funciton in the building
  * privacy: determines the order of placement of rooms
  * priority: determines the order in which the room is placed
  * delay: determines the frequency of this room
@@ -12,7 +14,7 @@
  * locX: the horizontal position of the room. -1 means not yet placed
  * locY: the vertical position of the room. -1 means not yet placed
  * adjacent: a list a rooms to connect to this room
- * isPlaced: keeps track of if the room has been placed in space yet (maybe unnecessary)
+ * isPlaced: keeps track of if the room has been placed in space yet
  * @param {ProtoRoom} proto Gives the room attributes based on the RoomType
  */
 function Room(proto) {
@@ -32,6 +34,8 @@ function Room(proto) {
         this.adjacent = [];
         this.parent = null;
         this.isPlaced = false;
+
+        // Doors are kept track of as lists for each side of the room. Use the accessors to get doors
         this.northDoors = [];
         this.southDoors = [];
         this.eastDoors = [];
@@ -45,7 +49,8 @@ function Room(proto) {
 }
 
 /**
- * Returns a list of points that represent the corners of a rectangle, with randomly determined length and width
+ * Returns a list of points that represent the corners of a rectangle
+ * If a width and height are not given, they are generated randomly
  * @returns {Array} An array of points
  */
 Room.prototype.makeRectangle = function (newWidth, newHeight) {
@@ -76,18 +81,14 @@ Room.prototype.makeRectangle = function (newWidth, newHeight) {
 
 /**
  * Draws the room in the given context
- * @param {Context} context The context in which the room is drawn
+ * @param context context The context in which the room is drawn
  */
 function drawRoom(context) {
-    // console.log(this.name);
-    // console.log(this.right());
-    // console.log(this.bottom());
     context.beginPath();
     context.lineWidth = scale / 3;
     context.strokeStyle = 'rgb(0, 0, 0)';
     context.moveTo(this.locX * scale, this.locY * scale);
     //For each direction: North, east, south, then west
-    //console.log(this.name);
     for (var i = 0; i < 4; i++) {
         var direction = directions[i];
         // Get the list of doors in the given direction
@@ -128,7 +129,7 @@ function drawRoom(context) {
  * 1 - East
  * 2 - South
  * 3 - West
- * The value is put througha mod function such that 5 corresponds to north, 6 to East, and so on
+ * The value is put through a mod function such that 5 corresponds to north, 6 to East, and so on
  * @param directionNumber
  * @returns {number}
  */
@@ -151,7 +152,7 @@ Room.prototype.printToConsole = function () {
 };
 
 /**
- * Adds a room to the adjacent of this room
+ * Adds a room to the adjacent list of this room
  * @param {Room} room the room to connect
  */
 Room.prototype.connect = function (room) {
@@ -182,7 +183,7 @@ Room.prototype.setLocation = function (x, y) {
 /**
  * Calculates the area of this room and all rooms it's connected to, excluding rooms given as a paremeter
  * @param usedRooms list of rooms to exclude
- * @returns {number|*} The area of this room and rooms that connect to it
+ * @returns {number} The area of this room and rooms that connect to it
  */
 Room.prototype.calcTotalArea = function(usedRooms) {
     var toReturn = this.area;
@@ -204,6 +205,8 @@ Room.prototype.calcTotalArea = function(usedRooms) {
 /**
  * Returns the area of the intersection between the given rectangle and the room
  * @param rectangle A rectangle of the the form: {right: *, left: *, top: *, bottom: *, area: *}
+ * @param floor The floors to check, defaults to this.floor
+ * If this.floor != floor, returns 0
  * @returns {number} the area of the intersecting space
  */
 Room.prototype.intersection = function (rectangle, floor) {
@@ -242,10 +245,10 @@ Room.prototype.rotate = function () {
 };
 
 /**
- * Prints out the room and all of it's descendants
+ * Prints out the room and all of it's descendants to the console
  */
 Room.prototype.printTree = function(string) {
-    var tab = typeof string != 'string' ? "" : string;
+    var tab = typeof string !== 'string' ? "" : string;
     console.log(tab + this.name);
     for (var i = 0; i < this.adjacent.length; i++) {
         var current = this.adjacent[i];
@@ -308,7 +311,7 @@ Room.prototype.addDoor = function (door, direction) {
 
 /**
  * Returns the location of the right side of the room
- * @returns {*}
+ * @returns {number}
  */
 Room.prototype.right = function() {
     return this.locX + this.width;
@@ -316,7 +319,7 @@ Room.prototype.right = function() {
 
 /**
  * Returns the location of the bottom side of the room
- * @returns {*}
+ * @returns {number}
  */
 Room.prototype.bottom = function () {
     return this.locY + this.height;
@@ -324,6 +327,7 @@ Room.prototype.bottom = function () {
 
 /**
  * Returns a list of doors in the given direction
+ * If not direction is given, returns all doors
  * @param direction
  * @returns {Array}
  */
@@ -351,9 +355,9 @@ Room.prototype.getDoors = function(direction) {
 };
 
 /**
- * Returns the value of the side of this room in the given direction
+ * Returns the location of the side of this room in the given direction
  * @param direction
- * @returns {*}
+ * @returns {number}
  */
 Room.prototype.getSide = function (direction) {
     switch (direction) {
@@ -374,6 +378,7 @@ Room.prototype.getSide = function (direction) {
  * Stretches the room in the given direction to the given location, if possible
  * @param spot
  * @param direction
+ * @param force If true, stretches even if it would extend past it's max or min size
  */
 Room.prototype.stretch = function (spot, direction, force) {
     if (typeof(force) === 'undefined') force = false;
@@ -443,6 +448,7 @@ Room.prototype.touchingSides = function (plot) {
 /**
  * Returns an array of edges that represent the area that the room touches the outside
  * @param building
+ * @param extraRooms A list of rooms to be considered that are not in the house
  * @returns {Array}
  */
 Room.prototype.getOutsideEdges = function (building, extraRooms) {
@@ -478,7 +484,8 @@ Room.prototype.getOutsideEdges = function (building, extraRooms) {
 /**
  * Returns a list or rooms that contact this one on the given side
  * @param building
- * @param direction
+ * @param direction 'north', 'south', 'east', or 'west'
+ * @param extraRooms A list of rooms to be considered that are not in the house
  * @returns {Array}
  */
 Room.prototype.getContactingRooms = function(building, direction, extraRooms) {
@@ -567,7 +574,7 @@ Room.prototype.doorCount = function(direction) {
 
 /**
  * Returns a string representation of the room
- * @returns {*}
+ * @returns {string}
  */
 Room.prototype.toString = function () {
     var parentName;
@@ -581,10 +588,11 @@ Room.prototype.toString = function () {
 
 /**
  * Sets the floor and its descendants to the given value
+ * Removes this Room from its current floor in the building
  * @param floor
+ * @param building The current building
  */
 Room.prototype.elevate = function (floor, building) {
-    //console.log(building);
     if (building.getFloor(this.floor).includes(this)) building.getFloor(this.floor).remove(building.getFloor(this.floor).getIndexOf(this));
     this.floor = floor;
     for (var i = 0; i < this.adjacent.length; i++) {
@@ -594,6 +602,7 @@ Room.prototype.elevate = function (floor, building) {
 
 /**
  * Sets isPlaced for this room and its descendants
+ * If set to false, also removes all doors from the rooms, and severs existing connections
  * @param bool
  */
 Room.prototype.setPlacedForAll = function (bool) {
@@ -616,7 +625,7 @@ Room.prototype.setPlacedForAll = function (bool) {
 Room.prototype.removeDoors = function(direction) {
     if (typeof(direction) === 'undefined') {
         for (var i = 0; i < 4; i++) {
-            var direction = directions[i];
+            direction = directions[i];
             this.removeDoors(direction);
         }
     } else {

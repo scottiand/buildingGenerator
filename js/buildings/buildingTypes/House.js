@@ -1,7 +1,14 @@
+/*
+Houses are small, suburban, single or double storied homes
+Other types of houses could be created to contrast with these
+ */
 
+/*
+Initializes the house BuildingType
+(Name, avgPlotSize, plotSnap, roomSnap, cyclingPrivacy, cyclingChance, doorSpace, maxFloors)
+ */
 function initHouse() {
-    var house = new BuildingType('House', 50, 4, 8, 50, 40, 0.5, 2);
-    //house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom);
+    var house = new BuildingType('House', 50, 4, 8, 40, 40, 0.5, 2);
     house.addRoomTypes(greatRoom,bathroom,bedroom,kitchen,diningRoom, garage,
         laundryRoom, familyRoom, livingRoom, mudRoom, foyer, study, office);
     var roomChoiceRules = [];
@@ -10,7 +17,6 @@ function initHouse() {
     roomChoiceRules.push(new RoomChoiceRule('bedroom', 1, Infinity));
     roomChoiceRules.push(new RoomChoiceRule('kitchen', 1, 1));
     roomChoiceRules.push(new RoomChoiceRule('dining', 1, 1));
-    //roomChoiceRules.push(new RoomChoiceRule('garage', 0, 1));
     roomChoiceRules.push(new RoomChoiceRule('laundry', 0, 1));
     roomChoiceRules.push(new RoomChoiceRule('entrance', 0, 1));
     roomChoiceRules.push(new RoomChoiceRule('office', 0, 1));
@@ -25,7 +31,14 @@ function initHouse() {
 }
 
 
-// CONNECTIVITY RULES
+/*
+ CONNECTIVITY RULES
+ */
+
+/**
+ * Connects bedrooms and bathrooms to hallways
+ * @param building
+ */
 function bedBathAndBeyondRule(building) {
     var roomList = building.getFloor(1);
     while (roomList.contains("bedroom")) {
@@ -51,11 +64,14 @@ function bedBathAndBeyondRule(building) {
         }
         var hall = new Room(new ProtoRoom(hallway));
         hall.connectAll(shortList);
-        //building.area += hall.area;
         building.push(hall);
     }
 }
 
+/**
+ * Connects kitchens to dining rooms
+ * @param building
+ */
 function diningAndKitchenRule(building) {
     var roomList = building.getFloor(1);
     var i = roomList.countAllOf("kitchen");
@@ -71,9 +87,15 @@ function diningAndKitchenRule(building) {
     }
 }
 
-// UPSTAIRS RULES
+/*
+ UPSTAIRS RULES
+ */
+
+/**
+ * Moves a set of rooms (usually a hallway with bedrooms) upstairs and adds a stairwell to link them
+ * @param building
+ */
 function upstairsBedroomRule(building) {
-    //console.log('upstairsBedroomRule');
     var roomList = building.getFloor(building.numFloors - 1);
     var candidates = [];
     for (var i = 0; i < roomList.length; i++) {
@@ -82,15 +104,15 @@ function upstairsBedroomRule(building) {
         if (room.purpose === 'bedroom') score += 15;
         if (room.purpose === 'hallway') score += 10;
         if (room.purpose === 'kitchen') score -= 100;
+        if (room.purpose === 'entrance') score -= 100;
         score += purposeCount(room.adjacent, 'bedroom') * 10;
         score -= purposeCount(room.adjacent, 'kitchen') * 40;
+        score -= purposeCount(room.adjacent, 'entrance') * 40;
         candidates.push({room: room, score: score});
     }
     candidates.sort(compareScore);
     candidates.reverse();
     var choice = candidates[0].room;
-    //console.log(choice);
-
     roomList.remove(roomList.getIndexOf(choice));
     var stairwellOne = stairwellRoom();
     stairwellOne.floor = building.numFloors - 1;
@@ -100,13 +122,19 @@ function upstairsBedroomRule(building) {
     building.push(stairwellOne);
     stairwellTwo.floor = building.numFloors;
     stairwellTwo.connect(choice);
-
     building.push(stairwellTwo);
     building.connectRoom(stairwellOne, building.getAllRooms(building.numFloors - 1));
-    //building.connectSubtrees(building.numFloors - 1);
 }
 
-// OUTSIDE DOORS RULE
+/*
+ OUTSIDE DOORS RULE
+ */
+
+/**
+ * Calls the appropriate function to add outside doors based on the number of yards
+ * @param building
+ * @param yardList
+ */
 function outsideDoorsRuleHouse(building, yardList) {
     if (yardList.length === 1) {
         outsideDoorsRuleHouseSingleYard(building);
@@ -115,8 +143,13 @@ function outsideDoorsRuleHouse(building, yardList) {
     }
 }
 
+/**
+ * Adds one or two doors to a home with one yard
+ * @param building
+ */
 function outsideDoorsRuleHouseSingleYard(building) {
     var edges = building.getOutsideEdges(1);
+    edges = edges.filter(largeEnoughForDoor);
     edges.sort(sortEdgesByRoomPrivacy);
     if (edges[0].room.purpose === 'wall') edges.splice(0, 1);
     addOutsideDoor(edges[0]);
@@ -124,6 +157,11 @@ function outsideDoorsRuleHouseSingleYard(building) {
     if (Math.random() > 0.5) addOutsideDoor(edges[0]);
 }
 
+/**
+ * Adds a door to each yard
+ * @param building
+ * @param yardList
+ */
 function outsideDoorsRuleHouseMultipleYards(building, yardList) {
     for (var i = 0; i < yardList.length; i++) {
         var yard = yardList[i];
@@ -131,8 +169,6 @@ function outsideDoorsRuleHouseMultipleYards(building, yardList) {
         var adjacentEdges = [];
         var edges = building.getOutsideEdges(1);
         var currentEdge = removeEdge(edges, currentLocation);
-        // console.log("Edges");
-        // console.log(edges.toString());
         if (currentEdge !== null) {
             while (currentLocation.x !== yard.x1 || currentLocation.y !== yard.y1) {
                 if (currentEdge === null) break;
@@ -142,6 +178,7 @@ function outsideDoorsRuleHouseMultipleYards(building, yardList) {
 
             }
             adjacentEdges.sort(sortEdgesByRoomPrivacy);
+            adjacentEdges = adjacentEdges.filter(largeEnoughForDoor);
             var publicEdges = [adjacentEdges[0]];
             var count = 1;
             while (count < adjacentEdges.length && adjacentEdges[0].room.privacy === adjacentEdges[count].room.privacy) {
@@ -154,7 +191,16 @@ function outsideDoorsRuleHouseMultipleYards(building, yardList) {
     }
 }
 
-// FILL GAPS WITH CLOSETS
+/*
+ FILL GAPS WITH CLOSETS
+ */
+
+/**
+ * Fills the given gap with a closet or pantry
+ * @param building
+ * @param rect
+ * @param floor
+ */
 function fillGapWithClosets(building, rect, floor) {
     if (typeof(floor) === "undefined") floor = 1;
     while (rect.area > 0) {
@@ -163,7 +209,6 @@ function fillGapWithClosets(building, rect, floor) {
         newRoom.setLocation(rect.left, rect.top);
         newRoom.floor = floor;
         var filledGap = false;
-
         // If the closet can fill the space, stretch it to fit and move on
         if (rect.width <= newRoom.proto.maxSize) {
             newRoom.stretch(rect.right, 'east', true);
@@ -200,18 +245,13 @@ function fillGapWithClosets(building, rect, floor) {
                 candidates.push({room: room, score: score});
             }
         }
-
         if (candidates.length > 0) {
-
             candidates.sort(compareScore);
             candidates.reverse();
             var choice = candidates[0].room;
-
             var newDoor = new Door(choice, newRoom,  choice.getDirectionFrom(newRoom));
-
             if (choice.purpose === 'kitchen' || choice.purpose === 'dining') newRoom.name = 'Pantry';
             if (purposeCount(choice.adjacent, 'storage') > 0) { // If a room would gain additional closet, expand that room instead
-                //console.log('here');
                 newDoor.expanded = true;
                 newRoom.name = "";
                 newRoom.purpose = choice.purpose;
@@ -223,16 +263,21 @@ function fillGapWithClosets(building, rect, floor) {
                 newDoor.overlap = newDoor.calcOverlap();
                 takeDownWall(newDoor);
             }
-
             building.doors.push(newDoor);
             choice.connect(newRoom);
-
         }
-
     }
 }
 
-// PLACE FIRST ROOM
+/*
+ PLACE FIRST ROOM
+ */
+
+/**
+ * If on the first floors, places the room randomly. Otherwise, the room is placed above a stairwell
+ * @param building
+ * @param firstRoom
+ */
 function placeFirstRoomHouse(building, firstRoom) {
     var floor = firstRoom.floor;
     if (floor === 1) {
@@ -246,7 +291,6 @@ function placeFirstRoomHouse(building, firstRoom) {
         }
     } else {
         var longList = building.getFloor(floor - 1);
-        //console.log(longList);
         var shortList = [];
         for (var i = 0; i < longList.length; i++) {
             if (longList.get(i).purpose === 'stairwell') shortList.push(longList.get(i));
@@ -256,18 +300,23 @@ function placeFirstRoomHouse(building, firstRoom) {
             firstRoom.setLocation(stairwell.locX, stairwell.locY);
             firstRoom.setSize(stairwell.width, stairwell.height);
         }
-
     }
     firstRoom.isPlaced = true;
 }
 
-// FINAL RULES
+/*
+ FINAL RULES
+ */
+
+/**
+ * Changes entrance to hallways if they cannot function as entrances
+ * @param building
+ */
 function entranceRule(building) {
     for (var i = 0; i < building.allRooms.length; i++) {
         var room = building.allRooms.get(i);
         if (room.purpose === 'entrance') {
             var doors = room.getDoors();
-            console.log(doors);
             var hasOutsideDoor = false;
             for (var j = 0; j < doors.length; j++) {
                 if (doors[j].room2 === null) hasOutsideDoor = true;

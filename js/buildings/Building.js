@@ -1,72 +1,64 @@
-// Scotti Anderson
-// Building
-// Buildings represent the entire plot and contain functions to generate the floor plan
-//
-
-var plotSize = 50;
+/*
+Buildings contain all of teh information about a specific building plot
+IMPORTANT: Many of the Building.prototype functions have been spread out between multiple files for the sake of organization:
+js/Building/BuildingConnectivityGraph
+js/Building/BuildingDoors
+js/Building/BuildingGaps
+js/Building/BuildingPlaceRooms
+js/Building/BuildingSnap
+ */
 
 /**
  * Represents the floor plan of a building as a series of rooms connected and placed in space.
+ * @param buildingType The buildingType to base this building on
  * @constructor
  */
 function Building(buildingType) {
     this.buildingType = buildingType;
 
-    this.plot = new Plot(buildingType.avgPlotSize);
-    this.minPlotPortion = this.plot.area * 0.5; // Calculate this based on density at a later date
-    this.maxPlotPortion = this.plot.area * 0.7; // Calculate this based on density at a later date
-    this.plotSnap = buildingType.plotSnap;
-    this.roomSnap = buildingType.roomSnap;
-    this.cyclingPrivacy = buildingType.cyclingPrivacy;
-    this.cyclingChance = buildingType.cyclingChance;
+    this.plot = new Plot(this.buildingType.avgPlotSize);
+    this.minPlotPortion = this.plot.area * 0.5; // Probably these should come from BuildingType at some point
+    this.maxPlotPortion = this.plot.area * 0.7;
+    this.plotSnap = this.buildingType.plotSnap;
+    this.roomSnap = this.buildingType.roomSnap;
+    this.cyclingPrivacy = this.buildingType.cyclingPrivacy;
+    this.cyclingChance = this.buildingType.cyclingChance;
     this.area = 0;
-
+    this.roomTypes = this.buildingType.roomTypes;
     // RULES
-    this.roomTypes = buildingType.roomTypes;
-    this.roomChoiceRules = buildingType.roomChoiceRules;
-
-    this.connectivityRules = buildingType.connectivityRules;
-    this.connectivityRulesUpstairs = buildingType.connectivityRulesUpstairs;
-    this.placeFirstRoom = buildingType.placeFirstRoom;
-    this.addOutsideDoorsToYards = buildingType.addOutsideDoors;
-    this.fillSmallGaps = buildingType.fillSmallGaps;
-    this.finalRules = buildingType.finalRules;
-
+    this.roomChoiceRules = this.buildingType.roomChoiceRules;
+    this.connectivityRules = this.buildingType.connectivityRules;
+    this.connectivityRulesUpstairs = this.buildingType.connectivityRulesUpstairs;
+    this.placeFirstRoom = this.buildingType.placeFirstRoom;
+    this.addOutsideDoorsToYards = this.buildingType.addOutsideDoors;
+    this.fillSmallGaps = this.buildingType.fillSmallGaps;
+    this.finalRules = this.buildingType.finalRules;
     this.protoRooms = [];
-
     this.floors = [new RoomList()];
     this.floorOutlines = [];
-
     this.roomList = this.floors[0];
-
     this.allRooms = new RoomList();
     //this.entry;
     this.doors = [];
     this.draw = true;
-    this.doorSpace = buildingType.doorSpace;
-
-    this.maxFloors = buildingType.maxFloors;
+    this.doorSpace = this.buildingType.doorSpace;
+    this.maxFloors = this.buildingType.maxFloors;
     this.numFloors = 1;
     this.selectedFloor = 1;
-
-
 }
 
 /**
  * Creates and draws the building
  */
 Building.prototype.build = function () {
-    //console.log('build()');
     canvas.width = this.plot.width * scale;
     canvas.height = this.plot.height * scale;
     spit('before generateRoomList');
     this.generateRoomList();
     spit('before generateConnectiveityGraph');
     this.generateConnectivityGraph();
-    //console.log('Graph Created');
     spit('before placeRooms');
     if (this.placeRooms()) {
-        //console.log('Rooms Placed');
         var toRemove = [];
         for (var i = 0; i < this.allRooms.length; i++) {
             if (this.allRooms.get(i).locX < 0) toRemove.push(this.allRooms.get(i));
@@ -75,13 +67,11 @@ Building.prototype.build = function () {
             this.allRooms.remove(this.allRooms.getIndexOf(toRemove[i]));
         }
         this.addOutsideDoors();
-        //console.log('Doors added');
         this.expandDoors();
         this.performRules(this.finalRules);
         if (this.draw) this.drawRooms(context);
         return true;
     }
-
     return false;
 };
 
@@ -107,6 +97,7 @@ Building.prototype.removeRoom = function (room) {
  * Returns true is the given rectangle is empty, except for the given room
  * @param room
  * @param rectangle
+ * @param extraRooms A list of rooms to be considered that are not part of the building
  * @returns {boolean}
  */
 Building.prototype.empty = function(room, rectangle, extraRooms) {
@@ -125,7 +116,7 @@ Building.prototype.empty = function(room, rectangle, extraRooms) {
  * Returns a list with the floor outilne dummy room added t the end of the given list
  * @param list A list of rooms
  * @param floor The current floor
- * @returns {*} A list of rooms with the dummy rooms added on the end
+ * @returns {Array} A list of rooms with the dummy rooms added on the end
  */
 Building.prototype.addFloorOutlineToList = function(list, floor) {
     if (floor > 1) {
@@ -138,10 +129,9 @@ Building.prototype.addFloorOutlineToList = function(list, floor) {
 /**
  * Gets the available space on the each side of the room, to determine where to place the next room
  * @param parent The room that the next room will be placed on.
- * @returns {*[]} Areas of available space in each cardinal direction
+ * @returns {string, number} Areas of available space in each cardinal direction
  */
 Building.prototype.getSideSpace = function(parent) {
-    //console.log(parent);
     var northRect = new Rectangle(0,0, this.plot.width,parent.locY);
     var southRect = new Rectangle(0, parent.bottom(), this.plot.width,this.plot.height - parent.bottom());
     var eastRect = new Rectangle(parent.right(), 0, this.plot.width - parent.right(), this.plot.height);
@@ -203,9 +193,6 @@ Building.prototype.drawRooms = function (context) {
     for (var i = 0; i < edges.length; i++) {
         edges[i].draw(context, scale / 1.5);
     }
-    // for (var i = 0; i < this.doors.length; i++) {
-    //     this.doors[i].draw(context);
-    // }
 };
 
 /**
@@ -222,6 +209,7 @@ Building.prototype.push = function (room) {
 /**
  * Returns true if any rooms in the building intersect the given rectangle
  * @param rectangle
+ * @param floor
  * @returns {boolean}
  */
 Building.prototype.intersection = function(rectangle, floor) {
@@ -237,6 +225,8 @@ Building.prototype.intersection = function(rectangle, floor) {
 /**
  * Returns an array of rooms that intersect the given rectangle
  * @param rectangle
+ * @param floor
+ * @param extraRooms A list of rooms to be considered that are not part of the building
  * @returns {Array}
  */
 Building.prototype.getIntersectingRooms = function (rectangle, floor, extraRooms) {
@@ -255,6 +245,7 @@ Building.prototype.getIntersectingRooms = function (rectangle, floor, extraRooms
 
 /**
  * Returns of list of room edges that line the outside of the building
+ * @param floor
  * @returns {Array}
  */
 Building.prototype.getOutsideEdges = function (floor) {
@@ -276,7 +267,8 @@ Building.prototype.getOutsideEdges = function (floor) {
  * Returns the first room it finds in the building that intersects the given point
  * @param x
  * @param y
- * @returns {*}
+ * @param floor
+ * @returns {Room}
  */
 Building.prototype.getRoomAtPoint = function (x, y, floor) {
     if (typeof(floor) === 'undefined') floor = 1;
@@ -304,7 +296,7 @@ Building.prototype.isConnected = function(listOfLine2D) {
  * Returns a list of Line1D that represent areas on the given edge of the plot that do not intersect any of the room in the given list
  * @param roomList
  * @param direction
- * @returns {*[]}
+ * @returns {Array}
  */
 Building.prototype.getFreeOuterLines = function (roomList, direction) {
     var lineList = [new Line1D(this.plot.getSide(getNextDirection(direction, false)),this.plot.getSide(getNextDirection(direction)))];
@@ -341,14 +333,13 @@ Building.prototype.addFloor = function () {
     if (this.numFloors === this.maxFloors) return false;
     this.numFloors++;
     this.floors.push(new RoomList());
-
     return true;
 };
 
 /**
  * Returns the roomList for the given floor
  * @param floor
- * @returns {RoomList|*}
+ * @returns {RoomList}
  */
 Building.prototype.getFloor = function (floor) {
     return this.floors[floor - 1];
@@ -374,32 +365,17 @@ Building.prototype.getRoomsOnFloor = function (floor) {
  * @returns {RoomList} A list of dummy rooms
  */
 Building.prototype.getFloorOutline = function(floor) {
-    // var roomList = new RoomList();
-
-
     if (floor < 1) return new RoomList();
     var count = 0;
     if (typeof this.floorOutlines[floor - 1] === 'undefined') {
-        // if (failures === 1) {
-        //     spit('here');
-        // }
         var queue = this.getOutsideEdges(floor);
         var list = new RoomList();
-        // context.fillStyle = 'rgb(255,255,255)';
-        // context.fillRect(0,0, this.plot.width * scale, this.plot.height.scale);
-        // this.drawRooms(context, floor);
         while (queue.length > 0) {
             count++;
-            if (count > 10000) {
+            if (count > 10000) { // Helps prevent infinite loops by causing an exception if this is reached
                 console.log(failures);
                 x.y();
             }
-            //console.log(failures);
-            // console.log('------------------------');
-            // console.log(this.allRooms);
-             //console.log('startwhile');
-            // console.log(queue.length);
-            // console.log(failures);
             var currentEdge = queue[0];
             queue.splice(0, 1);
             var direction = getOppositeDirection(currentEdge.directionOfRoom);
@@ -428,22 +404,24 @@ Building.prototype.getFloorOutline = function(floor) {
             newRoom = dummyRoom(rect.left, rect.top, rect.width, rect.height, floor);
             if (newRoom.area !== 0) {
                 list.push(newRoom);
-                //console.log(newRoom.getOutsideEdges(this, list));
                 var newEdges = newRoom.getOutsideEdges(this, list);
                 queue = queue.concat(newEdges);
-                //newRoom.draw(context);
             }
         }
-        //console.log(list);
         for (var i = 0; i < list.length; i++) {
             list.get(i).floor += 1;
         }
         return list;
     }
-
     return this.floorOutlines[floor - 1];
 };
 
+/**
+ * Returns a list of all rooms on the given floor
+ * If no floor is specified, returns all rooms.
+ * @param floor
+ * @returns {RoomList}
+ */
 Building.prototype.getAllRooms = function(floor) {
     if (typeof floor === 'undefined') {
         return this.allRooms;

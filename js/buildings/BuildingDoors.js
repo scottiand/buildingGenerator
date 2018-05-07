@@ -1,3 +1,6 @@
+/*
+Building.prototype functions that deal with Doors
+ */
 
 /**
  * Adds extra doors to low privacy rooms
@@ -5,23 +8,21 @@
  */
 Building.prototype.addCycles = function (floor) {
     if (typeof floor === 'undefined') floor = 1;
-    var usedRooms = [];
     for (var i = 0; i < this.allRooms.length; i++) {
         var room = this.allRooms.get(i);
-
         var cyclingPrivacy = this.cyclingPrivacy;
         if (room.floor === floor && room.privacy < cyclingPrivacy) {
-            //usedRooms.push(room);
             var contactingRooms= room.getContactingRooms(this);
             contactingRooms.filter(function (value) {
-                return value.privacy < cyclingPrivacy;// && !usedRooms.includes(room);
+                return value.privacy < cyclingPrivacy;
             });
-
             for (var j = 0; j < contactingRooms.length; j++) {
                 var room2 = contactingRooms[j];
-                //console.log(room2);
                 var direction = room.getDirectionFrom(room2);
-                if (!room2.hasDoorTo(room) && percentChance(this.cyclingChance) && greaterThan(getOverlap(room, room2, direction).length, 3)) {
+                var chance = this.cyclingChance;
+                if (room2.purpose === 'storage') chance -= this.cyclingChance;
+                if (room2.purpose === 'bathroom') chance -= 20;
+                if (!room2.hasDoorTo(room) && percentChance(chance) && greaterThan(getOverlap(room, room2, direction).length, 3)) {
                     var door = new Door(room, room2, direction);
                     this.doors.push(door);
                 }
@@ -32,9 +33,8 @@ Building.prototype.addCycles = function (floor) {
 };
 
 /**
- * Adds at least one door to each yard area
- * A yard area is any section of outdoor space on the plot defined by the edges of the plot and the wall of the house
- * If there is only one yard space, we may add a front door and a back door
+ * Adds outside doors
+ * Gets the different yard sections and passes them to the BuildingTypes addOutsideDoorsToYards function
  */
 Building.prototype.addOutsideDoors = function () {
     // Get all rooms that are touching an edge
@@ -45,7 +45,6 @@ Building.prototype.addOutsideDoors = function () {
             roomsTouchingEdge.push(room);
         }
     }
-
     // Get all the uninterrupted lines along the plot on each side
     var northLines = [];
     this.getFreeOuterLines(roomsTouchingEdge, 'north').forEach(function (value) { northLines.push(value.to2DPlotEdge(currentBuilding.plot,'north')) });
@@ -55,9 +54,7 @@ Building.prototype.addOutsideDoors = function () {
     this.getFreeOuterLines(roomsTouchingEdge, 'south').forEach(function (value) { southLines.push(value.to2DPlotEdge(currentBuilding.plot,'south')) });
     var westLines = [];
     this.getFreeOuterLines(roomsTouchingEdge, 'west').forEach(function (value) { westLines.push(value.to2DPlotEdge(currentBuilding.plot,'west')) });
-
     var yardList = northLines.concat(eastLines, southLines, westLines);
-
     // Connect yards at corners
     while (!this.isConnected(yardList) && yardList.length > 1) {
         //console.log('here');
@@ -77,9 +74,7 @@ Building.prototype.addOutsideDoors = function () {
  * Tells all doors to expand(), allowing for variety in doors
  */
 Building.prototype.expandDoors = function() {
-    //console.log(this.doors.toString());
     for (var i = 0; i < this.doors.length; i++) {
         this.doors[i].expand();
-        //console.log(this.doors.toString());
     }
 };
