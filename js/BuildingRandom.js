@@ -10,6 +10,7 @@ var truncation = 1000;
 /**
  * Returns a random value between 0 (inclusive) and 1 (exclusive), such that generates numbers have a normal distribution
  * Algorithm by Dr. Everett (Skip) Carter Jr.
+ * http://www.design.caltech.edu/erik/Misc/Gaussian.html
  * @param mean The number at the height of the normal curve
  * @param standDev The size of a single standard deviation
  * @returns {number} A random number between 0 (inclusive) and 1 (exclusive)
@@ -36,6 +37,8 @@ function randGauss(mean, standDev) {
 
 /**
  * Initialize the Math.random function to work from a given string
+ * Uses David Bau's seedrandom.js
+ * https://github.com/davidbau/seedrandom
  * @param string The string to act as the random seed
  */
 function initRandom(string) {
